@@ -104,51 +104,6 @@ def ttd925(T925, Td925):  # 925hPa温度露点差
 def tt500(T850, T500):  # 大概是温度差？？
     return T850-T500
 
-
-def thunder_potential(T925, Td925, T850, Td850, T700, Td700, T500, Td500):
-    if (K(T850-273.15, Td850-273.15, T700-273.15, Td700-273.15, T500-273.15) > 33.0):
-        k1 = 1
-    else:
-        k1 = 0
-
-    if (showalter(T850-273.15, Td850-273.15, T500-273.15) < 0.0):
-        k2 = 1
-    else:
-        k2 = 0
-
-    if (A(T850-273.15, Td850-273.15, T700-273.15, Td700-273.15, T500-273.15, Td500-273.15) > 10.0):
-        k3 = 1
-    else:
-        k3 = 0
-
-    if (ttd700(T700, Td700) < 3.0):
-        k4 = 1
-    else:
-        k4 = 0
-
-    if (ttd850(T850, Td850) < 3.0):
-        k5 = 1
-    else:
-        k5 = 0
-
-    if (ttd925(T925, Td925) < 3.0):
-        k6 = 1
-    else:
-        k6 = 0
-
-    if (tt500(T850, T500) > 23.0):
-        k7 = 1
-    else:
-        k7 = 0
-
-    y = 0.110+0.154*k1+0.142*k2+0.061*k3+0.146*k4+0.131*k5+0.03*k6+0.097*k7
-
-    if (y > 0.5):
-        k8 = 1
-    else:
-        k8 = 0
-    return k8
-
 def relhum_ttd(T,Td):   # 根据温度和露点计算相对湿度
     gc  = 461.5             # [j/{kg-k}]   gas constant water vapor
     gc  = gc/(1000.*4.186)  # [cal/{g-k}]  change units
@@ -180,6 +135,45 @@ def dewtemp_trh(Tk,RH):   # 根据温度和相对湿度计算露点
     LHV = (597.3-0.57* (Tk-273.15))/GCX
     TDK = Tk*LHV/ (LHV-Tk*math.log(RH*0.01))
     return TDK
+def TT(T850,R850,T500):  #TT全总指数
+    #TT=T850+Td850-2*T500
+    Td850 = dewtemp_trh(T850,R850)
+    TT = T850 + Td850 - 2*T500
+    return TT
+
+def ws(u,v): #风速
+    return math.sqrt(u**2+v**2)
+
+def wd(u,v): #风向,角度制
+    return 180+math.atan2(u,v)*180/math.pi
+
+def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
+    #SWEAT天气强威胁指数
+    '''
+    定义：SWEAT=12*Td850 + 20*(TT-49) + 4*WS850 + 2*WS500 + 125*(sin(WD500-WD850)+0.2)，其中：
+    TT为全总指数值
+    若算式子项小于0，不算该子项，即值为0
+    WS以“m/s”为单位
+    最右的子项必须满足 WD850在130°~250°，WD500在210°~310°，WD500大于WD850，WS850、WS500均大于7.5m/s 时才计算，否则为0
+    '''
+    S_1=12*dewtemp_trh(T850,R850)
+    S_2=20*(TT(T850,R850,T500)-49)
+    S_3=4*ws(U850,V850)
+    S_4=2*ws(U500,V500)
+    S_5=125*(math.sin((wd(U500,V500)-wd(U850,V850))/180*math.pi)+0.2)
+    if S_1 <0 : S_1 = 0
+    if S_2 <0 : S_2 = 0
+    if S_3 <0 : S_3 = 0
+    if S_4 <0 : S_4 = 0
+    if S_5 <0 : S_5 = 0
+    if wd(U850,V850) < 130 or wd(U850,V850) > 250 or wd(U500,V500) < 210 or wd(U500,V500) > 310 : S_5 = 0
+    return S_1+S_2+S_3+S_4+S_5
+
+def earth_distance(lat1, lon1, lat2, lon2):
+    from math import cos, asin, sqrt
+    p = math.pi / 180.0     #Pi/180
+    a = 0.5 - cos((lat2 - lat1) * p)/2.0 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2.0
+    return 2 * 6371 * asin(sqrt(a)) #2*R*asin...
 
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
