@@ -147,6 +147,12 @@ def ws(u,v): #风速
 def wd(u,v): #风向,角度制
     return 180+math.atan2(u,v)*180/math.pi
 
+def u(ws,wd): #计算u风。输入风速和风向（角度制）
+    return -ws*sin(wd/180*math.pi)
+  
+def v(ws,wd): #计算v风。输入风速和风向（角度制）
+    return -ws*cos(wd/180*math.pi)
+    
 def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
     #SWEAT天气强威胁指数
     '''
