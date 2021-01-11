@@ -30,7 +30,7 @@
 
 `Tc(p,t,td)`:   #根据温度和露点计算凝结高度上的温度
 
-`relhum_ttd(T,Td)`:   # 根据温度和露点计算相对湿度
+`relhum_ttd(T,Td)`:   # 根据温度和露点计算相对湿度(T:temperature[K],Td:temperature[K])
 
 `dewtemp_trh(Tk,RH)`:   # 根据温度和相对湿度计算露点
 
@@ -52,4 +52,4 @@
 
 `SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500)`:   # SWEAT天气强威胁指数
 
-`relhum(T,W,P)`:  # 计算相对湿度（T:temperature[K],W:mixing ratio[kg/kg],P:pressure[Pa])
+`relhum(T,W,P)`:  # 计算相对湿度(T:temperature[K],W:mixing ratio[kg/kg],P:pressure[Pa])
