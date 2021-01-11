@@ -1,6 +1,8 @@
 import math
+import numpy as np
+from geopy import distance
 
-
+@np.vectorize
 def showalter(t8, td8, t5):  # 输入850hPa温度和露点温度，500hPa温度，计算沙氏指数。单位：摄氏度
     P5 = 500
     P8 = 850
@@ -39,7 +41,7 @@ def showalter(t8, td8, t5):  # 输入850hPa温度和露点温度，500hPa温度�
             (((L0+C1*(T0-out))/out)*(Eout/(P5-Eout)))
     return t5-(out-T0)
 
-
+@np.vectorize
 def E_WATER(td):  # 计算水面饱和蒸汽压
     E0 = 6.1078
     T0 = 273.15
@@ -52,7 +54,7 @@ def E_WATER(td):  # 计算水面饱和蒸汽压
     E = E*E0*pow(T0/T, Cl/Rw)
     return E
 
-
+@np.vectorize
 def Tc(p, t, td):  # 根据温度和露点计算凝结高度上的温度
     step = 10.0
     Cpd = 0.2403
@@ -80,30 +82,31 @@ def Tc(p, t, td):  # 根据温度和露点计算凝结高度上的温度
             break
     return out-T0
 
-
+@np.vectorize
 def K(T850, Td850, T700, Td700, T500):  # K指数
     return T850-T500+Td850-(T700-Td700)
 
-
+@np.vectorize
 def A(T850, Td850, T700, Td700, T500, Td500):  # A指数
     return T850-T500-(T850-Td850)-(T700-Td700)-(T500-Td500)
 
-
+@np.vectorize
 def ttd700(T700, Td700):  # 700hPa温度露点差
     return T700-Td700
 
-
+@np.vectorize
 def ttd850(T850, Td850):  # 850hPa温度露点差
     return T850-Td850
 
-
+@np.vectorize
 def ttd925(T925, Td925):  # 925hPa温度露点差
     return T925-Td925
 
-
+@np.vectorize
 def tt500(T850, T500):  # 大概是温度差？？
     return T850-T500
 
+@np.vectorize
 def relhum_ttd(T,Td):   # 根据温度和露点计算相对湿度
     gc  = 461.5             # [j/{kg-k}]   gas constant water vapor
     gc  = gc/(1000.*4.186)  # [cal/{g-k}]  change units
@@ -115,6 +118,7 @@ def relhum_ttd(T,Td):   # 根据温度和露点计算相对湿度
     rh  = rh*100.0
     return rh
 
+@np.vectorize
 def dewtemp_trh(Tk,RH):   # 根据温度和相对湿度计算露点
     '''
     calculate the dew pt temperature [k]:
@@ -135,24 +139,31 @@ def dewtemp_trh(Tk,RH):   # 根据温度和相对湿度计算露点
     LHV = (597.3-0.57* (Tk-273.15))/GCX
     TDK = Tk*LHV/ (LHV-Tk*math.log(RH*0.01))
     return TDK
+
+@np.vectorize
 def TT(T850,R850,T500):  #TT全总指数
     #TT=T850+Td850-2*T500
     Td850 = dewtemp_trh(T850,R850)
     TT = T850 + Td850 - 2*T500
     return TT
 
+@np.vectorize
 def ws(u,v): #风速
     return math.sqrt(u**2+v**2)
 
+@np.vectorize
 def wd(u,v): #风向,角度制
     return 180+math.atan2(u,v)*180/math.pi
 
+@np.vectorize
 def u(ws,wd): #计算u风。输入风速和风向（角度制）
     return -ws*math.sin(wd/180*math.pi)
   
+@np.vectorize
 def v(ws,wd): #计算v风。输入风速和风向（角度制）
     return -ws*math.cos(wd/180*math.pi)
     
+@np.vectorize
 def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
     #SWEAT天气强威胁指数
     '''
@@ -175,11 +186,18 @@ def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
     if wd(U850,V850) < 130 or wd(U850,V850) > 250 or wd(U500,V500) < 210 or wd(U500,V500) > 310 : S_5 = 0
     return S_1+S_2+S_3+S_4+S_5
 
-def earth_distance(lat1, lon1, lat2, lon2):
+@np.vectorize
+def earth_distance(lat1, lon1, lat2, lon2,unit="km"):
+    '''
     from math import cos, asin, sqrt
     p = math.pi / 180.0     #Pi/180
     a = 0.5 - cos((lat2 - lat1) * p)/2.0 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2.0
     return 2 * 6371 * asin(sqrt(a)) #2*R*asin...
+    '''
+    a=distance.distance((lat1, lon1), (lat2, lon2))
+    return eval("a."+unit)
+
+@np.vectorize
 def relhum(T,W,P):
     '''
     T:  temperature  [K]
