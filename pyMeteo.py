@@ -3,7 +3,18 @@ import numpy as np
 from geopy import distance
 
 @np.vectorize
-def showalter(t8, td8, t5):  # 输入850hPa温度和露点温度，500hPa温度，计算沙氏指数。单位：摄氏度
+def showalter(t8, td8, t5):
+    # 输入850hPa温度和露点温度，500hPa温度，计算沙氏指数。单位：摄氏度
+    '''
+    caculating Showalter Index 
+    Input:
+        t8: temperature at 850hPa [degree cetigrade ]
+        td: dew point temperature at 850hPa [degree cetigrade ] 
+        t5: temperature at 850hPa [degree cetigrade ]
+    Output:
+        showalter index
+    '''
+
     P5 = 500
     P8 = 850
     Cpd = 0.2403
@@ -42,7 +53,15 @@ def showalter(t8, td8, t5):  # 输入850hPa温度和露点温度，500hPa温度�
     return t5-(out-T0)
 
 @np.vectorize
-def E_WATER(td):  # 计算水面饱和蒸汽压
+def E_WATER(td):  
+    '''
+    caculate aturated vapor pressure
+    Input:
+        td: dew point temperature [degree cetigrade] 
+    Output:
+        showalter index
+
+    '''
     E0 = 6.1078
     T0 = 273.15
     Cl = 0.57
@@ -55,7 +74,16 @@ def E_WATER(td):  # 计算水面饱和蒸汽压
     return E
 
 @np.vectorize
-def Tc(p, t, td):  # 根据温度和露点计算凝结高度上的温度
+def Tc(p, t, td):
+    '''
+    Calculate the temperature at condensation height based on temperature and dew point
+    Input:
+        p: pressure [hPa]
+        t: temperature [degree cetigrade]
+        td: dew point temperature [degree cetigrade]
+    Output:
+        temperature at condensation height [degree cetigrade]
+    '''
     step = 10.0
     Cpd = 0.2403
     Cpv = 0.445
@@ -84,42 +112,82 @@ def Tc(p, t, td):  # 根据温度和露点计算凝结高度上的温度
 
 @np.vectorize
 def K(T850, Td850, T700, Td700, T500):  # K指数
+    '''
+    caculating K index
+    The larger the K index, the more unstable the stratification. 
+    The statistical results: 
+        K<20 no thunderstorm; 
+        20<K<25 isolated thunderstorm; 
+        25<K<30 sporadic thunderstorm; 
+        30<K<35 flakes of thunderstorm.
+    Input:
+        T850: temperature at 850hPa [degree cetigrade]
+        Td850: dew point temperature at 850hPa [degree cetigrade]
+        T700: temperature at 700hPa [degree cetigrade]
+        Td700: dew point temperature at 700hPa [degree cetigrade]
+        T500: temperature at 500hPa [degree cetigrade]
+    Output:
+        K index
+    '''
     return T850-T500+Td850-(T700-Td700)
 
 @np.vectorize
-def A(T850, Td850, T700, Td700, T500, Td500):  # A指数
+def A(T850, Td850, T700, Td700, T500, Td500):  
+    '''
+    caculating A index
+    Input:
+        T850: temperature at 850hPa [degree cetigrade]
+        Td850: dew point temperature at 850hPa [degree cetigrade]
+        T700: temperature at 700hPa [degree cetigrade]
+        Td700: dew point temperature at 700hPa [degree cetigrade]
+        T500: temperature at 500hPa [degree cetigrade]
+        Td500: dew point temperature at 500hPa [degree cetigrade]
+    Output:
+        A index
+    '''
     return T850-T500-(T850-Td850)-(T700-Td700)-(T500-Td500)
 
 @np.vectorize
-def ttd700(T700, Td700):  # 700hPa温度露点差
+def ttd700(T700, Td700):  
+    # Temperature-dew point difference at 700hPa
     return T700-Td700
 
 @np.vectorize
-def ttd850(T850, Td850):  # 850hPa温度露点差
+def ttd850(T850, Td850):  
+    # Temperature-dew point difference at 850hPa
     return T850-Td850
 
 @np.vectorize
-def ttd925(T925, Td925):  # 925hPa温度露点差
+def ttd925(T925, Td925):  
+    # Temperature-dew point difference dat 925hhPa
     return T925-Td925
 
 @np.vectorize
-def tt500(T850, T500):  # 大概是温度差？？
+def tt500(T850, T500):  
+    # Temperature difference bewteen 850hPa and 500hPa
     return T850-T500
 
 @np.vectorize
-def relhum_ttd(T,Td):   # 根据温度和露点计算相对湿度
+def relhum_ttd(T,Td):   
+    '''
+    Calculate relative humidity giving temperature and dew point
+    Input:
+        T: temperature [K]
+        Td: dew point temperature [K]
+    Output:
+        relative humidity [%]
+    '''
     gc  = 461.5             # [j/{kg-k}]   gas constant water vapor
     gc  = gc/(1000.*4.186)  # [cal/{g-k}]  change units
                                        # lhv=latent heat vap
     lhv = ( 597.3-0.57*(T-273.15) )        # dutton top p273 [empirical]
-
     rh  = math.exp( (lhv/gc)*(1.0/T - 1.0/Td) ) 
     #rh=math.exp(lhv/gc/T)/math.exp(lhv/gc/Td)
     rh  = rh*100.0
     return rh
 
 @np.vectorize
-def dewtemp_trh(Tk,RH):   # 根据温度和相对湿度计算露点
+def dewtemp_trh(Tk,RH):  
     '''
     calculate the dew pt temperature [k]:
     input:
@@ -141,37 +209,81 @@ def dewtemp_trh(Tk,RH):   # 根据温度和相对湿度计算露点
     return TDK
 
 @np.vectorize
-def TT(T850,R850,T500):  #TT全总指数
-    #TT=T850+Td850-2*T500
+def TT(T850,R850,T500):  
+    '''
+    total totals index
+    Input: 
+        T850: temperature at 850hPa [K]
+        R850: relative humidty at 850hPa [%]
+        T500: temperature at 500hPa [K]
+    '''
     Td850 = dewtemp_trh(T850,R850)
     TT = T850 + Td850 - 2*T500
     return TT
 
 @np.vectorize
-def ws(u,v): #风速
+def ws(u,v): 
+    '''
+    caculating wind speed giving u and v
+    Input:
+        u: u-wind
+        v: v-wind
+    Output:
+        wind speed
+    '''
     return math.sqrt(u**2+v**2)
 
 @np.vectorize
-def wd(u,v): #风向,角度制
+def wd(u,v): 
+    '''
+    caculating wind direction giving u and v
+    Input:
+        u: u-wind
+        v: v-wind
+    Output:
+        wind direction [degree]
+    '''
     return 180+math.atan2(u,v)*180/math.pi
 
 @np.vectorize
-def u(ws,wd): #计算u风。输入风速和风向（角度制）
+def u(ws,wd): 
+    '''
+    caculating u-wind giving wind speed and wind direction
+    Input:
+        ws: wind speed
+        wd: wind direction [degree]
+    Output:
+        u-wind
+    '''
     return -ws*math.sin(wd/180*math.pi)
   
 @np.vectorize
-def v(ws,wd): #计算v风。输入风速和风向（角度制）
+def v(ws,wd): 
+    '''
+    caculating v-wind giving wind speed and wind direction
+    Input:
+        ws: wind speed
+        wd: wind direction [degree]
+    Output:
+        v-wind
+    '''
     return -ws*math.cos(wd/180*math.pi)
     
 @np.vectorize
 def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
-    #SWEAT天气强威胁指数
     '''
-    定义：SWEAT=12*Td850 + 20*(TT-49) + 4*WS850 + 2*WS500 + 125*(sin(WD500-WD850)+0.2)，其中：
-    TT为全总指数值
-    若算式子项小于0，不算该子项，即值为0
-    WS以“m/s”为单位
-    最右的子项必须满足 WD850在130°~250°，WD500在210°~310°，WD500大于WD850，WS850、WS500均大于7.5m/s 时才计算，否则为0
+    caculating SWEAT Severe Weather Threat Index
+    SWEAT=12*Td850 + 20*(TT-49) + 4*WS850 + 2*WS500 + 125*(sin(WD500-WD850)+0.2)
+    Input:
+        T850: tempereature at 850hPa [K]
+        R850: relative humidty at 850hPa [%]
+        T500: tempereature at 500hPa [K]
+        U850: u-wind at 850hPa [m/s]
+        V850: v-wind at 850hPa [m/s]
+        U500: u-wind at 500hPa [m/s]
+        V500: v-wind at 500hPa [m/s]
+    Output:
+        SWEAT Index
     '''
     S_1=12*dewtemp_trh(T850,R850)
     S_2=20*(TT(T850,R850,T500)-49)
@@ -189,10 +301,15 @@ def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
 @np.vectorize
 def earth_distance(lat1, lon1, lat2, lon2,unit="km"):
     '''
-    from math import cos, asin, sqrt
-    p = math.pi / 180.0     #Pi/180
-    a = 0.5 - cos((lat2 - lat1) * p)/2.0 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2.0
-    return 2 * 6371 * asin(sqrt(a)) #2*R*asin...
+        caculating the distance bewettn two point on the earth giving the latitude and longiude of the two points
+        Input:
+            lat1: latitude of point 1
+            lon1: longiude of point 1
+            lat2: latitude of point 2
+            lon2: longiude of point 2
+            unit: unit of distance. can be "m","meter","km" ...
+        Output:
+            distance, with certain unit giving in the parameter
     '''
     a=distance.distance((lat1, lon1), (lat2, lon2))
     return eval("a."+unit)
@@ -200,9 +317,13 @@ def earth_distance(lat1, lon1, lat2, lon2,unit="km"):
 @np.vectorize
 def relhum(T,W,P):
     '''
-    T:  temperature  [K]
-    W:  mixing ratio [kg/kg]
-    P:  pressure     [Pa]
+    caculating relative humidity using temperature,mixing ratio and pressure
+    Input:
+        T:  temperature  [K]
+        W:  mixing ratio [kg/kg]
+        P:  pressure     [Pa]
+    Output:
+        relative humidity [%]
     '''
     TABLE = [0.01403,0.01719,0.02101,0.02561,0.03117,0.03784,
             0.04584,0.05542,0.06685,0.08049,0.09672,0.1160,0.1388,
@@ -261,6 +382,25 @@ def relhum(T,W,P):
     if (DRELHUM < 0.0):
         DRELHUM = 0.0001
     return DRELHUM
+
+
+@np.vectorize
+def visibility(RH,T,method:str):
+    '''
+    estimating visibility using relativate humidity and temperature.
+    Input:
+        T:  temperature  [K]
+        RH: relative humidty [%]
+    Output:
+        visibility [km]
+    '''
+    if method == "RUC" : # using Rapid Updata Cyclef method
+        q = min(80.0,(RH/100-0.15))
+        return 60.0 * math.exp(-2.5*q)  * 1000
+    elif method == "FSL": # using Forecast System Laboratory method
+        vis = 6000*(T-dewtemp_trh(T,RH))/(RH**1.75)
+        return vis
+
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
     tk =   18. + 273.15   # K
