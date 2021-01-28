@@ -400,7 +400,11 @@ def visibility(RH,T,method:str):
     elif method == "FSL": # using Forecast System Laboratory method
         vis = 6000*(T-dewtemp_trh(T,RH))/(RH**1.75)
         return vis
-
+def g(lat):
+    '''
+    caculate more accurate gravitational acceleration using latitude.
+    '''
+    return 9.7803*(1+0.0053024*(math.sin(lat))**2-0.000005*(math.sin(2*lat))**2)
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
     tk =   18. + 273.15   # K
