@@ -401,23 +401,23 @@ def visibility(RH,T,method:str):
         vis = 6000*(T-dewtemp_trh(T,RH))/(RH**1.75)
         return vis
 def mixhum_ptrh(P,TK,RH,ISWIT:int):
-# computes qw (specific humidity or mixing ratio) from p, t and rh
-# definition of mixing ratio
-# if,
-#    es  - is the saturation mixing ratio
-#    ep  - is the ratio of the molecular weights of water vapor to dry air
-#    p   - is the atmospheric pressure
-#    rh  - is the relative humidity (given as a percent)
-#    q =   rh * ( (ep*es)/(p-es) )
-# input-
-#    p      - pressure (hPa or mb)
-#    tk     - temperature (k)
-#    rh     - rel hum in percent
-#    iswit  - if iswit=1 qw will contain mix ratio
-#                iswit=2 qw will contain spc humidity
-#                if iswit is negative the units will be kg/kg else g/kg
-# output-
-#    qw     - mixing ratio or specific hum
+    # computes qw (specific humidity or mixing ratio) from p, t and rh
+    # definition of mixing ratio
+    # if,
+    #    es  - is the saturation mixing ratio
+    #    ep  - is the ratio of the molecular weights of water vapor to dry air
+    #    p   - is the atmospheric pressure
+    #    rh  - is the relative humidity (given as a percent)
+    #    q =   rh * ( (ep*es)/(p-es) )
+    # input-
+    #    p      - pressure (hPa or mb)
+    #    tk     - temperature (k)
+    #    rh     - rel hum in percent
+    #    iswit  - if iswit=1 qw will contain mix ratio
+    #                iswit=2 qw will contain spc humidity
+    #                if iswit is negative the units will be kg/kg else g/kg
+    # output-
+    #    qw     - mixing ratio or specific hum
     T0,EP,ONEMEP,ES0,A,B = 273.15,0.622,0.378,6.11,17.269,35.86
     EST = ES0*math.exp((A* (TK-T0))/ (TK-B))
     QST = (EP*EST)/ (P-ONEMEP*EST)
@@ -433,6 +433,7 @@ def g(lat):
     caculate more accurate gravitational acceleration using latitude.
     '''
     return 9.7803*(1+0.0053024*(math.sin(lat))**2-0.000005*(math.sin(2*lat))**2)
+
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
     tk =   18. + 273.15   # K
