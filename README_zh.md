@@ -32,6 +32,6 @@
 
 `v(ws,wd)`: #计算v风。输入风速和风向（角度制）
 
-`SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500)`:   # SWEAT天气强威胁指数
+`SWEAT_calculate(T850,R850,T500,U850,V850,U500,V500)`:   # SWEAT天气强威胁指数
 
 `relhum(T,W,P)`:  # 计算相对湿度(T:temperature[K],W:mixing ratio[kg/kg],P:pressure[Pa])
