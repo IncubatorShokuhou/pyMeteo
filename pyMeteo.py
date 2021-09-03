@@ -434,6 +434,22 @@ def g(lat):
     '''
     return 9.7803*(1+0.0053024*(math.sin(lat))**2-0.000005*(math.sin(2*lat))**2)
 
+def sea_level_pressure(ph,h,t,t12,gamma=0.5/100):
+    """
+    caculate see level pressure using current pressure,
+    station height, current temperature and tempeaature 12 hours ago.
+    Input:
+        ph:  Station air pressure  [hPa]
+        h:  Station height [m]
+        t:  current tempetature [degree C]
+        t12: tempetature 12 hours ago [degree C]
+        gamma: temperature lapse rate. 0.5 degree C per 100 meter by default.
+    Output:
+        Sea Level Pressure [hPa]
+    """
+    tm = (t+t12)/2 + gamma*h/2  # Average air column temperature
+    return ph*10**(h/(18400*(1+tm/273)))
+
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
     tk =   18. + 273.15   # K
