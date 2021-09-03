@@ -6,11 +6,11 @@ from geopy import distance
 def showalter(t8, td8, t5):
     # 输入850hPa温度和露点温度，500hPa温度，计算沙氏指数。单位：摄氏度
     '''
-    caculating Showalter Index 
+    calculating Showalter Index 
     Input:
-        t8: temperature at 850hPa [degree cetigrade ]
-        td: dew point temperature at 850hPa [degree cetigrade ] 
-        t5: temperature at 850hPa [degree cetigrade ]
+        t8: temperature at 850hPa [degree C ]
+        td: dew point temperature at 850hPa [degree C ] 
+        t5: temperature at 850hPa [degree C ]
     Output:
         showalter index
     '''
@@ -55,9 +55,9 @@ def showalter(t8, td8, t5):
 @np.vectorize
 def E_WATER(td):  
     '''
-    caculate aturated vapor pressure
+    calculate saturated vapor pressure
     Input:
-        td: dew point temperature [degree cetigrade] 
+        td: dew point temperature [degree C] 
     Output:
         showalter index
 
@@ -79,10 +79,10 @@ def Tc(p, t, td):
     Calculate the temperature at condensation height based on temperature and dew point
     Input:
         p: pressure [hPa]
-        t: temperature [degree cetigrade]
-        td: dew point temperature [degree cetigrade]
+        t: temperature [degree C]
+        td: dew point temperature [degree C]
     Output:
-        temperature at condensation height [degree cetigrade]
+        temperature at condensation height [degree C]
     '''
     step = 10.0
     Cpd = 0.2403
@@ -113,7 +113,7 @@ def Tc(p, t, td):
 @np.vectorize
 def K(T850, Td850, T700, Td700, T500):  # K指数
     '''
-    caculating K index
+    calculating K index
     The larger the K index, the more unstable the stratification. 
     The statistical results: 
         K<20 no thunderstorm; 
@@ -134,7 +134,7 @@ def K(T850, Td850, T700, Td700, T500):  # K指数
 @np.vectorize
 def A(T850, Td850, T700, Td700, T500, Td500):  
     '''
-    caculating A index
+    calculating A index
     Input:
         T850: temperature at 850hPa [degree cetigrade]
         Td850: dew point temperature at 850hPa [degree cetigrade]
@@ -164,7 +164,7 @@ def ttd925(T925, Td925):
 
 @np.vectorize
 def tt500(T850, T500):  
-    # Temperature difference bewteen 850hPa and 500hPa
+    # Temperature difference between 850hPa and 500hPa
     return T850-T500
 
 @np.vectorize
@@ -191,7 +191,7 @@ def dewtemp_trh(Tk,RH):
     '''
     calculate the dew pt temperature [k]:
     input:
-        rh - relative humidty [%]
+        rh - relative humidity [%]
         tk - temperature [k]
     output:
         tdk- dew point temperature
@@ -214,7 +214,7 @@ def TT(T850,R850,T500):
     total totals index
     Input: 
         T850: temperature at 850hPa [K]
-        R850: relative humidty at 850hPa [%]
+        R850: relative humidity at 850hPa [%]
         T500: temperature at 500hPa [K]
     '''
     Td850 = dewtemp_trh(T850,R850)
@@ -224,7 +224,7 @@ def TT(T850,R850,T500):
 @np.vectorize
 def ws(u,v): 
     '''
-    caculating wind speed giving u and v
+    calculating wind speed giving u and v
     Input:
         u: u-wind
         v: v-wind
@@ -236,7 +236,7 @@ def ws(u,v):
 @np.vectorize
 def wd(u,v): 
     '''
-    caculating wind direction giving u and v
+    calculating wind direction giving u and v
     Input:
         u: u-wind
         v: v-wind
@@ -248,7 +248,7 @@ def wd(u,v):
 @np.vectorize
 def u(ws,wd): 
     '''
-    caculating u-wind giving wind speed and wind direction
+    calculating u-wind giving wind speed and wind direction
     Input:
         ws: wind speed
         wd: wind direction [degree]
@@ -260,7 +260,7 @@ def u(ws,wd):
 @np.vectorize
 def v(ws,wd): 
     '''
-    caculating v-wind giving wind speed and wind direction
+    calculating v-wind giving wind speed and wind direction
     Input:
         ws: wind speed
         wd: wind direction [degree]
@@ -270,14 +270,14 @@ def v(ws,wd):
     return -ws*math.cos(wd/180*math.pi)
     
 @np.vectorize
-def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
+def SWEAT_calculate(T850,R850,T500,U850,V850,U500,V500):
     '''
-    caculating SWEAT Severe Weather Threat Index
+    calculating SWEAT Severe Weather Threat Index
     SWEAT=12*Td850 + 20*(TT-49) + 4*WS850 + 2*WS500 + 125*(sin(WD500-WD850)+0.2)
     Input:
-        T850: tempereature at 850hPa [K]
-        R850: relative humidty at 850hPa [%]
-        T500: tempereature at 500hPa [K]
+        T850: temperature at 850hPa [K]
+        R850: relative humidity at 850hPa [%]
+        T500: temperature at 500hPa [K]
         U850: u-wind at 850hPa [m/s]
         V850: v-wind at 850hPa [m/s]
         U500: u-wind at 500hPa [m/s]
@@ -301,12 +301,12 @@ def SWEAT_caculate(T850,R850,T500,U850,V850,U500,V500):
 @np.vectorize
 def earth_distance(lat1, lon1, lat2, lon2,unit="km"):
     '''
-        caculating the distance bewettn two point on the earth giving the latitude and longiude of the two points
+        calculating the distance between two point on the earth giving the latitude and longitude of the two points
         Input:
             lat1: latitude of point 1
-            lon1: longiude of point 1
+            lon1: longitude of point 1
             lat2: latitude of point 2
-            lon2: longiude of point 2
+            lon2: longitude of point 2
             unit: unit of distance. can be "m","meter","km" ...
         Output:
             distance, with certain unit giving in the parameter
@@ -317,7 +317,7 @@ def earth_distance(lat1, lon1, lat2, lon2,unit="km"):
 @np.vectorize
 def relhum(T,W,P):
     '''
-    caculating relative humidity using temperature,mixing ratio and pressure
+    calculating relative humidity using temperature,mixing ratio and pressure
     Input:
         T:  temperature  [K]
         W:  mixing ratio [kg/kg]
@@ -387,37 +387,40 @@ def relhum(T,W,P):
 @np.vectorize
 def visibility(RH,T,method:str):
     '''
-    estimating visibility using relativate humidity and temperature.
+    estimating visibility using relative humidity and temperature.
     Input:
         T:  temperature  [K]
-        RH: relative humidty [%]
+        RH: relative humidity [%]
     Output:
         visibility [km]
     '''
-    if method == "RUC" : # using Rapid Updata Cyclef method
+    if method == "RUC" : # using Rapid Update Cycled method
         q = min(80.0,(RH/100-0.15))
         return 60.0 * math.exp(-2.5*q)  * 1000
     elif method == "FSL": # using Forecast System Laboratory method
         vis = 6000*(T-dewtemp_trh(T,RH))/(RH**1.75)
         return vis
+
 def mixhum_ptrh(P,TK,RH,ISWIT:int):
-    # computes qw (specific humidity or mixing ratio) from p, t and rh
-    # definition of mixing ratio
-    # if,
-    #    es  - is the saturation mixing ratio
-    #    ep  - is the ratio of the molecular weights of water vapor to dry air
-    #    p   - is the atmospheric pressure
-    #    rh  - is the relative humidity (given as a percent)
-    #    q =   rh * ( (ep*es)/(p-es) )
-    # input-
-    #    p      - pressure (hPa or mb)
-    #    tk     - temperature (k)
-    #    rh     - rel hum in percent
-    #    iswit  - if iswit=1 qw will contain mix ratio
-    #                iswit=2 qw will contain spc humidity
-    #                if iswit is negative the units will be kg/kg else g/kg
-    # output-
-    #    qw     - mixing ratio or specific hum
+    """
+    computes qw (specific humidity or mixing ratio) from p, t and rh
+    definition of mixing ratio
+    if,
+       es  - is the saturation mixing ratio
+       ep  - is the ratio of the molecular weights of water vapor to dry air
+       p   - is the atmospheric pressure
+       rh  - is the relative humidity (given as a percent)
+       q =   rh * ( (ep*es)/(p-es) )
+    input-
+       p      - pressure (hPa or mb)
+       tk     - temperature (k)
+       rh     - rel hum in percent
+       iswit  - if iswit=1 qw will contain mix ratio
+                   iswit=2 qw will contain spc humidity
+                   if iswit is negative the units will be kg/kg else g/kg
+    output-
+       qw     - mixing ratio or specific hum
+    """
     T0,EP,ONEMEP,ES0,A,B = 273.15,0.622,0.378,6.11,17.269,35.86
     EST = ES0*math.exp((A* (TK-T0))/ (TK-B))
     QST = (EP*EST)/ (P-ONEMEP*EST)
@@ -430,19 +433,19 @@ def mixhum_ptrh(P,TK,RH,ISWIT:int):
 
 def g(lat):
     '''
-    caculate more accurate gravitational acceleration using latitude.
+    calculate more accurate gravitational acceleration using latitude.
     '''
     return 9.7803*(1+0.0053024*(math.sin(lat))**2-0.000005*(math.sin(2*lat))**2)
 
 def sea_level_pressure(ph,h,t,t12,gamma=0.5/100):
     """
-    caculate see level pressure using current pressure,
-    station height, current temperature and tempeaature 12 hours ago.
+    calculate see level pressure using current pressure,
+    station height, current temperature and temperature 12 hours ago.
     Input:
         ph:  Station air pressure  [hPa]
         h:  Station height [m]
-        t:  current tempetature [degree C]
-        t12: tempetature 12 hours ago [degree C]
+        t:  current temperature [degree C]
+        t12: temperature 12 hours ago [degree C]
         gamma: temperature lapse rate. 0.5 degree C per 100 meter by default.
     Output:
         Sea Level Pressure [hPa]
