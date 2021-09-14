@@ -59,8 +59,7 @@ def E_WATER(td):
     Input:
         td: dew point temperature [degree C] 
     Output:
-        showalter index
-
+        saturated vapor pressure
     '''
     E0 = 6.1078
     T0 = 273.15
