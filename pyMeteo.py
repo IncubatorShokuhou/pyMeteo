@@ -10,7 +10,7 @@ def showalter(t8, td8, t5):
     Input:
         t8: temperature at 850hPa [degree C ]
         td: dew point temperature at 850hPa [degree C ] 
-        t5: temperature at 850hPa [degree C ]
+        t5: temperature at 500hPa [degree C ]
     Output:
         showalter index
     '''
