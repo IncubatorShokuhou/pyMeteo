@@ -452,6 +452,46 @@ def sea_level_pressure(ph,h,t,t12,gamma=0.5/100):
     tm = (t+t12)/2 + gamma*h/2  # Average air column temperature
     return ph*10**(h/(18400*(1+tm/273)))
 
+
+def mixhum_convert(wq,wqType:int=0,iounit:tuple[int,int]=(0,0)):
+    """
+    q = w/(1+w) [switch=True]  <===>   w = q/(1-q) [switch=False]
+    w: mixing ratio
+    q: specific humidity
+    
+    wq
+    A scalar or array containing mixing ratio or specific humidity (units: kg/kg, g/kg).
+
+    wqType
+        wqType="w" or "W" means that wq is mixing ratio and a conversion to specific humidity is desired.
+        wqType="q" or "Q" means that wq is specific humidity and a conversion to mixing ratio is desired.
+    iounit
+        An integer array of length 2 which specifies the units of the input wq and returned variable
+
+        iounit(0)=0 input wq are kg/kg
+        iounit(0)=1 input wq are g/kg
+        iounit(1)=0 returned units are kg/kg
+        iounit(1)=1 returned units are g/kg
+    """
+    # convert to kg/kg (if necessary) then calculate
+    if iounit[0] == 0: # input unit: kg/kg
+        pass
+    else: # input unit: g/kg
+        wq = wq / 1000 # g/kg -> kg/kg
+    
+    if wqType == 0: # mixing ratio to specific humidity
+        wq = wq/(1+wq)
+    else: # specific humidity to mixing ratio
+        wq = wq/(1-wq)
+    
+    if iounit[1] == 0: # output unit: kg/kg
+        pass
+    else: # output unit: g/kg
+        wq = wq * 1000
+
+    return wq
+
+
 if __name__ == "__main__":
     #a = showalter(16.6, 0.6, -15.9)
     tk =   18. + 273.15   # K
