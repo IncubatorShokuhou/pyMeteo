@@ -37,6 +37,7 @@ Units are strings on the call (`temperature_unit="C"`). Defaults live in each fu
 - [Dynamics](Dynamics.md) — Coriolis, ω ↔ w
 - [Units](Units.md) — aliases and `UnitError`
 - [NCL](NCL.md) — NCL names with NCL’s unit conventions
+- [Agent](Agent.md) — skill / MCP / `MeteoEngine`
 - [Install](Install.md)
 
 中文：[首页](Home_zh.md)

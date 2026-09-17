@@ -30,6 +30,19 @@ ws = pm.wind_speed(3.0, 4.0)
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5)
 ```
 
+## Agents
+
+Agents can load the packaged `meteo-expert` skill or an optional MCP server to pick functions, check units, and resolve NCL names. The classic `import pymeteo as pm` API is unchanged.
+
+```bash
+pip install pymeteo-kit
+pymeteo install-skill              # Claude Code: ~/.claude/skills/meteo-expert
+pymeteo install-skill --project    # Codex: ./skills/meteo-expert
+pip install "pymeteo-kit[mcp]"
+pymeteo mcp serve                  # or: python -m pymeteo.mcp_server
+pymeteo info
+```
+
 ## Units
 
 Pass units as strings (`temperature_unit="C"`); conversion happens inside the function. Defaults are in each function’s docstring. No Pint.

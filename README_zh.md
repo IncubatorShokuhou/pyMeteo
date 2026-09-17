@@ -30,6 +30,19 @@ ws = pm.wind_speed(3.0, 4.0)
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5)
 ```
 
+## 给 agent 用
+
+可以用随包装的 `meteo-expert` skill，或可选的 MCP 服务，来选函数、核对单位、对照 NCL 名字。原来的 `import pymeteo as pm` 调用方式不变。
+
+```bash
+pip install pymeteo-kit
+pymeteo install-skill              # Claude Code：~/.claude/skills/meteo-expert
+pymeteo install-skill --project    # Codex：./skills/meteo-expert
+pip install "pymeteo-kit[mcp]"
+pymeteo mcp serve                  # 或：python -m pymeteo.mcp_server
+pymeteo info
+```
+
 ## 单位
 
 函数用字符串参数声明单位（如 `temperature_unit="C"`），在函数内换算。默认单位写在各函数的文档字符串里。不引入 Pint。

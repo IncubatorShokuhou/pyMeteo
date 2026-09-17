@@ -19,4 +19,6 @@ pip install -e ".[dev]"
 pytest
 ```
 
+Optional agent extras: `pymeteo install-skill`, `pip install "pymeteo-kit[mcp]"`, `pymeteo mcp serve`. See [Agent](Agent.md).
+
 [中文](Install_zh.md)

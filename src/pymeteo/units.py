@@ -199,6 +199,23 @@ def canonical_angle_unit(unit: str) -> str:
     return _lookup(unit, _ANGLE_ALIASES, "角度")
 
 
+def unit_alias_tables():
+    """返回各物理量的别名 → 规范名表，供 agent / ``unit_help`` 使用。
+
+    键为物理量种类；值为别名（已去掉空白与大小写差异后的查找键）到规范名。
+    """
+
+    return {
+        "temperature": dict(_TEMPERATURE_ALIASES),
+        "pressure": dict(_PRESSURE_ALIASES),
+        "speed": dict(_SPEED_ALIASES),
+        "humidity": dict(_RH_ALIASES),
+        "mass_humidity": dict(_MASS_HUMIDITY_ALIASES),
+        "distance": dict(_DISTANCE_ALIASES),
+        "angle": dict(_ANGLE_ALIASES),
+    }
+
+
 def to_kelvin(value: ArrayLike, unit: str) -> np.ndarray:
     """把温度换算为开尔文。"""
 
