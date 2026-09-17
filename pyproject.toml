@@ -42,6 +42,9 @@ Documentation = "https://github.com/IncubatorShokuhou/pyMeteo/blob/master/README
 [tool.hatch.version]
 path = "src/pymeteo/__init__.py"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/pymeteo"]
+
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
