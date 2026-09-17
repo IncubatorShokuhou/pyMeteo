@@ -2,34 +2,17 @@
 
 [English](Publishing.md)
 
-## 用户安装
-
 ```bash
 pip install pymeteo-kit
 ```
 
-导入仍为 `import pymeteo`。Python 3.6+。运行时只有 NumPy。
+`import pymeteo`。Python 3.7+。
 
-## PyPI
-
-发行名：[`pymeteo-kit`](https://pypi.org/project/pymeteo-kit/)。发布走 GitHub Actions：
-
-* 触发：GitHub **Release**，或 **Actions → Publish → Run workflow**
-* 工作流：`.github/workflows/publish.yml`
-* 环境：`pypi`（URL https://pypi.org/p/pymeteo-kit）
-* 密钥：`PYPI_API_TOKEN`
-* 构建：Python 3.12，`python -m build`（hatchling ≥ 1.18）
-
-wheel/sdist 把 `core-metadata-version` 钉在 `2.1`，好让 CPython 3.6 上的 pip 21.3 仍能读元数据。
-
-## CI
-
-`.github/workflows/ci.yml`：3.12 上跑 ruff；3.8 / 3.10 / 3.12 / 3.13 上跑 pytest；3.6 job 把 3.12 构建的 wheel 装进 `python:3.6.15-buster`。
+发布走 [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions) 上传 PyPI。
 
 ```bash
 pip install -e ".[dev]"
 pytest
-ruff check src tests
 ```
 
 ## 贡献（简）
@@ -43,4 +26,4 @@ ruff check src tests
 
 ## 许可
 
-MIT。版权人 IncubatorShokuhou，2019–2026。见源码树中的 `LICENSE`。
+MIT License。版权人 IncubatorShokuhou，2019–2026。见源码树中的 `LICENSE`。
