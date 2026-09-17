@@ -4,9 +4,7 @@
 
 Humidity and parcel temperature. Most of the library’s thermodynamics lives here.
 
-Functions are re-exported at the package root (`import pymeteo as pm`). Defaults are °C, hPa, %, kg/kg unless noted.
-
-Saturation vapour pressure follows Li Shehong (1994). Dewpoint ↔ RH uses Dutton’s latent-heat relation. Mixing-ratio RH uses the NCL `relhum` table; mixing ratio from RH uses Tetens. Potential temperature is Poisson (κ = 0.286). θe and LCL follow Bolton (1980). Wet-bulb is Stull (2011), sea-level only.
+Functions are re-exported at the package root (`import pymeteo as pm`). Defaults are °C, hPa, %, kg/kg unless noted. Formula citations are on the individual functions.
 
 ## saturation_vapor_pressure
 

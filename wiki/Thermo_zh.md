@@ -4,9 +4,7 @@
 
 水汽和气块温度。库里大部分热力学计算在这一页。
 
-函数可以从包根导入（`import pymeteo as pm`）。没特别说明时，默认单位是 °C、hPa、%、kg/kg。
-
-饱和水汽压用李社宏（1994）水面公式。露点与相对湿度互换走 Dutton 的潜热关系。由混合比求 RH 用 NCL `relhum` 那张表；由 RH 求混合比用 Tetens。位温是 Poisson（κ = 0.286）。θe 和 LCL 跟 Bolton（1980）。湿球是 Stull（2011），只适用于海平面附近。
+函数可以从包根导入（`import pymeteo as pm`）。没特别说明时，默认单位是 °C、hPa、%、kg/kg。各函数下面写了用的公式。
 
 ## saturation_vapor_pressure
 
