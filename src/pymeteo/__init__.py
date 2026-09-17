@@ -1,5 +1,6 @@
 """pymeteo：带显式单位参数的轻量气象诊断函数库。"""
 
+from pymeteo import ncl
 from pymeteo.geo import earth_distance, gravity, sea_level_pressure
 from pymeteo.indices import (
     a_index,
@@ -29,7 +30,7 @@ from pymeteo.wind import (
     wind_speed,
 )
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 __all__ = [
     "UnitError",
@@ -43,6 +44,7 @@ __all__ = [
     "k_index",
     "layer_temperature_difference",
     "mixing_ratio_from_relative_humidity",
+    "ncl",
     "relative_humidity_from_dewpoint",
     "relative_humidity_from_mixing_ratio",
     "saturation_vapor_pressure",

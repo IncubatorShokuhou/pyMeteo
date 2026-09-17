@@ -16,6 +16,7 @@ def test_public_api_exports() -> None:
         "k_index",
         "layer_temperature_difference",
         "mixing_ratio_from_relative_humidity",
+        "ncl",
         "relative_humidity_from_dewpoint",
         "relative_humidity_from_mixing_ratio",
         "saturation_vapor_pressure",
@@ -40,7 +41,7 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.0.0"
+    assert pymeteo.__version__ == "2.1.0"
 
 
 def test_old_single_file_names_are_gone() -> None:
