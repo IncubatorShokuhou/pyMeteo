@@ -18,17 +18,15 @@ from pymeteo.thermo import (
 from pymeteo.units import (
     ArrayOrScalar,
     as_float_array,
+    canonical_temperature_unit,
     from_kelvin,
-    from_pascal,
     restore_shape,
     to_kelvin,
     to_mps,
-    to_rh_fraction,
 )
 from pymeteo.wind import wind_direction, wind_speed
 
 _T0 = 273.15
-_KNOT_PER_MPS = 3600.0 / 1852.0
 
 
 def temperature_dewpoint_depression(
@@ -86,8 +84,6 @@ def layer_temperature_difference(
 def _delta_temperature(delta_k: ArrayLike, output_unit: str) -> np.ndarray:
     """把开尔文温差换算为输出单位下的温差。"""
 
-    from pymeteo.units import canonical_temperature_unit
-
     kind = canonical_temperature_unit(output_unit)
     arr = as_float_array(delta_k)
     if kind in {"C", "K"}:
@@ -122,18 +118,21 @@ def k_index(
     返回
     ----
     float 或 ndarray
-        K 指数（数值上等于摄氏度或开尔文温差）。经验上：K<20 无雷暴；
-        20–25 零星雷暴；25–30 分散雷暴；30–35 成片雷暴。
+        K 指数。公式按摄氏度定义（Td850 以绝对温度加入），输入会先换算到
+        °C，因此 ``temperature_unit="K"`` 与 ``"C"`` 得到同一指数。经验上：
+        K<20 无雷暴；20–25 零星雷暴；25–30 分散雷暴；30–35 成片雷暴。
     """
 
-    t850 = to_kelvin(temperature_850, temperature_unit)
-    td850 = to_kelvin(dewpoint_850, temperature_unit)
-    t700 = to_kelvin(temperature_700, temperature_unit)
-    td700 = to_kelvin(dewpoint_700, temperature_unit)
-    t500 = to_kelvin(temperature_500, temperature_unit)
+    # K 指数按摄氏度定义（Td850 以绝对温度加入），先统一换到 °C 再组合。
+    t850 = from_kelvin(to_kelvin(temperature_850, temperature_unit), "C")
+    td850 = from_kelvin(to_kelvin(dewpoint_850, temperature_unit), "C")
+    t700 = from_kelvin(to_kelvin(temperature_700, temperature_unit), "C")
+    td700 = from_kelvin(to_kelvin(dewpoint_700, temperature_unit), "C")
+    t500 = from_kelvin(to_kelvin(temperature_500, temperature_unit), "C")
     result = t850 - t500 + td850 - (t700 - td700)
-    return restore_shape(result, temperature_850, dewpoint_850, temperature_700,
-                         dewpoint_700, temperature_500)
+    return restore_shape(
+        result, temperature_850, dewpoint_850, temperature_700, dewpoint_700, temperature_500
+    )
 
 
 def a_index(
@@ -158,8 +157,15 @@ def a_index(
     t500 = to_kelvin(temperature_500, temperature_unit)
     td500 = to_kelvin(dewpoint_500, temperature_unit)
     result = (t850 - t500) - (t850 - td850) - (t700 - td700) - (t500 - td500)
-    return restore_shape(result, temperature_850, dewpoint_850, temperature_700,
-                         dewpoint_700, temperature_500, dewpoint_500)
+    return restore_shape(
+        result,
+        temperature_850,
+        dewpoint_850,
+        temperature_700,
+        dewpoint_700,
+        temperature_500,
+        dewpoint_500,
+    )
 
 
 def total_totals_index(
@@ -283,6 +289,7 @@ def _showalter_c(t8_c: ArrayLike, td8_c: ArrayLike, t5_c: ArrayLike) -> np.ndarr
     c_const = 1.002
     c1 = 0.57
     t8_k = t0 + t8
+    # 沿用旧实现：混合比用 850 hPa 气温的水面饱和水汽压，而非露点（与李社宏迭代格式一致）。
     etd8 = _saturation_vapor_pressure_hpa(t8)
     mixing = (rd / rw) * etd8 / (p8 - etd8)
     ml = (cpd * (1.0 + cpv * mixing / cpd)) / (rd * (1.0 + mixing / (rd / rw)))

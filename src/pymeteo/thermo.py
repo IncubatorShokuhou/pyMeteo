@@ -35,10 +35,10 @@ _RW_CAL = 0.1101787372
 _L0 = 597.4
 
 # Dutton 水汽气体常数与单位换算
-_GC_J = 461.5  # J K^-1 kg^-1
-_GC_CAL = _GC_J / (1000.0 * 4.186)  # cal g^-1 K^-1
+_GC_J = 461.5  # 水汽气体常数，单位 J·K⁻¹·kg⁻¹
+_GC_CAL = _GC_J / (1000.0 * 4.186)  # 换算为 cal·g⁻¹·K⁻¹
 
-# NCL mixhum_ptrh / Tetens
+# NCL mixhum_ptrh 所用 Tetens 公式常数
 _EP = 0.622
 _ONEMEP = 0.378
 _ES0 = 6.11
@@ -514,8 +514,10 @@ def relative_humidity_from_mixing_ratio(
     index = np.floor(temperature_k - 173.16).astype(int)
     index = np.clip(index, 0, _RELHUM_ES_TABLE.size - 2)
     t_low = 173.16 + index
-    es_pa = ((t_low + 1.0 - temperature_k) * _RELHUM_ES_TABLE[index]
-             + (temperature_k - t_low) * _RELHUM_ES_TABLE[index + 1]) * 0.1
+    es_pa = (
+        (t_low + 1.0 - temperature_k) * _RELHUM_ES_TABLE[index]
+        + (temperature_k - t_low) * _RELHUM_ES_TABLE[index + 1]
+    ) * 0.1
     rh_percent = (mixing * (pressure_pa - 0.378 * es_pa) / (0.622 * es_pa)) * 100.0
     rh_percent = np.where(rh_percent < 0.0, 0.0001, rh_percent)
     rh = from_rh_fraction(rh_percent / 100.0, output_humidity_unit)
@@ -557,10 +559,12 @@ def mixing_ratio_from_relative_humidity(
         混合比。饱和水汽压采用 Tetens 公式（NCL ``mixhum_ptrh``）。
     """
 
-    mixing = _tetens_mixing_ratio(pressure, temperature, relative_humidity,
-                                  pressure_unit, temperature_unit, humidity_unit)
-    return restore_shape(from_kgkg(mixing, output_humidity_unit),
-                         pressure, temperature, relative_humidity)
+    mixing = _tetens_mixing_ratio(
+        pressure, temperature, relative_humidity, pressure_unit, temperature_unit, humidity_unit
+    )
+    return restore_shape(
+        from_kgkg(mixing, output_humidity_unit), pressure, temperature, relative_humidity
+    )
 
 
 def specific_humidity_from_relative_humidity(
@@ -578,11 +582,13 @@ def specific_humidity_from_relative_humidity(
     参数含义同 :func:`mixing_ratio_from_relative_humidity`。比湿 ``q = w / (1 + w)``。
     """
 
-    mixing = _tetens_mixing_ratio(pressure, temperature, relative_humidity,
-                                  pressure_unit, temperature_unit, humidity_unit)
+    mixing = _tetens_mixing_ratio(
+        pressure, temperature, relative_humidity, pressure_unit, temperature_unit, humidity_unit
+    )
     specific = mixing / (1.0 + mixing)
-    return restore_shape(from_kgkg(specific, output_humidity_unit),
-                         pressure, temperature, relative_humidity)
+    return restore_shape(
+        from_kgkg(specific, output_humidity_unit), pressure, temperature, relative_humidity
+    )
 
 
 def _tetens_mixing_ratio(
@@ -630,6 +636,7 @@ def convert_humidity(
     ----
     float 或 ndarray
         转换后的水汽含量。关系为 ``q = w / (1 + w)``、``w = q / (1 - q)``。
+        由比湿转为混合比时，若比湿 ≥ 1，对应元素为 ``nan``（物理上不可能）。
     """
 
     if from_quantity not in ("mixing_ratio", "specific_humidity"):
@@ -642,7 +649,8 @@ def convert_humidity(
         if from_quantity == "mixing_ratio":
             amount = amount / (1.0 + amount)
         else:
-            amount = amount / (1.0 - amount)
+            denominator = np.where(amount >= 1.0, np.nan, 1.0 - amount)
+            amount = amount / denominator
     return restore_shape(from_kgkg(amount, output_humidity_unit), value)
 
 

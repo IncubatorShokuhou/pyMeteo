@@ -39,7 +39,8 @@ def test_earth_distance_array() -> None:
 def test_gravity_latitude_in_degrees() -> None:
     assert gravity(0.0) == pytest.approx(9.7803)
     expected_45 = 9.7803 * (
-        1.0 + 0.0053024 * math.sin(math.radians(45.0)) ** 2
+        1.0
+        + 0.0053024 * math.sin(math.radians(45.0)) ** 2
         - 0.000005 * math.sin(math.radians(90.0)) ** 2
     )
     assert gravity(45.0, latitude_unit="deg") == pytest.approx(expected_45)

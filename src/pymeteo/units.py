@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import Any
 
 import numpy as np
@@ -348,26 +347,3 @@ def to_radians(value: ArrayLike, unit: str = "deg") -> NDArray[np.floating[Any]]
     if kind == "rad":
         return arr
     return np.deg2rad(arr)
-
-
-def from_radians(value: ArrayLike, unit: str = "deg") -> NDArray[np.floating[Any]]:
-    """把弧度换算为指定角度单位。"""
-
-    arr = as_float_array(value)
-    kind = canonical_angle_unit(unit)
-    if kind == "rad":
-        return arr
-    return np.rad2deg(arr)
-
-
-def broadcasted(*values: ArrayLike) -> tuple[NDArray[np.floating[Any]], ...]:
-    """把若干输入广播为形状一致的 ``float`` 数组。"""
-
-    arrays = [as_float_array(value) for value in values]
-    return tuple(np.broadcast_arrays(*arrays))
-
-
-def all_scalar(values: Iterable[ArrayLike]) -> bool:
-    """判断一组输入是否全部为 0 维标量。"""
-
-    return all(np.ndim(np.asarray(item)) == 0 for item in values)

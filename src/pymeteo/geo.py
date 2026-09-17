@@ -17,6 +17,7 @@ from pymeteo.units import (
     from_pascal,
     restore_shape,
     to_kelvin,
+    to_meters,
     to_pascal,
     to_radians,
 )
@@ -77,7 +78,9 @@ def earth_distance(
     )
 
 
-def _haversine(lat1: np.ndarray, lon1: np.ndarray, lat2: np.ndarray, lon2: np.ndarray) -> np.ndarray:
+def _haversine(
+    lat1: np.ndarray, lon1: np.ndarray, lat2: np.ndarray, lon2: np.ndarray
+) -> np.ndarray:
     """平均半径球面 haversine 距离（米），用作 Vincenty 失败时的回退。"""
 
     dlat = lat2 - lat1
@@ -101,6 +104,7 @@ def _vincenty_inverse(
         as_float_array(lon2),
     )
     flattened = np.column_stack([lat1.ravel(), lon1.ravel(), lat2.ravel(), lon2.ravel()])
+    # 逐点迭代：Vincenty λ 更新难以整阵收敛；测站对数在数千以内足够快。
     out = np.empty(flattened.shape[0], dtype=float)
     for i, (phi1, lambda1, phi2, lambda2) in enumerate(flattened):
         out[i] = _vincenty_scalar(float(phi1), float(lambda1), float(phi2), float(lambda2))
@@ -161,19 +165,25 @@ def _vincenty_scalar(lat1: float, lon1: float, lat2: float, lon2: float) -> floa
         return float(_haversine(np.array(lat1), np.array(lon1), np.array(lat2), np.array(lon2)))
 
     u2_val = cos2_alpha * (a**2 - b**2) / b**2
-    a_series = 1.0 + u2_val / 16384.0 * (4096.0 + u2_val * (-768.0 + u2_val * (320.0 - 175.0 * u2_val)))
+    a_series = 1.0 + u2_val / 16384.0 * (
+        4096.0 + u2_val * (-768.0 + u2_val * (320.0 - 175.0 * u2_val))
+    )
     b_series = u2_val / 1024.0 * (256.0 + u2_val * (-128.0 + u2_val * (74.0 - 47.0 * u2_val)))
-    delta_sigma = b_series * sin_sigma * (
-        cos2_sigma_m
-        + b_series
-        / 4.0
+    delta_sigma = (
+        b_series
+        * sin_sigma
         * (
-            cos_sigma * (-1.0 + 2.0 * cos2_sigma_m**2)
-            - b_series
-            / 6.0
-            * cos2_sigma_m
-            * (-3.0 + 4.0 * sin_sigma**2)
-            * (-3.0 + 4.0 * cos2_sigma_m**2)
+            cos2_sigma_m
+            + b_series
+            / 4.0
+            * (
+                cos_sigma * (-1.0 + 2.0 * cos2_sigma_m**2)
+                - b_series
+                / 6.0
+                * cos2_sigma_m
+                * (-3.0 + 4.0 * sin_sigma**2)
+                * (-3.0 + 4.0 * cos2_sigma_m**2)
+            )
         )
     )
     return float(b * a_series * (sigma - delta_sigma))
@@ -235,8 +245,9 @@ def sea_level_pressure(
     temperature_12h_ago:
         12 小时前气温。
     lapse_rate:
-        气柱订正用递减率，单位为 ``temperature_unit`` 每米，默认 0.005 °C/m
-        （即每 100 m 降低 0.5 °C）。
+        气柱订正用递减率，单位为 ``temperature_unit`` **每米**，默认 0.005。
+        在默认摄氏度下即每 100 m 降低 0.5 °C。若 ``temperature_unit="F"``，
+        请把递减率也改成华氏度每米，否则不要沿用 0.005。
     pressure_unit:
         输入气压单位，默认 ``hPa``。
     height_unit:
@@ -259,15 +270,13 @@ def sea_level_pressure(
     """
 
     pressure_hpa = from_pascal(to_pascal(station_pressure, pressure_unit), "hPa")
-    height_m = as_float_array(station_height)
-    if height_unit != "m":
-        from pymeteo.units import to_meters
-
-        height_m = to_meters(station_height, height_unit)
+    height_m = to_meters(station_height, height_unit)
     t_c = from_kelvin(to_kelvin(temperature, temperature_unit), "C")
     t12_c = from_kelvin(to_kelvin(temperature_12h_ago, temperature_unit), "C")
-    lapse_c_per_m = float(from_kelvin(to_kelvin(lapse_rate, temperature_unit), "C")
-                          - from_kelvin(to_kelvin(0.0, temperature_unit), "C"))
+    lapse_c_per_m = float(
+        from_kelvin(to_kelvin(lapse_rate, temperature_unit), "C")
+        - from_kelvin(to_kelvin(0.0, temperature_unit), "C")
+    )
     tm = (t_c + t12_c) / 2.0 + lapse_c_per_m * height_m / 2.0
     slp_hpa = pressure_hpa * 10.0 ** (height_m / (18400.0 * (1.0 + tm / 273.0)))
     return restore_shape(

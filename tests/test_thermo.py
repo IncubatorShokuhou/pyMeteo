@@ -18,8 +18,12 @@ from pymeteo import (
 
 def test_saturation_vapor_pressure_known_values() -> None:
     assert saturation_vapor_pressure(0.0, temperature_unit="C") == pytest.approx(6.1078)
-    assert saturation_vapor_pressure(20.0, temperature_unit="C") == pytest.approx(23.364614454202506)
-    assert saturation_vapor_pressure(-10.0, temperature_unit="C") == pytest.approx(2.8622003456927323)
+    assert saturation_vapor_pressure(20.0, temperature_unit="C") == pytest.approx(
+        23.364614454202506
+    )
+    assert saturation_vapor_pressure(-10.0, temperature_unit="C") == pytest.approx(
+        2.8622003456927323
+    )
     pa = saturation_vapor_pressure(0.0, temperature_unit="C", output_pressure_unit="Pa")
     assert pa == pytest.approx(610.78)
 
@@ -118,12 +122,15 @@ def test_convert_humidity_mixing_ratio_specific_humidity() -> None:
     assert grams == pytest.approx(9.900990099009901)
 
 
+def test_convert_humidity_invalid_specific_humidity_is_nan() -> None:
+    result = convert_humidity(1.0, from_quantity="specific_humidity", to_quantity="mixing_ratio")
+    assert np.isnan(result)
+
+
 def test_visibility_ruc_is_kilometre_scale() -> None:
     vis_km = visibility(80.0, 18.0, method="RUC", humidity_unit="%", temperature_unit="C")
     assert vis_km == pytest.approx(11.814700512251644, rel=1e-6)
-    vis_m = visibility(
-        80.0, 18.0, method="RUC", output_distance_unit="m"
-    )
+    vis_m = visibility(80.0, 18.0, method="RUC", output_distance_unit="m")
     assert vis_m == pytest.approx(11814.700512251644, rel=1e-6)
 
 
