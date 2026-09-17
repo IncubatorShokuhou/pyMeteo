@@ -1,43 +1,54 @@
-# Geo (`pymeteo.geo`)
+# Geo
 
 [中文](Geo_zh.md)
 
-Geodesy, gravity, station-to-sea-level pressure, hypsometric thickness.
+Distance on the ellipsoid, gravity from latitude, station pressure reduced to sea level, and layer thickness from the hypsometric equation.
 
----
+## earth_distance
 
-### `earth_distance(latitude_1, longitude_1, latitude_2, longitude_2, *, angle_unit="deg", output_distance_unit="km")`
+Geodesic distance between two lat/lon points. WGS84 Vincenty inverse, in NumPy — no geopy.
 
-WGS84 Vincenty inverse. A handful of antipodal pairs that fail iteration fall back to a mean-Earth-radius haversine. Identical points → 0.
+`angle_unit` default `deg` (`rad` accepted). Output default `km`. Identical points are 0. A handful of antipodal pairs that fail to converge fall back to a mean-Earth-radius haversine.
 
 ```python
-pm.earth_distance(0.0, 0.0, 0.0, 1.0, output_distance_unit="m")  # about 111319.5 m
-pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
+import pymeteo as pm
+pm.earth_distance(0.0, 0.0, 0.0, 1.0, output_distance_unit="m")  # ~111319 m
+pm.earth_distance(39.9, 116.4, 31.2, 121.5)  # ~1070 km
 ```
 
-### `gravity(latitude, *, latitude_unit="deg")`
+## gravity
 
 `g = 9.7803 · (1 + 0.0053024 sin²φ − 0.000005 sin²2φ)` m/s². Latitude is converted to radians first. Equator: 9.7803.
 
 ```python
 pm.gravity(0.0)
-pm.gravity(45.0, latitude_unit="deg")
+pm.gravity(45.0)
 ```
 
-### `sea_level_pressure(station_pressure, station_height, temperature, temperature_12h_ago, *, lapse_rate=0.005, pressure_unit="hPa", height_unit="m", temperature_unit="C", output_pressure_unit="hPa")`
+## sea_level_pressure
 
-Column mean temperature `tm = (t + t12)/2 + lapse_rate·h/2`, then `p0 = ph · 10^(h / (18400 · (1 + tm/273)))`. The 273 and 18400 are the original empirical constants; temperature is substituted in Celsius.
+Reduce station pressure to sea level with a simple empirical column:
 
-`lapse_rate` is **per metre in `temperature_unit`**. Default 0.005 is 0.5 °C / 100 m. If you pass Fahrenheit temperatures, change the lapse rate too.
+`tm = (t + t12) / 2 + lapse_rate · h / 2`
+
+`p0 = ph · 10^(h / (18400 · (1 + tm/273)))`
+
+The 273 and 18400 are the original empirical constants; temperature is substituted in Celsius.
+
+`lapse_rate` is **per metre in `temperature_unit`**. The default 0.005 is 0.5 °C / 100 m. If you pass Fahrenheit temperatures, change the lapse rate too.
 
 ```python
-pm.sea_level_pressure(1000.0, 100.0, 20.0, 18.0)  # about 1011.76 hPa
+pm.sea_level_pressure(1000.0, 100.0, 20.0, 18.0)  # about 1011.8 hPa
 ```
 
-### `height_thickness(pressure_bottom, pressure_top, mean_temperature, *, pressure_unit="hPa", temperature_unit="C", output_distance_unit="m")`
+## height_thickness
 
-Hypsometric: `Δz = (Rd T̄ / g0) ln(p_bottom / p_top)` with `Rd = 287.058` J K⁻¹ kg⁻¹, `g0 = 9.80665` m s⁻². Default output is **metres**.
+Hypsometric thickness between two isobaric surfaces:
+
+`ΔZ = (Rd T̄ / g0) ln(p_bottom / p_top)`
+
+`Rd = 287.058` J K⁻¹ kg⁻¹, `g0 = 9.80665` m s⁻². Output default is **metres**, not km. Pass virtual temperature as `mean_temperature` if the layer is moist.
 
 ```python
-pm.height_thickness(1000.0, 500.0, 0.0, temperature_unit="C")
+pm.height_thickness(1000.0, 500.0, 0.0)  # about 5542 m
 ```
