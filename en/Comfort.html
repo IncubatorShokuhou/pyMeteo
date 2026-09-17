@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comfort (`pymeteo.comfort`) · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li class="here"><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../zh/Comfort.html">中文</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>Comfort (<code>pymeteo.comfort</code>)</h1>
+<p><a href="../zh/Comfort.html">中文</a></p>
+<p>NWS operational regressions, reimplemented (not copied from MetPy). Internally the code converts to Fahrenheit and miles per hour, then back. <strong>No NCL-name wrappers</strong> — NCL has no matching builtins, and <code>pymeteo.ncl</code> does not invent them.</p>
+<hr />
+<h3><code>heat_index(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit=None)</code></h3>
+<p>Rothfusz (1990) / NWS SR 90-23, after Steadman (1979):</p>
+<ol>
+<li>Simple form <code>HI = 0.5 {T + 61 + (T−68)·1.2 + RH·0.094}</code> (<code>T</code> in °F, <code>RH</code> in percent), averaged with air temperature.</li>
+<li>If that average ≥ 80 °F, switch to the full Rothfusz polynomial, with the low-humidity (RH &lt; 13%, 80–112 °F) and high-humidity (RH &gt; 85%, 80–87 °F) adjustments.</li>
+</ol>
+<p>Outside Steadman’s original table the formula is not reliable. 90 °F, 60% → about 100 °F.</p>
+<pre><code class="language-python">pm.heat_index(90.0, 60.0, temperature_unit=&quot;F&quot;, output_temperature_unit=&quot;F&quot;)
+</code></pre>
+<p>Output unit defaults to <code>temperature_unit</code>.</p>
+<h3><code>wind_chill(temperature, wind_speed, *, temperature_unit="C", speed_unit="m/s", output_temperature_unit=None)</code></h3>
+<p>NWS / Environment Canada 2001:</p>
+<p><code>WC = 35.74 + 0.6215 T − 35.75 V^0.16 + 0.4275 T V^0.16</code></p>
+<p>(<code>T</code> in °F, <code>V</code> in mph; wind intended near 10 m). Valid roughly for <code>T ≤ 50 °F</code> and <code>V ≥ 3 mph</code>; values are still returned outside that range. 0 °F, 10 mph → about −16 °F.</p>
+<pre><code class="language-python">pm.wind_chill(0.0, 10.0, temperature_unit=&quot;F&quot;, speed_unit=&quot;mph&quot;, output_temperature_unit=&quot;F&quot;)
+</code></pre>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>安装 · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">函数说明 · Python 3.6+ · 仅 NumPy · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li class="here"><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../en/Install.html">English</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>安装</h1>
+<p><a href="../en/Install.html">English</a></p>
+<h2>运行时</h2>
+<p>Python <strong>3.6+</strong>。运行时依赖只有 NumPy。CPython 3.6 上的 NumPy 上限是 <strong>1.19.x</strong>（最后一条完整支持 3.6 的发行线）。</p>
+<pre><code class="language-bash">pip install pymeteo-kit
+</code></pre>
+<p>PyPI 发行名是 <code>pymeteo-kit</code>（<code>pymeteo</code> 已被占用，<code>py-meteo</code> 因过于相似被拒）。导入仍为：</p>
+<pre><code class="language-python">import pymeteo as pm
+</code></pre>
+<h2>从 git 检出</h2>
+<p>当前 <code>[build-system]</code> 要求 <code>hatchling&gt;=1.18</code>，因此从源码做可编辑安装或 <code>python -m build</code> 需要 <strong>Python 3.8+</strong>。不要用 3.6 / 3.7 构建 sdist；这两个解释器请安装 PyPI 上的 <code>py3-none-any</code> wheel。</p>
+<pre><code class="language-bash">pip install -e .
+pip install -e &quot;.[dev]&quot;   # pytest；ruff 在 3.8+
+pytest
+ruff check src tests
+</code></pre>
+<p>CI 里 lint 只跑 Python 3.12。本仓库 ruff 的 <code>target-version</code> 最低是 <code>py37</code>。</p>
+<h2>关于 3.6 的 CI</h2>
+<p>GitHub 托管的 <code>ubuntu-20.04</code> 与 <code>actions/setup-python</code> 的 3.6 镜像已于 2025 年下线。CI 仍用 <code>python:3.6.15-buster</code> 容器、对 3.12 构建的 wheel 跑 3.6 测试。wheel/sdist 把 <code>core-metadata-version</code> 钉在 <code>2.1</code>，好让 3.6 上最后一版 pip（21.3）能读元数据。</p>
+<h2>发布</h2>
+<p>GitHub Release，或手动 <strong>Actions → Publish → Run workflow</strong>，会构建 sdist/wheel 并用 <code>pypi</code> 环境里的 <code>PYPI_API_TOKEN</code> 上传到 PyPI。工作流文件：<code>.github/workflows/publish.yml</code>。详见 <a href="Publishing.html">发布与贡献</a>。</p>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

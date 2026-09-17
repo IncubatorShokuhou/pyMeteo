@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pymeteo · meteorological diagnostics</title>
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="alternate" hreflang="zh-Hans" href="zh/index.html">
+  <link rel="alternate" hreflang="en" href="index.html">
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">Python 3.6+ · NumPy only · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+    <h2>Functions</h2>
+    <ul>
+      <li><a href="en/Units.html">Units</a></li>
+      <li><a href="en/Thermo.html">Thermo</a></li>
+      <li><a href="en/Indices.html">Indices</a></li>
+      <li><a href="en/Wind.html">Wind</a></li>
+      <li><a href="en/Geo.html">Geo</a></li>
+      <li><a href="en/Comfort.html">Comfort</a></li>
+      <li><a href="en/Dynamics.html">Dynamics</a></li>
+      <li><a href="en/NCL.html">NCL names</a></li>
+      <li><a href="en/Install.html">Install</a></li>
+      <li><a href="en/Publishing.html">Publishing</a></li>
+    </ul>
+    <h2>Language</h2>
+    <ul>
+      <li><a href="zh/index.html">中文</a></li>
+    </ul>
+  </nav>
+  <main>
+    <p class="lang"><a href="zh/index.html">中文</a></p>
+    <h1>pymeteo</h1>
+    <p class="lead">Pointwise meteorological diagnostics with explicit string unit parameters. Runtime dependency: NumPy. PyPI name <code>pymeteo-kit</code>; import name <code>pymeteo</code>.</p>
+    <p>No Pint, no Sounding/Wind objects, no MetPy, no NCL runtime. Not an I/O, plotting, or full CAPE/CIN package.</p>
+
+    <h2>Install</h2>
+<pre><code>pip install pymeteo-kit</code></pre>
+    <p>Python 3.6+. On 3.6 the NumPy pin is 1.19.x. Building from a git checkout needs Python 3.8+ (hatchling ≥ 1.18); 3.6/3.7 should install the wheel.</p>
+
+    <h2>Example</h2>
+<pre><code>import pymeteo as pm
+
+td = pm.dewpoint_from_relative_humidity(
+    18.0, 46.5, temperature_unit="C", humidity_unit="%"
+)  # about 6.30 °C
+
+si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")  # about 1.1
+
+km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
+
+from pymeteo.ncl import dewtemp_trh
+td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # K in, K out
+</code></pre>
+    <p>Defaults: temperature <code>C</code>, pressure <code>hPa</code>, wind <code>m/s</code>, relative humidity <code>%</code>, mixing ratio <code>kg/kg</code>, distance <code>km</code> (thickness defaults to <code>m</code>), angles in degrees. Unknown strings raise <code>pymeteo.UnitError</code>.</p>
+
+    <h2>Modules</h2>
+    <table>
+      <thead><tr><th>Page</th><th>Import</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><a href="en/Thermo.html">Thermo</a></td><td><code>pymeteo.thermo</code></td><td>Vapour, θ, θe, LCL, wet-bulb, visibility</td></tr>
+        <tr><td><a href="en/Indices.html">Indices</a></td><td><code>pymeteo.indices</code></td><td>Showalter, K, A, TT, SWEAT, LI</td></tr>
+        <tr><td><a href="en/Wind.html">Wind</a></td><td><code>pymeteo.wind</code></td><td>Speed, from-direction, u/v, bulk shear</td></tr>
+        <tr><td><a href="en/Geo.html">Geo</a></td><td><code>pymeteo.geo</code></td><td>Vincenty distance, gravity, SLP, thickness</td></tr>
+        <tr><td><a href="en/Comfort.html">Comfort</a></td><td><code>pymeteo.comfort</code></td><td>NWS heat index, wind chill</td></tr>
+        <tr><td><a href="en/Dynamics.html">Dynamics</a></td><td><code>pymeteo.dynamics</code></td><td>Coriolis, ω ↔ w</td></tr>
+        <tr><td><a href="en/NCL.html">NCL</a></td><td><code>pymeteo.ncl</code></td><td>Fixed-unit name shims, not re-exported at top level</td></tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
+      <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
+      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a>
+      <a class="alt" href="en/Install.html">Install notes</a>
+    </div>
+  </main>
+</div>
+<footer class="site">MIT License · IncubatorShokuhou 2019–2026</footer>
+</body>
+</html>

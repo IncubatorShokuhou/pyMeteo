@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>几何与气压（`pymeteo.geo`） · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">函数说明 · Python 3.6+ · 仅 NumPy · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li class="here"><a href="Geo.html">Geo</a></li>
+<li><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../en/Geo.html">English</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>几何与气压（<code>pymeteo.geo</code>）</h1>
+<p><a href="../en/Geo.html">English</a></p>
+<p>大地测量、重力、本站气压订正到海平面、压高厚度。</p>
+<hr />
+<h3><code>earth_distance(latitude_1, longitude_1, latitude_2, longitude_2, *, angle_unit="deg", output_distance_unit="km")</code></h3>
+<p>WGS84 Vincenty 反解。极少数对跖点迭代失败时回退到平均地球半径的 haversine。相同点 → 0。</p>
+<pre><code class="language-python">pm.earth_distance(0.0, 0.0, 0.0, 1.0, output_distance_unit=&quot;m&quot;)  # 约 111319.5 m
+pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit=&quot;km&quot;)
+</code></pre>
+<h3><code>gravity(latitude, *, latitude_unit="deg")</code></h3>
+<p><code>g = 9.7803 · (1 + 0.0053024 sin²φ − 0.000005 sin²2φ)</code>，单位 m/s²。纬度先化为弧度。赤道：9.7803。</p>
+<pre><code class="language-python">pm.gravity(0.0)
+pm.gravity(45.0, latitude_unit=&quot;deg&quot;)
+</code></pre>
+<h3><code>sea_level_pressure(station_pressure, station_height, temperature, temperature_12h_ago, *, lapse_rate=0.005, pressure_unit="hPa", height_unit="m", temperature_unit="C", output_pressure_unit="hPa")</code></h3>
+<p>气柱平均温度 <code>tm = (t + t12)/2 + lapse_rate·h/2</code>，再按 <code>p0 = ph · 10^(h / (18400 · (1 + tm/273)))</code> 订正。273 与 18400 沿用原经验常数，温度按摄氏度代入。</p>
+<p><code>lapse_rate</code> 的单位是 <strong><code>temperature_unit</code> 每米</strong>。默认 0.005 即每 100 m 降低 0.5 °C。若温度用华氏度，递减率也要改。</p>
+<pre><code class="language-python">pm.sea_level_pressure(1000.0, 100.0, 20.0, 18.0)  # 约 1011.76 hPa
+</code></pre>
+<h3><code>height_thickness(pressure_bottom, pressure_top, mean_temperature, *, pressure_unit="hPa", temperature_unit="C", output_distance_unit="m")</code></h3>
+<p>压高方程：<code>Δz = (Rd T̄ / g0) ln(p_bottom / p_top)</code>，<code>Rd = 287.058</code> J K⁻¹ kg⁻¹，<code>g0 = 9.80665</code> m s⁻²。默认输出为<strong>米</strong>。</p>
+<pre><code class="language-python">pm.height_thickness(1000.0, 500.0, 0.0, temperature_unit=&quot;C&quot;)
+</code></pre>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

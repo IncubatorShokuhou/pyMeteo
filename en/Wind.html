@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wind (`pymeteo.wind`) · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li class="here"><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../zh/Wind.html">中文</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>Wind (<code>pymeteo.wind</code>)</h1>
+<p><a href="../zh/Wind.html">中文</a></p>
+<p>Meteorological <strong>from</strong>-direction in degrees, range <code>[0, 360)</code>. Calm (speed 0) → direction 0 in the modern API.</p>
+<hr />
+<h3><code>wind_speed(u, v, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
+<p><code>sqrt(u²+v²)</code>. Output unit defaults to <code>speed_unit</code>.</p>
+<pre><code class="language-python">pm.wind_speed(3.0, 4.0)  # 5.0 m/s
+pm.wind_speed(10.0, 0.0, speed_unit=&quot;m/s&quot;, output_speed_unit=&quot;kt&quot;)
+</code></pre>
+<h3><code>wind_direction(u, v, *, speed_unit="m/s")</code></h3>
+<p>From-direction in degrees. <code>speed_unit</code> is kept for a consistent interface; direction does not depend on it.</p>
+<pre><code class="language-python">pm.wind_direction(3.0, 4.0)  # about 216.87°
+pm.wind_direction(0.0, 0.0)  # 0.0
+</code></pre>
+<p>NCL <code>wind_direction</code> in <a href="NCL.html"><code>pymeteo.ncl</code></a> adds <code>opt</code> for the calm fill (0 / nan / custom).</p>
+<h3><code>uv_from_speed_direction(speed, direction, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
+<p>Direction in <strong>degrees</strong> (from). Meteorological convention: 90° → u = −speed, v = 0; 0° → u = 0, v = −speed.</p>
+<pre><code class="language-python">u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit=&quot;kt&quot;, output_speed_unit=&quot;m/s&quot;)
+</code></pre>
+<h3><code>wind_components(speed, direction, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
+<p>Alias of <code>uv_from_speed_direction</code>.</p>
+<h3><code>bulk_wind_shear(u_bottom, v_bottom, u_top, v_top, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
+<p>Magnitude of the vector difference between two layers.</p>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

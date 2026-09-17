@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NCL compatibility (`pymeteo.ncl`) · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li class="here"><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../zh/NCL.html">中文</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>NCL compatibility (<code>pymeteo.ncl</code>)</h1>
+<p><a href="../zh/NCL.html">中文</a></p>
+<p>Thin wrappers with NCL builtin <strong>names</strong> and <strong>fixed NCL units</strong>. They only translate arguments and call the modern functions. They are <strong>not</strong> re-exported from top-level <code>pymeteo</code> (<code>from pymeteo import dewtemp_trh</code> fails). Need flexible units? Call the modern API.</p>
+<pre><code class="language-python">import pymeteo as pm
+from pymeteo.ncl import dewtemp_trh, relhum_ttd, mixhum_ptrh, wind_speed
+
+td_k = dewtemp_trh(18.0 + 273.15, 46.5)        # tk K, rh % → dewpoint K (~279.45)
+td_k = pm.ncl.dewtemp_trh(18.0 + 273.15, 46.5)
+rh = pm.ncl.relhum_ttd(291.15, 279.45, 0)      # opt=0 → %, opt=1 → fraction
+</code></pre>
+<p>Showalter / K / SWEAT / heat index / wind chill have no matching NCL builtins here; those names are not invented.</p>
+<p>Regression tests that pin numbers from NCL documentation examples live in <code>tests/test_ncl_official_examples.py</code>. Wiring and unit flags are in <code>tests/test_ncl.py</code>.</p>
+<h2>Map</h2>
+<table>
+<thead>
+<tr>
+<th>NCL name</th>
+<th>Fixed units / flags</th>
+<th>Calls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dewtemp_trh(tk, rh)</code></td>
+<td><code>tk</code> K, <code>rh</code> %, return dewpoint K</td>
+<td><code>dewpoint_from_relative_humidity</code></td>
+</tr>
+<tr>
+<td><code>relhum_ttd(t, td, opt)</code></td>
+<td><code>t</code>/<code>td</code> K; <code>opt=0</code> → %, <code>opt=1</code> → fraction</td>
+<td><code>relative_humidity_from_dewpoint</code></td>
+</tr>
+<tr>
+<td><code>relhum(t, w, p)</code></td>
+<td><code>t</code> K, <code>w</code> kg/kg, <code>p</code> Pa, return %</td>
+<td><code>relative_humidity_from_mixing_ratio</code></td>
+</tr>
+<tr>
+<td><code>mixhum_ptrh(p, tk, rh, iswit)</code></td>
+<td><code>p</code> <strong>hPa</strong>, <code>tk</code> K, <code>rh</code> %; <code>\|iswit\|=1</code> mixing ratio, <code>2</code> specific humidity; sign − → g/kg, + → kg/kg</td>
+<td><code>mixing_ratio_from_relative_humidity</code> / <code>specific_humidity_from_relative_humidity</code></td>
+</tr>
+<tr>
+<td><code>mixhum_ptd(p, tdk, iswit)</code></td>
+<td><code>p</code> <strong>Pa</strong>, <code>tdk</code> K; <code>iswit</code> as above</td>
+<td><code>mixing_ratio_from_dewpoint</code> (+ convert)</td>
+</tr>
+<tr>
+<td><code>mixhum_convert(wq, wqType, iounit)</code></td>
+<td><code>wqType</code> <code>"w"</code> mixing→specific, <code>"q"</code> reverse; <code>iounit=(in,out)</code> 0=kg/kg, 1=g/kg</td>
+<td><code>convert_humidity</code></td>
+</tr>
+<tr>
+<td><code>vapor_pres_rh(rh, es)</code></td>
+<td><code>rh</code> %; <code>es</code> and return share a unit</td>
+<td><code>RH/100 · e_s</code></td>
+</tr>
+<tr>
+<td><code>pot_temp(p, t, dim=-1, opt=False)</code></td>
+<td><code>p</code> Pa, <code>t</code> K, return K. <code>dim</code>/<code>opt</code> ignored</td>
+<td><code>potential_temperature</code></td>
+</tr>
+<tr>
+<td><code>pot_temp_equiv(p, t, w, dim=-1, humVarType="r")</code></td>
+<td><code>p</code> Pa, <code>t</code> K; <code>humVarType</code> <code>"r"</code>/<code>"w"</code> mixing kg/kg, <code>"q"</code> specific humidity, <code>"rh"</code> RH %. Internally Bolton with LCL (closer to <code>pot_temp_equiv_tlcl</code> than NCL 6.4’s no-LCL approx). <code>dim</code> ignored</td>
+<td><code>equivalent_potential_temperature</code></td>
+</tr>
+<tr>
+<td><code>temp_virtual(t, w, iounit)</code></td>
+<td><code>iounit</code> length 3: T in 0=°C/1=K/2=°F, mixing 0=kg/kg or 1=g/kg, output T. Uses <code>T(1+r/ε)/(1+r)</code>, not NCL’s <code>T(1+0.61 r)</code> approx</td>
+<td><code>virtual_temperature</code></td>
+</tr>
+<tr>
+<td><code>wetbulb_stull(t, rh, iounit, opt=False)</code></td>
+<td><code>rh</code> %; <code>iounit</code> length 2 (0=°C, 1=K, 2=°F). <code>opt</code> unused</td>
+<td><code>wet_bulb_temperature</code></td>
+</tr>
+<tr>
+<td><code>lclvl(p, tk, tdk)</code></td>
+<td><code>p</code> hPa, temperatures K, return LCL pressure hPa only</td>
+<td><code>lifting_condensation_level</code></td>
+</tr>
+<tr>
+<td><code>wind_speed(u, v)</code></td>
+<td>m/s → m/s</td>
+<td><code>wind_speed</code></td>
+</tr>
+<tr>
+<td><code>wind_direction(u, v, opt=0)</code></td>
+<td>from-direction degrees; calm: <code>opt=0</code> → 0, <code>opt=1</code> → nan, other scalar → fill</td>
+<td><code>wind_direction</code></td>
+</tr>
+<tr>
+<td><code>wind_component(wspd, wdir, opt=0)</code></td>
+<td>m/s and from-direction → <code>(u, v)</code> tuple. NCL <code>opt</code> unused</td>
+<td><code>uv_from_speed_direction</code></td>
+</tr>
+<tr>
+<td><code>coriolis_param(lat)</code></td>
+<td>latitude degrees → s⁻¹</td>
+<td><code>coriolis_parameter</code></td>
+</tr>
+<tr>
+<td><code>omega_to_w(omega, p, t)</code></td>
+<td>Pa/s, <strong>Pa</strong>, K → m/s. Order <code>(omega, p, t)</code></td>
+<td><code>omega_to_w</code> (modern order is temperature before pressure)</td>
+</tr>
+<tr>
+<td><code>w_to_omega(w, p, t)</code></td>
+<td>inverse of the above</td>
+<td><code>w_to_omega</code></td>
+</tr>
+</tbody>
+</table>
+<h2>Examples that match the test suite</h2>
+<pre><code class="language-python"># mixhum_ptrh, Wallace &amp; Hobbs-style 1000 hPa / 18 °C / 46.5 %
+mix_kg = pm.ncl.mixhum_ptrh(1000.0, 18.0 + 273.15, 46.5, 1)   # ~0.006018 kg/kg
+mix_g  = pm.ncl.mixhum_ptrh(1000.0, 18.0 + 273.15, 46.5, -1)  # ~6.018 g/kg
+
+# pot_temp: 100000 Pa, 301.25 K → 301.25 K
+pm.ncl.pot_temp(100000.0, 301.25)
+
+# wetbulb_stull: 20 °C, 50 %, iounit (0,0) → ~13.70 °C
+pm.ncl.wetbulb_stull(20.0, 50.0, (0, 0), False)
+
+# lclvl: 1000 hPa, 15 °C, Td 4 °C → ~847–849 hPa (Bolton vs Stipanuk)
+pm.ncl.lclvl(1000.0, 15.0 + 273.15, 4.0 + 273.15)
+</code></pre>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

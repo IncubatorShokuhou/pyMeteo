@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>体感（`pymeteo.comfort`） · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">函数说明 · Python 3.6+ · 仅 NumPy · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li class="here"><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../en/Comfort.html">English</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>体感（<code>pymeteo.comfort</code>）</h1>
+<p><a href="../en/Comfort.html">English</a></p>
+<p>NWS 业务回归式，自行实现（不拷贝 MetPy）。内部先换到华氏度与英里每小时再算，再换回调用方单位。<strong>没有 NCL 名封装</strong>——NCL 无对应内建函数，<code>pymeteo.ncl</code> 也不伪造。</p>
+<hr />
+<h3><code>heat_index(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit=None)</code></h3>
+<p>Rothfusz（1990）/ NWS SR 90-23，基于 Steadman（1979）：</p>
+<ol>
+<li>先算简化式 <code>HI = 0.5 {T + 61 + (T−68)·1.2 + RH·0.094}</code>（<code>T</code> 为 °F，<code>RH</code> 为百分数），再与气温平均；</li>
+<li>若该均值 ≥ 80 °F，改用 Rothfusz 全式，并在低湿（RH&lt;13%、80–112 °F）或高湿（RH&gt;85%、80–87 °F）时加减订正项。</li>
+</ol>
+<p>Steadman 原表范围外不可靠。90 °F、60% 时约 100 °F。</p>
+<pre><code class="language-python">pm.heat_index(90.0, 60.0, temperature_unit=&quot;F&quot;, output_temperature_unit=&quot;F&quot;)
+</code></pre>
+<p>输出单位默认与 <code>temperature_unit</code> 相同。</p>
+<h3><code>wind_chill(temperature, wind_speed, *, temperature_unit="C", speed_unit="m/s", output_temperature_unit=None)</code></h3>
+<p>NWS / Environment Canada 2001：</p>
+<p><code>WC = 35.74 + 0.6215 T − 35.75 V^0.16 + 0.4275 T V^0.16</code></p>
+<p>（<code>T</code> 为 °F，<code>V</code> 为 mph；业务公式针对约 10 m 高度的风）。有效范围约 <code>T ≤ 50 °F</code> 且 <code>V ≥ 3 mph</code>；超出范围仍返回公式值。0 °F、10 mph 时约 −16 °F。</p>
+<pre><code class="language-python">pm.wind_chill(0.0, 10.0, temperature_unit=&quot;F&quot;, speed_unit=&quot;mph&quot;, output_temperature_unit=&quot;F&quot;)
+</code></pre>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

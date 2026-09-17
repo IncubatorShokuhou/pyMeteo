@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Units · pymeteo</title>
+  <link rel="stylesheet" href="../css/site.css">
+  
+</head>
+<body>
+<header class="site">
+  <h1>pymeteo <span>pymeteo-kit</span></h1>
+  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+</header>
+<div class="wrap">
+  <nav class="side">
+      <h2>Modules</h2>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+<li><a href="Install.html">Install</a></li>
+<li class="here"><a href="Units.html">Units</a></li>
+<li><a href="Thermo.html">Thermo</a></li>
+<li><a href="Indices.html">Indices</a></li>
+<li><a href="Wind.html">Wind</a></li>
+<li><a href="Geo.html">Geo</a></li>
+<li><a href="Comfort.html">Comfort</a></li>
+<li><a href="Dynamics.html">Dynamics</a></li>
+<li><a href="NCL.html">NCL names</a></li>
+<li><a href="Publishing.html">Publishing</a></li>
+      </ul>
+      <h2>Language</h2>
+      <ul>
+        <li><a href="../zh/Units.html">中文</a></li>
+      </ul>
+</nav>
+  <main>
+    <h1>Units</h1>
+<p><a href="../zh/Units.html">中文</a></p>
+<p>Each dimensional argument has a string unit keyword (or a pair of input/output units). Values are converted to an internal SI-ish scale, then converted back. Results are ordinary <code>float</code> or NumPy arrays (<code>restore_shape</code> returns a Python float when every original input was a scalar).</p>
+<p>Unrecognised or inapplicable strings raise <strong><code>pymeteo.UnitError</code></strong> (a <code>ValueError</code> subclass).</p>
+<h2>Defaults and internals</h2>
+<table>
+<thead>
+<tr>
+<th>Quantity</th>
+<th>Internal</th>
+<th>Default public unit</th>
+<th>Aliases (not exhaustive)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>K</td>
+<td><code>C</code></td>
+<td><code>degC</code> / <code>celsius</code> / <code>centigrade</code>, <code>K</code> / <code>kelvin</code>, <code>F</code> / <code>degF</code> / <code>fahrenheit</code></td>
+</tr>
+<tr>
+<td>Pressure</td>
+<td>Pa</td>
+<td><code>hPa</code></td>
+<td><code>mb</code> / <code>mbar</code> / <code>millibar</code>, <code>Pa</code> / <code>pascal</code>, <code>kPa</code>, <code>atm</code></td>
+</tr>
+<tr>
+<td>Wind speed</td>
+<td>m/s</td>
+<td><code>m/s</code></td>
+<td><code>ms-1</code> / <code>mps</code>, <code>kt</code> / <code>knot</code> / <code>knots</code> / <code>kn</code>, <code>km/h</code> / <code>kmh</code> / <code>kph</code>, <code>mph</code></td>
+</tr>
+<tr>
+<td>Relative humidity</td>
+<td>fraction 0–1</td>
+<td><code>%</code></td>
+<td><code>percent</code> / <code>percentage</code>, <code>fraction</code> / <code>1</code> / <code>ratio</code></td>
+</tr>
+<tr>
+<td>Mixing ratio / specific humidity</td>
+<td>kg/kg</td>
+<td><code>kg/kg</code></td>
+<td><code>g/kg</code>, <code>mg/kg</code>, <code>kgkg-1</code>, <code>g/g</code></td>
+</tr>
+<tr>
+<td>Distance</td>
+<td>m</td>
+<td><code>km</code></td>
+<td><code>m</code> / <code>meter</code>, <code>cm</code>, <code>mi</code> / <code>mile</code>, <code>ft</code> / <code>foot</code>, <code>nmi</code> / <code>nm</code> / <code>nauticalmile</code></td>
+</tr>
+<tr>
+<td>Angle (lat/lon, wind from-direction)</td>
+<td>converted to rad before trig</td>
+<td><code>deg</code></td>
+<td><code>degree</code> / <code>degrees</code>, <code>rad</code> / <code>radian</code></td>
+</tr>
+</tbody>
+</table>
+<p>Layer <strong>thickness</strong> (<code>height_thickness</code>) defaults to <strong><code>m</code></strong>, not <code>km</code>.</p>
+<p>Stability indices (Showalter, K, A, TT, SWEAT) are temperature differences or dimensionless combinations. TT / K / A / Showalter have the <strong>same numeric value</strong> in Celsius and Kelvin.</p>
+<p>Output unit kwargs follow the pattern <code>output_temperature_unit</code>, <code>output_pressure_unit</code>, <code>output_speed_unit</code>, <code>output_distance_unit</code>, <code>output_humidity_unit</code>, <code>output_omega_unit</code>.</p>
+<h2>Conversion helpers (<code>pymeteo.units</code>)</h2>
+<p>These are used internally. They are not re-exported from the package root (except <code>UnitError</code>).</p>
+<p>Canonicalisers: <code>canonical_temperature_unit</code>, <code>canonical_pressure_unit</code>, <code>canonical_speed_unit</code>, <code>canonical_rh_unit</code>, <code>canonical_mass_humidity_unit</code>, <code>canonical_distance_unit</code>, <code>canonical_angle_unit</code>.</p>
+<p>Converters: <code>to_kelvin</code> / <code>from_kelvin</code>, <code>to_pascal</code> / <code>from_pascal</code>, <code>to_mps</code> / <code>from_mps</code>, <code>to_rh_fraction</code> / <code>from_rh_fraction</code>, <code>to_kgkg</code> / <code>from_kgkg</code>, <code>to_meters</code> / <code>from_meters</code>, <code>to_radians</code>.</p>
+<p>Knots use <code>1852/3600</code> m/s. Statute mile is <code>1609.344</code> m. Nautical mile is <code>1852</code> m. Atmosphere is <code>101325</code> Pa.</p>
+<pre><code class="language-python">from pymeteo.units import UnitError, to_kelvin, from_kelvin
+
+k = to_kelvin(18.0, &quot;C&quot;)          # 291.15
+c = from_kelvin(k, &quot;celsius&quot;)     # 18.0
+</code></pre>
+  </main>
+</div>
+<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+</body>
+</html>

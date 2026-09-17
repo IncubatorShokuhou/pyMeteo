@@ -1,0 +1,153 @@
+/* Original stylesheet for pymeteo-kit docs. Inspired by the clarity of
+   traditional scientific function manuals (headings, prototypes, tables),
+   not copied from any third-party stylesheet. */
+:root {
+  --ink: #1b2430;
+  --muted: #4b5563;
+  --navy: #163a5f;
+  --teal: #0f6a7c;
+  --line: #d5dde5;
+  --paper: #f7f5f0;
+  --card: #ffffff;
+  --code-bg: #eef2f5;
+  --accent: #b45309;
+}
+* { box-sizing: border-box; }
+html { font-size: 17px; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  line-height: 1.55;
+}
+code, kbd, pre, .proto {
+  font-family: "IBM Plex Mono", "Source Code Pro", "Menlo", "Consolas", monospace;
+  font-size: 0.88em;
+}
+a { color: var(--teal); text-decoration-thickness: 1px; }
+a:hover { color: var(--navy); }
+header.site {
+  background: var(--navy);
+  color: #f3f6f8;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 4px solid var(--accent);
+}
+header.site a { color: #e8eef3; }
+header.site h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+header.site h1 span { font-weight: 400; opacity: 0.85; }
+header.site .meta {
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+  font-family: "IBM Plex Mono", Menlo, Consolas, monospace;
+  opacity: 0.9;
+}
+.wrap {
+  display: grid;
+  grid-template-columns: 14rem minmax(0, 52rem);
+  gap: 1.5rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 3rem;
+}
+nav.side {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.88rem;
+}
+nav.side h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 1.1rem 0 0.35rem;
+}
+nav.side ul { list-style: none; margin: 0; padding: 0; }
+nav.side li { margin: 0.15rem 0; }
+nav.side a { color: var(--navy); text-decoration: none; }
+nav.side a:hover { text-decoration: underline; }
+main {
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 1.4rem 1.6rem 2rem;
+}
+main h1 { margin-top: 0; color: var(--navy); font-size: 1.7rem; }
+main h2 {
+  margin-top: 1.6rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--navy);
+  font-size: 1.2rem;
+}
+main h3 {
+  margin-top: 1.35rem;
+  color: var(--teal);
+  font-family: "IBM Plex Mono", Menlo, Consolas, monospace;
+  font-size: 0.98rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+p.lead { font-size: 1.05rem; color: var(--muted); }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+}
+code { background: var(--code-bg); padding: 0.05em 0.28em; }
+pre code { background: none; padding: 0; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.92rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  margin: 0.8rem 0 1.2rem;
+}
+th, td {
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.55rem;
+  text-align: left;
+  vertical-align: top;
+}
+th { background: #e8eef4; color: var(--navy); }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+.actions a {
+  display: inline-block;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--navy);
+  background: var(--navy);
+  color: #fff;
+  text-decoration: none;
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+.actions a.alt {
+  background: #fff;
+  color: var(--navy);
+}
+.lang {
+  float: right;
+  font-family: system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+footer.site {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.25rem 2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-family: system-ui, sans-serif;
+}
+@media (max-width: 800px) {
+  .wrap { grid-template-columns: 1fr; }
+  nav.side { order: 2; }
+}
