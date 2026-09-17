@@ -5,10 +5,9 @@ K 指数、A 指数、全总指数为温度与露点的线性组合；沙氏指�
 开尔文、把风速当米每秒却套用节系数的问题。
 """
 
-from __future__ import annotations
+from typing import Optional, Union
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.thermo import (
     _condensation_temperature_c,
@@ -17,6 +16,7 @@ from pymeteo.thermo import (
     parcel_temperature_at_pressure,
 )
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     as_float_array,
     canonical_temperature_unit,
@@ -175,8 +175,8 @@ def total_totals_index(
     temperature_850: ArrayLike,
     temperature_500: ArrayLike,
     *,
-    dewpoint_850: ArrayLike | None = None,
-    relative_humidity_850: ArrayLike | None = None,
+    dewpoint_850: Optional[ArrayLike] = None,
+    relative_humidity_850: Optional[ArrayLike] = None,
     temperature_unit: str = "C",
     humidity_unit: str = "%",
 ) -> ArrayOrScalar:
@@ -213,8 +213,8 @@ def total_totals_index(
 
 def _dewpoint_850_k(
     temperature_850_k: ArrayLike,
-    dewpoint_850: ArrayLike | None,
-    relative_humidity_850: ArrayLike | None,
+    dewpoint_850: Optional[ArrayLike],
+    relative_humidity_850: Optional[ArrayLike],
     temperature_unit: str,
     humidity_unit: str,
 ) -> np.ndarray:
@@ -300,7 +300,7 @@ def _showalter_c(t8_c: ArrayLike, td8_c: ArrayLike, t5_c: ArrayLike) -> np.ndarr
     pa = p8 * np.power(ta / t8_k, ml)
     m2 = (cpd / rd) * (1.0 + c_const * mixing / cpd)
 
-    def moist_entropy(pressure: np.ndarray | float, temperature_k: np.ndarray) -> np.ndarray:
+    def moist_entropy(pressure: Union[np.ndarray, float], temperature_k: np.ndarray) -> np.ndarray:
         e_val = _saturation_vapor_pressure_hpa(temperature_k - t0)
         return np.log((pressure - e_val) / np.power(temperature_k, m2)) - (0.622 / rd) * (
             ((l0 + c1 * (t0 - temperature_k)) / temperature_k) * (e_val / (pressure - e_val))
@@ -331,8 +331,8 @@ def sweat_index(
     u_500: ArrayLike,
     v_500: ArrayLike,
     *,
-    dewpoint_850: ArrayLike | None = None,
-    relative_humidity_850: ArrayLike | None = None,
+    dewpoint_850: Optional[ArrayLike] = None,
+    relative_humidity_850: Optional[ArrayLike] = None,
     temperature_unit: str = "C",
     humidity_unit: str = "%",
     speed_unit: str = "m/s",

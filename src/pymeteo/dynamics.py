@@ -4,12 +4,10 @@
 ``omega_to_w`` / ``w_to_omega`` 同一关系式，按文献自行实现。
 """
 
-from __future__ import annotations
-
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     UnitError,
     as_float_array,

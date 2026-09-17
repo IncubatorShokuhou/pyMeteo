@@ -4,12 +4,12 @@
 英里每小时再计算，再换回调用方单位。NCL 无对应内建名，故不提供 ncl 封装。
 """
 
-from __future__ import annotations
+from typing import Optional
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     as_float_array,
     from_kelvin,
@@ -28,7 +28,7 @@ def heat_index(
     *,
     temperature_unit: str = "C",
     humidity_unit: str = "%",
-    output_temperature_unit: str | None = None,
+    output_temperature_unit: Optional[str] = None,
 ) -> ArrayOrScalar:
     """计算热指数（Heat Index，体感炎热程度）。
 
@@ -99,7 +99,7 @@ def wind_chill(
     *,
     temperature_unit: str = "C",
     speed_unit: str = "m/s",
-    output_temperature_unit: str | None = None,
+    output_temperature_unit: Optional[str] = None,
 ) -> ArrayOrScalar:
     """计算风寒温度（NWS / Environment Canada 2001 公式）。
 

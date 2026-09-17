@@ -5,16 +5,15 @@
 需要灵活单位时请使用顶层现代函数，不要从 ``pymeteo`` 顶层导入这些 NCL 名字。
 """
 
-from __future__ import annotations
+from typing import Tuple
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 import pymeteo.dynamics as _dynamics
 import pymeteo.thermo as _thermo
 import pymeteo.wind as _wind
 from pymeteo.thermo import HumidityKind
-from pymeteo.units import ArrayOrScalar, as_float_array, restore_shape, to_rh_fraction
+from pymeteo.units import ArrayLike, ArrayOrScalar, as_float_array, restore_shape, to_rh_fraction
 
 __all__ = [
     "coriolis_param",
@@ -212,7 +211,7 @@ def wind_component(
     wspd: ArrayLike,
     wdir: ArrayLike,
     opt: ArrayLike = 0,
-) -> tuple[ArrayOrScalar, ArrayOrScalar]:
+) -> Tuple[ArrayOrScalar, ArrayOrScalar]:
     """由风速和气象风向计算 u、v（NCL ``wind_component`` 兼容封装）。
 
     这是 NCL 兼容薄封装。NCL 中 ``opt`` 未使用，保留以兼容位置参数。返回

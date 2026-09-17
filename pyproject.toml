@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.18"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Lightweight meteorological diagnostic functions with explicit string unit parameters."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.6"
 authors = [{ name = "IncubatorShokuhou" }]
 keywords = [
     "meteorology",
@@ -22,16 +22,36 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Atmospheric Science",
 ]
-dependencies = ["numpy>=1.21"]
+dependencies = [
+    "numpy>=1.19,<1.20; python_version < '3.7'",
+    "numpy>=1.20,<1.22; python_version >= '3.7' and python_version < '3.8'",
+    "numpy>=1.21,<1.25; python_version >= '3.8' and python_version < '3.9'",
+    "numpy>=1.21,<2.1; python_version >= '3.9' and python_version < '3.10'",
+    "numpy>=1.21.3; python_version >= '3.10' and python_version < '3.11'",
+    "numpy>=1.23.2; python_version >= '3.11' and python_version < '3.12'",
+    "numpy>=1.26; python_version >= '3.12' and python_version < '3.13'",
+    "numpy>=2.1; python_version >= '3.13'",
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "ruff>=0.4"]
+dev = [
+    "pytest>=6.2.5,<7; python_version < '3.7'",
+    "pytest>=7.0,<8; python_version >= '3.7' and python_version < '3.8'",
+    "pytest>=7.0; python_version >= '3.8'",
+    "importlib-metadata>=1.4,<4.9; python_version < '3.7'",
+    "importlib-metadata>=1.4; python_version >= '3.7' and python_version < '3.8'",
+    "ruff>=0.4; python_version >= '3.8'",
+]
 
 [project.urls]
 Homepage = "https://github.com/IncubatorShokuhou/pyMeteo"
@@ -44,8 +64,11 @@ path = "src/pymeteo/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pymeteo"]
+# pip 21.3 (last release that runs on CPython 3.6) understands 2.1, not 2.4/2.5.
+core-metadata-version = "2.1"
 
 [tool.hatch.build.targets.sdist]
+core-metadata-version = "2.1"
 include = [
     "/src",
     "/tests",
@@ -60,7 +83,8 @@ addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+# ruff 0.16+ has no py36 target; runtime remains 3.6 (PEP 604/585 rewritten).
+target-version = "py37"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
