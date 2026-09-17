@@ -20,6 +20,8 @@ pytest
 ruff check src tests
 ```
 
+`tests/test_ncl_official_examples.py` **含 NCL 官网例题回归**（黄金值硬编码自公开文档，不依赖 MetPy / NCL / Pint）；`tests/test_ncl.py` 只测兼容层接线与单位。
+
 ## 快速开始
 
 ```python
@@ -227,6 +229,8 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 
 沙氏 / K / SWEAT 等指数在 NCL 中没有与本库一一对应的同名内建函数，因此**只保留现代 API**，本模块不伪造 NCL 名字。需要灵活单位时请直接调用现代函数。
 
+数值回归**含 NCL 官网例题回归**：`tests/test_ncl_official_examples.py` 对照 dewtemp_trh、mixhum_ptrh、pot_temp、wetbulb_stull、lclvl 文档打印值；接线测试仍在 `tests/test_ncl.py`。
+
 ## 科学来源与相对旧代码的订正
 
 公式意图仍来自：
@@ -238,7 +242,7 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 - Rothfusz, L. P., 1990: The heat index equation. NWS Technical Attachment SR 90-23.
 - NWS / Environment Canada, 2001: 风寒公式。
 
-2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。
+2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。
 
 在保持上述公式意图的前提下，重写时修正了若干会误导结果的问题：
 
