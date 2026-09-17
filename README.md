@@ -14,6 +14,8 @@ pip install pymeteo-kit
 
 The PyPI project name is `pymeteo-kit` because `pymeteo` was already taken and `py-meteo` was rejected as too similar. The import is still `import pymeteo`.
 
+Publishing is automated: a GitHub Release (or a manual **Actions → Publish → Run workflow**) builds the sdist/wheel and uploads to PyPI via Trusted Publishing (OIDC). No PyPI token is stored in this repository.
+
 For local development:
 
 ```bash
