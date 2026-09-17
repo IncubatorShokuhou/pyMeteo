@@ -53,8 +53,8 @@ dev = [
 Homepage = "https://github.com/IncubatorShokuhou/pyMeteo"
 Repository = "https://github.com/IncubatorShokuhou/pyMeteo"
 Issues = "https://github.com/IncubatorShokuhou/pyMeteo/issues"
-Documentation = "https://github.com/IncubatorShokuhou/pyMeteo/blob/master/wiki/Home.md"
-Wiki = "https://github.com/IncubatorShokuhou/pyMeteo/tree/master/wiki"
+Documentation = "https://incubatorshokuhou.github.io/pyMeteo/"
+Wiki = "https://github.com/IncubatorShokuhou/pyMeteo/wiki"
 
 [tool.hatch.version]
 path = "src/pymeteo/__init__.py"
