@@ -1138,6 +1138,25 @@ def lifting_condensation_level(
     return restore_shape(pressure_out, *extras), restore_shape(temperature_out, *extras)
 
 
+def _dewpoint_c_from_vapor_pressure_hpa(vapor_hpa: ArrayLike) -> np.ndarray:
+    """由水面饱和水汽压反演露点（摄氏度），牛顿迭代李社宏（1994）公式。"""
+
+    target = as_float_array(vapor_hpa)
+    ratio = np.log(np.maximum(target, 1.0e-12) / _ES0)
+    temperature_k = (ratio * _TETENS_B - _TETENS_A * _T0) / (ratio - _TETENS_A)
+    temperature_c = temperature_k - _T0
+    for _ in range(12):
+        saturation = _saturation_vapor_pressure_hpa(temperature_c)
+        delta = (
+            _saturation_vapor_pressure_hpa(temperature_c + 0.05)
+            - _saturation_vapor_pressure_hpa(temperature_c - 0.05)
+        ) / 0.1
+        temperature_c = temperature_c - (saturation - target) / np.where(
+            np.abs(delta) < 1.0e-12, np.nan, delta
+        )
+    return temperature_c
+
+
 def _moist_adiabatic_temperature_k(
     pressure_lcl_hpa: ArrayLike,
     temperature_lcl_k: ArrayLike,
@@ -1197,8 +1216,8 @@ def parcel_temperature_at_pressure(
     """把近地层气块干绝热抬到 LCL、再湿绝热抬到目标气压，返回气块温度。
 
     用于抬升指数等。LCL 用 Bolton（1980）；湿绝热段用李社宏（1994）湿熵
-    迭代（与沙氏指数同一格式）。若目标气压仍低于凝结（``p_target ≥ p_LCL``），
-    则全程干绝热 ``T_2 = T (p_2 / p)^{κ}``。
+    迭代（与沙氏指数同一格式）。若目标气压仍高于 LCL 气压（``p_target ≥ p_LCL``，
+    高度上尚未到达凝结高度），则全程干绝热 ``T_2 = T (p_2 / p)^{κ}``。
     """
 
     pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")

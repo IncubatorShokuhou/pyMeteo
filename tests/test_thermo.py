@@ -241,6 +241,25 @@ def test_equivalent_potential_temperature_bolton_formula() -> None:
     assert theta_e == pytest.approx(expected, rel=1e-10)
 
 
+def test_equivalent_potential_temperature_poisson_factor_off_1000_hpa() -> None:
+    pressure = 850.0
+    temperature_k = 10.0 + 273.15
+    dewpoint_k = 0.0 + 273.15
+    es = saturation_vapor_pressure(0.0)
+    mixing = 0.622 * es / (pressure - es)
+    t_lcl = 1.0 / (1.0 / (dewpoint_k - 56.0) + np.log(temperature_k / dewpoint_k) / 800.0) + 56.0
+    exponent = 0.2854 * (1.0 - 0.28 * mixing)
+    expected = (
+        temperature_k
+        * (1000.0 / pressure) ** exponent
+        * np.exp((3376.0 / t_lcl - 2.54) * mixing * (1.0 + 0.81 * mixing))
+    )
+    theta_e = equivalent_potential_temperature(
+        pressure, 10.0, 0.0, temperature_unit="C", output_temperature_unit="K"
+    )
+    assert theta_e == pytest.approx(expected, rel=1e-10)
+
+
 def test_virtual_temperature_exact_formula() -> None:
     mixing = 0.0135
     temperature_k = 20.0 + 273.15

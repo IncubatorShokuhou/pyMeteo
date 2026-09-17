@@ -292,23 +292,70 @@ def pot_temp(p: ArrayLike, t: ArrayLike, dim: ArrayLike = -1, opt: bool = False)
     )
 
 
-def pot_temp_equiv(p: ArrayLike, t: ArrayLike, td: ArrayLike) -> ArrayOrScalar:
-    """计算相当位温（NCL ``pot_temp_equiv`` 名兼容，Bolton 1980 实现）。
+def pot_temp_equiv(
+    p: ArrayLike,
+    t: ArrayLike,
+    w: ArrayLike,
+    dim: ArrayLike = -1,
+    humVarType: str = "r",
+) -> ArrayOrScalar:
+    """计算相当位温（NCL ``pot_temp_equiv`` 兼容封装，内部仍用 Bolton 1980）。
 
-    这是薄封装：``p`` 为 Pa，``t`` / ``td`` 为开尔文气温与露点，返回 K。
-    NCL 原 ``pot_temp_equiv`` 吃混合比且不用 LCL；本封装转调 Bolton 式 (43)
-    （更接近 ``pot_temp_equiv_tlcl``）。灵活单位请用
+    这是薄封装。NCL 约定：``p`` 为 Pa、``t`` 为 K；``w`` 的含义由
+    ``humVarType`` 决定：``"r"`` / ``"w"`` 为混合比 kg/kg，``"q"`` 为比湿
+    kg/kg，``"rh"`` 为相对湿度百分数。``dim`` 仅为兼容签名，忽略。
+    物理上转调 Bolton 式 (43)（含 LCL），比 NCL 6.4 无 LCL 近似更接近
+    ``pot_temp_equiv_tlcl``。灵活单位请用
     :func:`pymeteo.equivalent_potential_temperature`。
     """
 
+    _ = dim
+    kind = str(humVarType).strip().lower()
+    if kind in {"r", "w"}:
+        dewpoint = _dewpoint_k_from_mixing_ratio(p, t, w)
+    elif kind == "q":
+        mixing = _thermo.convert_humidity(
+            w,
+            from_quantity="specific_humidity",
+            to_quantity="mixing_ratio",
+            humidity_unit="kg/kg",
+            output_humidity_unit="kg/kg",
+        )
+        dewpoint = _dewpoint_k_from_mixing_ratio(p, t, mixing)
+    elif kind == "rh":
+        dewpoint = _thermo.dewpoint_from_relative_humidity(
+            t,
+            w,
+            temperature_unit="K",
+            humidity_unit="%",
+            output_temperature_unit="K",
+        )
+    else:
+        raise ValueError("humVarType 必须是 'r'/'w'（混合比）、'q'（比湿）或 'rh'（相对湿度 %）")
     return _thermo.equivalent_potential_temperature(
         p,
         t,
-        td,
+        dewpoint,
         pressure_unit="Pa",
         temperature_unit="K",
         output_temperature_unit="K",
     )
+
+
+def _dewpoint_k_from_mixing_ratio(
+    pressure_pa: ArrayLike, temperature_k: ArrayLike, mixing: ArrayLike
+) -> ArrayOrScalar:
+    """由混合比（kg/kg）反演开尔文露点，供 NCL ``pot_temp_equiv`` 转调。"""
+
+    vapor_hpa = _thermo.vapor_pressure_from_mixing_ratio(
+        pressure_pa,
+        mixing,
+        pressure_unit="Pa",
+        mixing_ratio_unit="kg/kg",
+        output_pressure_unit="hPa",
+    )
+    dewpoint_c = _thermo._dewpoint_c_from_vapor_pressure_hpa(vapor_hpa)
+    return restore_shape(dewpoint_c + 273.15, pressure_pa, temperature_k, mixing)
 
 
 def temp_virtual(t: ArrayLike, w: ArrayLike, iounit: ArrayLike) -> ArrayOrScalar:
@@ -338,19 +385,31 @@ def temp_virtual(t: ArrayLike, w: ArrayLike, iounit: ArrayLike) -> ArrayOrScalar
     )
 
 
-def wetbulb_stull(t: ArrayLike, rh: ArrayLike) -> ArrayOrScalar:
+def wetbulb_stull(
+    t: ArrayLike, rh: ArrayLike, iounit: ArrayLike, opt: bool = False
+) -> ArrayOrScalar:
     """海平面湿球温度（NCL ``wetbulb_stull`` 兼容封装）。
 
-    这是 NCL 兼容薄封装。``t`` 为摄氏度、``rh`` 为百分数，返回摄氏度。
+    这是 NCL 兼容薄封装。``rh`` 为百分数。``iounit`` 长度为 2：下标 0 为
+    输入温度、下标 1 为输出温度（0=°C、1=K、2=°F）。``opt`` 未使用。
     灵活单位请用 :func:`pymeteo.wet_bulb_temperature`。
     """
 
+    _ = opt
+    flags = np.asarray(iounit, dtype=int).reshape(-1)
+    if flags.size != 2:
+        raise ValueError("iounit 必须是长度为 2 的整数序列")
+    try:
+        temperature_unit = _NCL_TEMP_UNIT[int(flags[0])]
+        output_temperature_unit = _NCL_TEMP_UNIT[int(flags[1])]
+    except KeyError as exc:
+        raise ValueError("iounit 取值：0=°C、1=K、2=°F") from exc
     return _thermo.wet_bulb_temperature(
         t,
         rh,
-        temperature_unit="C",
+        temperature_unit=temperature_unit,
         humidity_unit="%",
-        output_temperature_unit="C",
+        output_temperature_unit=output_temperature_unit,
     )
 
 

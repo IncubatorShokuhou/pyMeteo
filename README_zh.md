@@ -107,9 +107,9 @@ from pymeteo import showalter_index, wind_speed
 | `mixhum_ptd(p, tdk, iswit)` | `p` 为 Pa，`tdk` 为 K；`iswit` 同 `mixhum_ptrh` | `mixing_ratio_from_dewpoint` |
 | `vapor_pres_rh(rh, es)` | `rh` 为 %，`es` 与返回值同单位 | `RH/100 · e_s` |
 | `pot_temp(p, t)` | `p` 为 Pa，`t` 为 K，返回 K | `potential_temperature` |
-| `pot_temp_equiv(p, t, td)` | `p` 为 Pa，`t`/`td` 为 K，返回 K。用 Bolton 式 (43)（含 LCL），不是 NCL 6.4 那版无 LCL 近似 | `equivalent_potential_temperature` |
+| `pot_temp_equiv(p, t, w, dim=-1, humVarType="r")` | `p` 为 Pa，`t` 为 K；`humVarType` 为 `"r"` 混合比 kg/kg、`"q"` 比湿、`"rh"` 相对湿度 %。内部 Bolton 含 LCL | `equivalent_potential_temperature` |
 | `temp_virtual(t, w, iounit)` | `iounit` 长度 3：温度 C/K/F、混合比 kg/kg 或 g/kg、输出温度 | `virtual_temperature` |
-| `wetbulb_stull(t, rh)` | `t` 为 °C，`rh` 为 %，返回 °C | `wet_bulb_temperature` |
+| `wetbulb_stull(t, rh, iounit, opt=False)` | `rh` 为 %；`iounit` 长度 2 指定输入/输出温度（0=°C、1=K、2=°F） | `wet_bulb_temperature` |
 | `lclvl(p, tk, tdk)` | `p` 为 hPa，温度 K，返回 LCL 气压 hPa | `lifting_condensation_level` |
 | `coriolis_param(lat)` | 纬度度，返回 s⁻¹ | `coriolis_parameter` |
 | `omega_to_w(omega, p, t)` | ω 为 Pa/s，`p` 为 Pa，`t` 为 K，返回 m/s | `omega_to_w`（注意参数顺序与现代 API 不同） |
@@ -217,9 +217,9 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 | `mixhum_ptd(p, tdk, iswit)` | `p` 为 Pa，`tdk` 为 K；`iswit` 同 `mixhum_ptrh` | `mixing_ratio_from_dewpoint` |
 | `vapor_pres_rh(rh, es)` | `rh` 为 %，`es` 与返回同单位 | `RH/100 · e_s` |
 | `pot_temp(p, t)` | `p` 为 Pa，`t` 为 K，返回 K | `potential_temperature` |
-| `pot_temp_equiv(p, t, td)` | `p` 为 Pa，`t`/`td` 为 K（露点）；Bolton 含 LCL | `equivalent_potential_temperature` |
+| `pot_temp_equiv(p, t, w, dim=-1, humVarType="r")` | `p` 为 Pa，`t` 为 K；`humVarType`：`r` 混合比、`q` 比湿、`rh` 相对湿度 % | `equivalent_potential_temperature` |
 | `temp_virtual(t, w, iounit)` | `iounit` 长度 3，见上文新增节 | `virtual_temperature` |
-| `wetbulb_stull(t, rh)` | `t` 为 °C，`rh` 为 % | `wet_bulb_temperature` |
+| `wetbulb_stull(t, rh, iounit, opt=False)` | `rh` 为 %；`iounit` 长度 2（0=°C、1=K、2=°F） | `wet_bulb_temperature` |
 | `lclvl(p, tk, tdk)` | `p` 为 hPa，温度 K，返回 LCL 气压 | `lifting_condensation_level` |
 | `coriolis_param(lat)` | 纬度度 → s⁻¹ | `coriolis_parameter` |
 | `omega_to_w(omega, p, t)` | Pa/s、Pa、K → m/s | `omega_to_w` |
