@@ -48,6 +48,12 @@ dev = [
     "importlib-metadata>=1.4; python_version < '3.8'",
     "ruff>=0.4; python_version >= '3.8'",
 ]
+mcp = [
+    "mcp>=1.0,<2; python_version >= '3.10'",
+]
+
+[project.scripts]
+pymeteo = "pymeteo.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/IncubatorShokuhou/pyMeteo"

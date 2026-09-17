@@ -37,6 +37,7 @@ td = pm.dewpoint_from_relative_humidity(18.0, 46.5)
 - [动力学](Dynamics_zh.md) — 科氏参数、ω ↔ w
 - [单位](Units_zh.md) — 别名与 `UnitError`
 - [NCL](NCL_zh.md) — NCL 函数名和它的单位约定
+- [Agent](Agent_zh.md) — skill / MCP / `MeteoEngine`
 - [安装](Install_zh.md)
 
 English: [Home](Home.md)

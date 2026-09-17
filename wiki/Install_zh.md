@@ -19,4 +19,6 @@ pip install -e ".[dev]"
 pytest
 ```
 
+给 agent 用的可选命令：`pymeteo install-skill`，`pip install "pymeteo-kit[mcp]"`，`pymeteo mcp serve`。见 [Agent](Agent_zh.md)。
+
 [English](Install.md)

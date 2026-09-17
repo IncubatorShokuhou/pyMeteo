@@ -76,13 +76,13 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.4.1"
+    assert pymeteo.__version__ == "2.5.0"
 
 
 def test_pypi_distribution_name() -> None:
     meta = metadata("pymeteo-kit")
     assert meta["Name"] == "pymeteo-kit"
-    assert version("pymeteo-kit") == "2.4.1"
+    assert version("pymeteo-kit") == "2.5.0"
     assert meta["Requires-Python"] == ">=3.7"
 
 
@@ -162,7 +162,7 @@ _NamedExpr = getattr(ast, "NamedExpr", None)
 
 def test_sources_avoid_syntax_newer_than_37() -> None:
     src_root = _REPO_ROOT / "src" / "pymeteo"
-    for path in sorted(src_root.glob("*.py")):
+    for path in sorted(src_root.rglob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         filename = str(path.relative_to(_REPO_ROOT))
         for node in ast.walk(tree):
