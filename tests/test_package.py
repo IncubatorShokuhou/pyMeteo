@@ -1,8 +1,14 @@
 """包导入面与破坏性变更。"""
 
+import subprocess
+import sys
+import zipfile
 from importlib.metadata import metadata, version
+from pathlib import Path
 
 import pymeteo
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_public_api_exports() -> None:
@@ -67,8 +73,39 @@ def test_version_present() -> None:
 
 def test_pypi_distribution_name() -> None:
     meta = metadata("py-meteo")
-    assert meta["Name"].replace("_", "-").lower() == "py-meteo"
+    assert meta["Name"] == "py-meteo"
     assert version("py-meteo") == "2.2.2"
+
+
+def test_hatchling_wheel_maps_src_pymeteo() -> None:
+    text = (_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert 'name = "py-meteo"' in text
+    assert "[tool.hatch.build.targets.wheel]" in text
+    assert 'packages = ["src/pymeteo"]' in text
+
+
+def test_built_wheel_ships_pymeteo_import_package(tmp_path: Path) -> None:
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "wheel",
+            str(_REPO_ROOT),
+            "-w",
+            str(tmp_path),
+            "--no-deps",
+        ],
+    )
+    wheels = list(tmp_path.glob("py_meteo-*.whl"))
+    assert len(wheels) == 1, wheels
+    with zipfile.ZipFile(wheels[0]) as zf:
+        names = zf.namelist()
+        meta = zf.read(next(n for n in names if n.endswith(".dist-info/METADATA"))).decode()
+    assert "pymeteo/__init__.py" in names
+    assert not any(n.startswith("py_meteo/") for n in names)
+    assert "Name: py-meteo" in meta
+    assert f"Version: {pymeteo.__version__}" in meta
 
 
 def test_old_single_file_names_are_gone() -> None:
