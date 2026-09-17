@@ -1,5 +1,7 @@
 """包导入面与破坏性变更。"""
 
+from importlib.metadata import metadata, version
+
 import pymeteo
 
 
@@ -60,7 +62,13 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.2.1"
+    assert pymeteo.__version__ == "2.2.2"
+
+
+def test_pypi_distribution_name() -> None:
+    meta = metadata("py-meteo")
+    assert meta["Name"].replace("_", "-").lower() == "py-meteo"
+    assert version("py-meteo") == "2.2.2"
 
 
 def test_old_single_file_names_are_gone() -> None:

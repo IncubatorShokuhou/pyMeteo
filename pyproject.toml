@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pymeteo"
+name = "py-meteo"
 dynamic = ["version"]
 description = "Lightweight meteorological diagnostic functions with explicit string unit parameters."
 readme = "README.md"
