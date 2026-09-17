@@ -19,18 +19,18 @@ _engine = None
 
 
 def _check_mcp():
-    """Return FastMCP if the optional extra is installed, else None."""
+    """Return FastMCP if the optional extra is installed, else None.
+
+    Probe by importing. ``find_spec("mcp.server.fastmcp")`` can succeed on
+    mcp 2.x even though the module raises and FastMCP was renamed.
+    """
 
     if importlib.util.find_spec("mcp") is None:
         return None
     try:
-        spec = importlib.util.find_spec("mcp.server.fastmcp")
-    except ModuleNotFoundError:
+        from mcp.server.fastmcp import FastMCP
+    except (ModuleNotFoundError, ImportError):
         return None
-    if spec is None:
-        return None
-    from mcp.server.fastmcp import FastMCP
-
     return FastMCP
 
 
@@ -51,7 +51,7 @@ def _parse_json_object_or_list(text, empty):
     try:
         parsed = json.loads(text)
     except (json.JSONDecodeError, TypeError) as exc:
-        raise ValueError("Invalid JSON: %s" % exc)
+        raise ValueError(f"Invalid JSON: {exc}") from exc
     return parsed
 
 

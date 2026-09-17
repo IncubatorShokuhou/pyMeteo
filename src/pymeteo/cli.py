@@ -1,7 +1,6 @@
 """Command-line interface: skill install, MCP serve, and diagnostics."""
 
 import argparse
-import importlib.util
 import shutil
 import sys
 from pathlib import Path
@@ -10,12 +9,9 @@ from pymeteo.skills import packaged_skill_names, run_install
 
 
 def _mcp_available():
-    if importlib.util.find_spec("mcp") is None:
-        return False
-    try:
-        return importlib.util.find_spec("mcp.server.fastmcp") is not None
-    except ModuleNotFoundError:
-        return False
+    from pymeteo.mcp_server import _check_mcp
+
+    return _check_mcp() is not None
 
 
 def _cmd_install_skill(args):
@@ -51,18 +47,19 @@ def _cmd_info(args):
     project_installed = project_skill.is_file()
 
     agents = []
-    if shutil.which("claude") is not None or (Path.home() / ".claude.json").exists() or claude_dir.is_dir():
+    has_claude = shutil.which("claude") is not None
+    if has_claude or (Path.home() / ".claude.json").exists() or claude_dir.is_dir():
         agents.append("Claude Code")
     if codex_dir.is_dir():
         agents.append("Codex")
 
-    print("pymeteo version: %s" % pymeteo.__version__)
+    print(f"pymeteo version: {pymeteo.__version__}")
     parts = []
     for key in ("thermo", "indices", "wind", "geo", "dynamics", "comfort"):
         if counts.get(key):
-            parts.append("%d %s" % (counts[key], key))
-    print("Functions: %d total (%s)" % (len(listed), ", ".join(parts)))
-    print("Classic API: %s" % ("OK" if classic_ok else "ERROR"))
+            parts.append(f"{counts[key]} {key}")
+    print("Functions: {} total ({})".format(len(listed), ", ".join(parts)))
+    print("Classic API: {}".format("OK" if classic_ok else "ERROR"))
     print("MeteoEngine: OK")
     if _mcp_available():
         print("MCP extra: OK (run: pymeteo mcp serve)")
@@ -70,14 +67,14 @@ def _cmd_info(args):
         print("MCP extra: NOT INSTALLED (install: pip install 'pymeteo-kit[mcp]')")
 
     if user_installed and project_installed:
-        print("meteo-expert skill: INSTALLED (user-global) at %s" % user_skill)
-        print("                    INSTALLED (project) at %s" % project_skill)
+        print(f"meteo-expert skill: INSTALLED (user-global) at {user_skill}")
+        print(f"                    INSTALLED (project) at {project_skill}")
     elif user_installed:
-        print("meteo-expert skill: INSTALLED (user-global) at %s" % user_skill)
+        print(f"meteo-expert skill: INSTALLED (user-global) at {user_skill}")
         if "Codex" in agents:
             print("  Codex does not read ~/.claude/skills/. Use: pymeteo install-skill --project")
     elif project_installed:
-        print("meteo-expert skill: INSTALLED (project) at %s" % project_skill)
+        print(f"meteo-expert skill: INSTALLED (project) at {project_skill}")
         if "Claude Code" in agents:
             print("  For a user-global Claude Code install: pymeteo install-skill")
     else:
@@ -85,8 +82,8 @@ def _cmd_info(args):
         print("  Claude Code: pymeteo install-skill")
         print("  Codex:       pymeteo install-skill --project")
     if agents:
-        print("Detected agents: %s" % ", ".join(agents))
-    print("Packaged skills: %s" % ", ".join(packaged_skill_names()))
+        print("Detected agents: {}".format(", ".join(agents)))
+    print("Packaged skills: {}".format(", ".join(packaged_skill_names())))
     return 0
 
 

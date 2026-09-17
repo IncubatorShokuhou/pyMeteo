@@ -58,7 +58,6 @@ _SKILL_VOCAB = {
     "run_calc",
     "MeteoEngine",
     "install_skill",
-    "pressure_unit",
     "__all__",
     "method",
 }

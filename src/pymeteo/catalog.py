@@ -165,7 +165,10 @@ _NCL_MAP = {
     },
     "mixhum_ptrh": {
         "pymeteo": "mixing_ratio_from_relative_humidity",
-        "units": "p in hPa (not Pa), tk in K, rh in %; |iswit|=1 mixing ratio, 2 specific humidity; negative → g/kg",
+        "units": (
+            "p in hPa (not Pa), tk in K, rh in %; |iswit|=1 mixing ratio, "
+            "2 specific humidity; negative → g/kg"
+        ),
         "notes": "iswit=2 maps to specific_humidity_from_relative_humidity.",
     },
     "mixhum_ptd": {
@@ -180,8 +183,8 @@ _NCL_MAP = {
     },
     "vapor_pres_rh": {
         "pymeteo": "vapor_pressure_from_relative_humidity",
-        "units": "rh in %; es and the result share a unit. NCL form is RH/100 · e_s (no temperature).",
-        "notes": "Modern vapor_pressure_from_relative_humidity needs temperature; NCL wrapper does not.",
+        "units": "rh in %; es and result share a unit. NCL is RH/100 · e_s (no T).",
+        "notes": "Modern vapor_pressure_from_relative_humidity needs temperature.",
     },
     "pot_temp": {
         "pymeteo": "potential_temperature",
@@ -330,7 +333,9 @@ def list_functions(module=None):
         wanted = module.split(".")[-1]
         known = set(_MODULE_TAGS)
         if wanted not in known:
-            raise ValueError("unknown module %r; expected one of %s" % (module, ", ".join(sorted(known))))
+            raise ValueError(
+                "unknown module {!r}; expected one of {}".format(module, ", ".join(sorted(known)))
+            )
     records = []
     for name in public_function_names():
         rec = _record(name)
@@ -353,12 +358,12 @@ def explain_function(name):
         return _record(key)
     if key in ncl_mod.__all__:
         return _explain_ncl(key)
-    raise ValueError("Unknown function: %s" % name)
+    raise ValueError(f"Unknown function: {name}")
 
 
 def _explain_ncl(ncl_name):
     if ncl_name not in ncl_mod.__all__:
-        raise ValueError("Unknown function: ncl.%s" % ncl_name)
+        raise ValueError(f"Unknown function: ncl.{ncl_name}")
     func = getattr(ncl_mod, ncl_name)
     doc = inspect.getdoc(func) or ""
     try:
@@ -422,20 +427,20 @@ def recommend(query="", need=None, top_k=5):
             needle = tag.lower()
             if needle and needle in haystack:
                 score += 3
-                why.append("keyword %s" % tag)
+                why.append(f"keyword {tag}")
         scores[name] = score
         reasons[name] = why
 
     for phrase, name in _PHRASES:
         if phrase.lower() in haystack or phrase in haystack:
             scores[name] = scores.get(name, 0) + 20
-            reasons.setdefault(name, []).append("phrase %s" % phrase)
+            reasons.setdefault(name, []).append(f"phrase {phrase}")
 
     for ncl_name, meta in _NCL_MAP.items():
         if ncl_name.lower() in text_l:
             modern = meta["pymeteo"]
             scores[modern] = scores.get(modern, 0) + 18
-            reasons.setdefault(modern, []).append("NCL %s" % ncl_name)
+            reasons.setdefault(modern, []).append(f"NCL {ncl_name}")
 
     if isinstance(need, dict) and need.get("module"):
         module = str(need["module"]).split(".")[-1]
@@ -481,8 +486,10 @@ def ncl_lookup(name):
     meta = _NCL_MAP.get(key)
     if meta is None or key not in ncl_mod.__all__:
         return {
-            "error": "No NCL shim named %r. Showalter, K, SWEAT, heat index, and wind chill are modern-only."
-            % name
+            "error": (
+                f"No NCL shim named {name!r}. "
+                "Showalter, K, SWEAT, heat index, and wind chill are modern-only."
+            )
         }
     result = {
         "ncl": key,
@@ -539,7 +546,7 @@ def unit_help(kind=None):
     }
     key = aliases.get(key, key)
     if key not in payloads:
-        raise ValueError("unknown unit kind %r" % kind)
+        raise ValueError(f"unknown unit kind {kind!r}")
     return payloads[key]
 
 
@@ -591,13 +598,13 @@ def resolve_callable(name):
     if key.startswith("ncl."):
         ncl_name = key.split(".", 1)[1]
         if ncl_name not in ncl_mod.__all__:
-            raise ValueError("Unknown function: %s" % name)
+            raise ValueError(f"Unknown function: {name}")
         return getattr(ncl_mod, ncl_name)
     if key in pymeteo.__all__ and key not in _PUBLIC_SKIP:
         return getattr(pymeteo, key)
     if key in ncl_mod.__all__:
         return getattr(ncl_mod, key)
-    raise ValueError("Unknown function: %s" % name)
+    raise ValueError(f"Unknown function: {name}")
 
 
 def run_calc(name, args=None, kwargs=None):
@@ -621,12 +628,14 @@ def run_calc(name, args=None, kwargs=None):
             _ensure_run_calc_value(value)
         n_values = _count_values(args) + sum(_count_values(v) for v in kwargs.values())
         if n_values > _MAX_RUN_CALC_VALUES:
-            raise ValueError("payload has %d values; max is %d" % (n_values, _MAX_RUN_CALC_VALUES))
+            raise ValueError(
+                f"payload has {n_values} values; max is {_MAX_RUN_CALC_VALUES}"
+            )
         func = resolve_callable(name)
     except (TypeError, ValueError) as exc:
         return {"ok": False, "error": str(exc)}
     try:
         result = func(*args, **kwargs)
     except Exception as exc:
-        return {"ok": False, "error": "%s: %s" % (type(exc).__name__, exc)}
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
     return {"ok": True, "name": name, "value": _to_jsonable(result)}

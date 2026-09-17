@@ -71,7 +71,7 @@ def install(target_dir, skill_name="meteo-expert"):
     source_skill = source_dir / "SKILL.md"
     if not source_skill.is_file():
         raise FileNotFoundError(
-            "Packaged skill not found: %s. Reinstalling pymeteo-kit may fix this." % source_skill
+            f"Packaged skill not found: {source_skill}. Reinstalling pymeteo-kit may fix this."
         )
     dest_dir = Path(target_dir).expanduser().resolve() / _install_dirname(pkg_name)
     _copytree_overwrite(str(source_dir), str(dest_dir))
@@ -86,7 +86,7 @@ def run_install(target=None, project=False, skill="meteo-expert", list_skills=Fa
         for pkg_name, install_name in _INSTALL_DIRNAME_MAP.items():
             source = get_skill_path(pkg_name) / "SKILL.md"
             marker = "ok" if source.is_file() else "MISSING"
-            print("  %s (%s)" % (install_name, marker))
+            print(f"  {install_name} ({marker})")
         return 0
 
     if target is not None:
@@ -102,15 +102,18 @@ def run_install(target=None, project=False, skill="meteo-expert", list_skills=Fa
     try:
         dest = install(resolved_target, skill_name=skill)
     except FileNotFoundError as exc:
-        print("error: %s" % exc, file=sys.stderr)
+        print(f"error: {exc}", file=sys.stderr)
         return 1
 
     canonical = _install_dirname(_normalize_to_package_name(skill))
-    print("Installed %s skill to: %s" % (canonical, dest))
+    print(f"Installed {canonical} skill to: {dest}")
     if mode == "user-global":
         print("Claude Code picks this up from ~/.claude/skills/ on the next session.")
     elif mode == "project":
-        print("Project-local skill is at ./skills/%s/ (Codex / Claude Code in this directory)." % canonical)
+        print(
+            f"Project-local skill is at ./skills/{canonical}/ "
+            "(Codex / Claude Code in this directory)."
+        )
     else:
         print("Restart the agent session if it caches skills at startup.")
     return 0
