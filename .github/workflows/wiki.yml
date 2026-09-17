@@ -1,0 +1,43 @@
+name: Publish wiki
+
+on:
+  push:
+    branches: [gh-pages]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Push markdown to GitHub Wiki
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SRC="$GITHUB_WORKSPACE/wiki"
+          TMP="$(mktemp -d)"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          AUTH="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          if git clone "$AUTH" "$TMP/wiki"; then
+            echo "cloned existing wiki"
+          else
+            echo "wiki clone failed; attempting first-page init"
+            mkdir -p "$TMP/wiki"
+            git -C "$TMP/wiki" init
+            git -C "$TMP/wiki" checkout -b master
+            git -C "$TMP/wiki" remote add origin "$AUTH"
+          fi
+          rm -rf "$TMP/wiki"/*.md
+          cp -a "$SRC"/. "$TMP/wiki"/
+          git -C "$TMP/wiki" add -A
+          if git -C "$TMP/wiki" diff --cached --quiet; then
+            echo "wiki already up to date"
+            exit 0
+          fi
+          git -C "$TMP/wiki" commit -m "docs: sync bilingual wiki from gh-pages"
+          git -C "$TMP/wiki" push -u origin HEAD:master
