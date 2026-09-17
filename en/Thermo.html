@@ -28,8 +28,7 @@
 <h1>Thermo</h1>
 <p><a href="../zh/Thermo.html">中文</a></p>
 <p>Humidity and parcel temperature. Most of the library’s thermodynamics lives here.</p>
-<p>Functions are re-exported at the package root (<code>import pymeteo as pm</code>). Defaults are °C, hPa, %, kg/kg unless noted.</p>
-<p>Saturation vapour pressure follows Li Shehong (1994). Dewpoint ↔ RH uses Dutton’s latent-heat relation. Mixing-ratio RH uses the NCL <code>relhum</code> table; mixing ratio from RH uses Tetens. Potential temperature is Poisson (κ = 0.286). θe and LCL follow Bolton (1980). Wet-bulb is Stull (2011), sea-level only.</p>
+<p>Functions are re-exported at the package root (<code>import pymeteo as pm</code>). Defaults are °C, hPa, %, kg/kg unless noted. Formula citations are on the individual functions.</p>
 <h2>saturation_vapor_pressure</h2>
 <p>Saturation vapour pressure over liquid water. Ice is not treated separately.</p>
 <p><code>temperature</code> default unit <code>C</code>; result default <code>hPa</code>. At 0 °C this is 6.1078 hPa.</p>
