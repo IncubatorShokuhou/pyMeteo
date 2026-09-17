@@ -45,7 +45,7 @@ from pymeteo.wind import (
     wind_speed,
 )
 
-__version__ = "2.2.2"
+__version__ = "2.2.3"
 
 __all__ = [
     "UnitError",

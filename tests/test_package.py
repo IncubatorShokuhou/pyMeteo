@@ -68,18 +68,18 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.2.2"
+    assert pymeteo.__version__ == "2.2.3"
 
 
 def test_pypi_distribution_name() -> None:
-    meta = metadata("py-meteo")
-    assert meta["Name"] == "py-meteo"
-    assert version("py-meteo") == "2.2.2"
+    meta = metadata("pymeteo-kit")
+    assert meta["Name"] == "pymeteo-kit"
+    assert version("pymeteo-kit") == "2.2.3"
 
 
 def test_hatchling_wheel_maps_src_pymeteo() -> None:
     text = (_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'name = "py-meteo"' in text
+    assert 'name = "pymeteo-kit"' in text
     assert "[tool.hatch.build.targets.wheel]" in text
     assert 'packages = ["src/pymeteo"]' in text
 
@@ -97,14 +97,14 @@ def test_built_wheel_ships_pymeteo_import_package(tmp_path: Path) -> None:
             "--no-deps",
         ],
     )
-    wheels = list(tmp_path.glob("py_meteo-*.whl"))
+    wheels = list(tmp_path.glob("pymeteo_kit-*.whl"))
     assert len(wheels) == 1, wheels
     with zipfile.ZipFile(wheels[0]) as zf:
         names = zf.namelist()
         meta = zf.read(next(n for n in names if n.endswith(".dist-info/METADATA"))).decode()
     assert "pymeteo/__init__.py" in names
-    assert not any(n.startswith("py_meteo/") for n in names)
-    assert "Name: py-meteo" in meta
+    assert not any(n.startswith("pymeteo_kit/") for n in names)
+    assert "Name: pymeteo-kit" in meta
     assert f"Version: {pymeteo.__version__}" in meta
 
 
