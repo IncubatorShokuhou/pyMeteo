@@ -9,10 +9,10 @@ This is a **breaking rewrite** of the old single-file `pyMeteo.py`. The import n
 ## Install
 
 ```bash
-pip install py-meteo
+pip install pymeteo-kit
 ```
 
-The PyPI project name is `py-meteo` because `pymeteo` was already taken. The import is still `import pymeteo`.
+The PyPI project name is `pymeteo-kit` because `pymeteo` was already taken and `py-meteo` was rejected as too similar. The import is still `import pymeteo`.
 
 For local development:
 
@@ -39,7 +39,9 @@ Default units: temperature `C`, pressure `hPa`, wind `m/s`, relative humidity `%
 
 **v2.2.1** adds NCL official-documentation example regression tests (`tests/test_ncl_official_examples.py`).
 
-**v2.2.2** publishes the package on PyPI as `py-meteo` (`pymeteo` was taken). The import remains `import pymeteo`.
+**v2.2.2** attempted to publish as `py-meteo` (`pymeteo` was taken); PyPI rejected that name as too similar to existing `pymeteo`.
+
+**v2.2.3** publishes the package on PyPI as `pymeteo-kit`. The import remains `import pymeteo`.
 
 The old names (`showalter`, `E_WATER`, `SWEAT_calculate`, …) are **gone** from the top-level modern API—no compatibility aliases there.
 
