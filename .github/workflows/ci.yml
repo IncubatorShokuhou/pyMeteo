@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.10", "3.12", "3.13"]
+        python-version: ["3.10", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,12 +49,10 @@ jobs:
       - name: Tests
         run: pytest
 
-  # GitHub-hosted ubuntu-20.04 and actions/setup-python 3.6 were removed in 2025.
-  # Runtime support is still 3.6+; this job installs the hatchling wheel (built
-  # on 3.12) into the last official CPython 3.6 image. hatchling itself needs
-  # 3.8+, so 3.6 cannot pip-install from sdist / editable.
-  test-py36:
-    name: test (3.6)
+  # hatchling needs 3.8+; 3.7 is tested from the wheel built above.
+  # setup-python has no 3.7 build for ubuntu-24.04 (ubuntu-latest).
+  test-py37:
+    name: test (3.7)
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -63,10 +61,10 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
-      - name: Tests on CPython 3.6
+      - name: Tests on CPython 3.7
         run: |
           docker run --rm \
             -v "$PWD":/src \
             -w /src \
-            python:3.6.15-buster \
-            bash -c 'python -m pip install "pip<22" && python -m pip install dist/*.whl "pytest>=6.2.5,<7" "importlib-metadata>=1.4,<4.9" && python -m pytest'
+            python:3.7.17-bullseye \
+            bash -c 'python -m pip install dist/*.whl "pytest>=7.0,<8" "importlib-metadata>=1.4" && python -m pytest'

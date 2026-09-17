@@ -76,24 +76,38 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.3.0"
+    assert pymeteo.__version__ == "2.4.0"
 
 
 def test_pypi_distribution_name() -> None:
     meta = metadata("pymeteo-kit")
     assert meta["Name"] == "pymeteo-kit"
-    assert version("pymeteo-kit") == "2.3.0"
-    assert meta["Requires-Python"] == ">=3.6"
+    assert version("pymeteo-kit") == "2.4.0"
+    assert meta["Requires-Python"] == ">=3.7"
 
 
-def test_packaging_declares_python_36() -> None:
+def test_packaging_declares_python_37() -> None:
     text = (_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
-    assert 'requires-python = ">=3.6"' in text
-    assert "Programming Language :: Python :: 3.6" in text
-    assert "numpy>=1.19,<1.20" in text
+    assert 'requires-python = ">=3.7"' in text
+    assert "Programming Language :: Python :: 3.7" in text
+    assert "Programming Language :: Python :: 3.6" not in text
+    assert "numpy>=1.19,<1.20" not in text
+    assert "numpy>=1.20,<1.22" in text
     assert "numpy>=2.1" in text
-    assert 'core-metadata-version = "2.1"' in text
-    assert 'requires = ["hatchling>=1.18"]' in text
+    assert "core-metadata-version" not in text
+
+
+def test_ci_and_readme_do_not_promise_python_36() -> None:
+    ci = (_REPO_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "test-py36" not in ci
+    assert "python:3.6" not in ci
+    assert "test-py37" in ci
+    assert "python:3.7" in ci
+    assert '"3.10"' in ci and '"3.12"' in ci and '"3.13"' in ci
+    for name in ("README.md", "README_zh.md"):
+        text = (_REPO_ROOT / name).read_text(encoding="utf-8")
+        assert "3.6" not in text
+        assert "3.7" in text
 
 
 def test_hatchling_wheel_maps_src_pymeteo() -> None:
@@ -111,34 +125,28 @@ def test_package_compiles() -> None:
 _PEP585_BASES = frozenset({"list", "dict", "tuple", "set", "frozenset", "type"})
 
 
-def _assert_annotation_is_py36(node: ast.AST, filename: str, lineno: int) -> None:
+def _assert_annotation_is_py37(node: ast.AST, filename: str, lineno: int) -> None:
     for child in ast.walk(node):
         if isinstance(child, ast.BinOp) and isinstance(child.op, ast.BitOr):
             raise AssertionError(
-                f"{filename}:{lineno}: PEP 604 `X | Y` in a type annotation is invalid at runtime on 3.6"
+                f"{filename}:{lineno}: PEP 604 `X | Y` in a type annotation is invalid at runtime on 3.7"
             )
         if isinstance(child, ast.Subscript) and isinstance(child.value, ast.Name):
             if child.value.id in _PEP585_BASES:
                 raise AssertionError(
-                    f"{filename}:{lineno}: PEP 585 `{child.value.id}[...]` is not subscriptable on 3.6"
+                    f"{filename}:{lineno}: PEP 585 `{child.value.id}[...]` is not subscriptable on 3.7"
                 )
 
 
 _NamedExpr = getattr(ast, "NamedExpr", None)
 
 
-def test_sources_avoid_syntax_newer_than_36() -> None:
+def test_sources_avoid_syntax_newer_than_37() -> None:
     src_root = _REPO_ROOT / "src" / "pymeteo"
     for path in sorted(src_root.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         filename = str(path.relative_to(_REPO_ROOT))
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module == "__future__":
-                names = {alias.name for alias in node.names}
-                if "annotations" in names:
-                    raise AssertionError(
-                        f"{filename}:{node.lineno}: `from __future__ import annotations` is 3.7+"
-                    )
             if _NamedExpr is not None and isinstance(node, _NamedExpr):
                 raise AssertionError(f"{filename}:{node.lineno}: walrus `:=` is 3.8+")
             if type(node).__name__ == "Match":
@@ -152,21 +160,20 @@ def test_sources_avoid_syntax_newer_than_36() -> None:
                     args.append(node.args.kwarg)
                 for arg in args:
                     if arg.annotation is not None:
-                        _assert_annotation_is_py36(arg.annotation, filename, arg.lineno)
+                        _assert_annotation_is_py37(arg.annotation, filename, arg.lineno)
                 if node.returns is not None:
-                    _assert_annotation_is_py36(node.returns, filename, node.lineno)
+                    _assert_annotation_is_py37(node.returns, filename, node.lineno)
                 if getattr(node.args, "posonlyargs", None):
                     raise AssertionError(
                         f"{filename}:{node.lineno}: positional-only `/` is 3.8+"
                     )
             if isinstance(node, ast.AnnAssign) and node.annotation is not None:
-                _assert_annotation_is_py36(node.annotation, filename, node.lineno)
-
+                _assert_annotation_is_py37(node.annotation, filename, node.lineno)
 
 
 @pytest.mark.skipif(
     sys.version_info < (3, 8),
-    reason="hatchling requires Python 3.8+; 3.6/3.7 install a prebuilt wheel",
+    reason="hatchling requires Python 3.8+; 3.7 installs a prebuilt wheel",
 )
 def test_built_wheel_ships_pymeteo_import_package(tmp_path: Path) -> None:
     subprocess.check_call(
@@ -189,8 +196,7 @@ def test_built_wheel_ships_pymeteo_import_package(tmp_path: Path) -> None:
     assert "pymeteo/__init__.py" in names
     assert not any(n.startswith("pymeteo_kit/") for n in names)
     assert "Name: pymeteo-kit" in meta
-    assert "Requires-Python: >=3.6" in meta
-    assert "Metadata-Version: 2.1" in meta
+    assert "Requires-Python: >=3.7" in meta
     assert f"Version: {pymeteo.__version__}" in meta
 
 
