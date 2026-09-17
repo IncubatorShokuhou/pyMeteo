@@ -126,14 +126,9 @@ footer.site {
     gap: 1rem;
     padding: 1rem 0.9rem 2rem;
   }
-  aside nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.15rem 0.9rem;
-  }
   aside nav a {
-    display: inline-block;
-    white-space: nowrap;
+    display: block;
+    padding: 0.12rem 0;
   }
   .langswitch { margin-top: 0.6rem; }
 }
