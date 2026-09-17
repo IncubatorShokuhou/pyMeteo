@@ -2,7 +2,7 @@
 
 Meteorological diagnostic functions with explicit string unit parameters. Runtime dependency: NumPy only. Import: `pymeteo`. PyPI name: `pymeteo-kit`.
 
-This is a breaking rewrite of the old single-file `pyMeteo.py`. Public functions take string unit kwargs. There is no Pint, no Sounding/Wind object facade, no MetPy, and no NCL runtime. It is not an I/O, plotting, or full CAPE/CIN sounding package.
+Public functions take string unit kwargs. There is no Pint, no Sounding/Wind object facade, no MetPy, and no NCL runtime. It is not an I/O, plotting, or full CAPE/CIN sounding package.
 
 Parameter tables, unit aliases, and the NCL name map are in [README_zh.md](README_zh.md).
 
@@ -39,12 +39,12 @@ km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 
 Default units: temperature `C`, pressure `hPa`, wind `m/s`, relative humidity `%`, mixing ratio `kg/kg`, distance `km` (thickness defaults to `m`), angles in degrees. Aliases such as `K`/`kelvin`, `hPa`/`mb`, `kt`, `fraction`, `g/kg`, `m`/`nmi` are documented in [README_zh.md](README_zh.md).
 
-The old names (`showalter`, `E_WATER`, `SWEAT_calculate`, …) are gone from the top-level modern API—no compatibility aliases there.
+Top-level `pymeteo` uses English snake_case names. NCL builtin names live in `pymeteo.ncl` and are not re-exported from the package root.
 
 ## Versions
 
 - **v2.2.0** adds pointwise thermodynamic, stability, kinematic and NWS comfort algorithms (potential/equivalent potential temperature, LCL, wet-bulb, lifted index, Coriolis, hypsometric thickness, ω↔w, heat index, wind chill) plus NCL name shims. See the “新增” section in [README_zh.md](README_zh.md). No MetPy, NCL, Pint, or extra runtime dependencies — NumPy only, string unit kwargs.
-- **v2.2.1** adds NCL official-documentation example regression tests (`tests/test_ncl_official_examples.py`).
+- **v2.2.1** adds `tests/test_ncl_official_examples.py`, which pins expected numbers taken from NCL documentation examples.
 - **v2.2.2** attempted to publish as `py-meteo` (`pymeteo` was taken); PyPI rejected that name as too similar to existing `pymeteo`.
 - **v2.2.3** publishes the package on PyPI as `pymeteo-kit`. The import remains `import pymeteo`.
 - **v2.3.0** lowers supported Python to 3.6+.

@@ -1,12 +1,12 @@
 # pymeteo
 
-气象诊断函数库（Python 3.6+）。由原先单文件 `pyMeteo.py` **不兼容重写** 而来：导入包名为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
+气象诊断函数库（Python 3.6+）。导入包名为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
 
 更短的英文说明见 [README.md](README.md)。
 
 ## 安装
 
-需要 Python ≥ 3.6 与 NumPy。运行时**只有** `numpy` 依赖，不再需要 `geopy`。CPython 3.6 上的 NumPy 上限是 1.19.x（最后一条完整支持 3.6 的发行线）。
+需要 Python ≥ 3.6 与 NumPy。运行时**只有** `numpy` 依赖。CPython 3.6 上的 NumPy 上限是 1.19.x（最后一条完整支持 3.6 的发行线）。
 
 ```bash
 pip install pymeteo-kit
@@ -26,14 +26,14 @@ pytest
 ruff check src tests
 ```
 
-`tests/test_ncl_official_examples.py` **含 NCL 官网例题回归**（黄金值硬编码自公开文档，不依赖 MetPy / NCL / Pint）；`tests/test_ncl.py` 只测兼容层接线与单位。lint 在 CI 里只跑 Python 3.12：当前 ruff 的 `target-version` 最低是 `py37`，不能在 3.6 上跑。
+`tests/test_ncl_official_examples.py` 把 NCL 文档例题里的预期数值写进断言（不依赖 MetPy / NCL / Pint）；`tests/test_ncl.py` 只测兼容层接线与单位。lint 在 CI 里只跑 Python 3.12：当前 ruff 的 `target-version` 最低是 `py37`，不能在 3.6 上跑。
 
 ## 快速开始
 
 ```python
 import pymeteo as pm
 
-# 旧 __main__ 示例：18 °C、相对湿度 46.5% → 露点约 6.30 °C
+# 18 °C、相对湿度 46.5% → 露点约 6.30 °C
 dewpoint = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
 )
@@ -77,7 +77,7 @@ km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 from pymeteo import showalter_index, wind_speed
 ```
 
-`from pymeteo import showalter` 之类的旧名**已从顶层删除**。若需要 NCL 原名与固定单位，请使用 ``pymeteo.ncl``（见下一节），不要从 ``pymeteo`` 顶层导入。
+顶层是英文蛇形名。若需要 NCL 原名与固定单位，请使用 ``pymeteo.ncl``（见下一节），不要从 ``pymeteo`` 顶层导入那些 NCL 名字。
 
 ## 新增（2.2.0）
 
@@ -157,9 +157,9 @@ from pymeteo import showalter_index, wind_speed
 | `k_index` | K 指数 |
 | `a_index` | A 指数 |
 | `total_totals_index` | 全总指数 TT（可给 850 hPa 露点或相对湿度） |
-| `sweat_index` | SWEAT（露点用 °C，风速用节；见下方订正说明） |
-| `temperature_dewpoint_depression` | 温度露点差（替代旧 `ttd850` 等） |
-| `layer_temperature_difference` | 两层温度差（替代旧 `tt500`） |
+| `sweat_index` | SWEAT（露点用 °C，风速用节；见下方公式说明） |
+| `temperature_dewpoint_depression` | 温度露点差 |
+| `layer_temperature_difference` | 两层温度差 |
 | `lifted_index` / `lifted_index_from_surface` | 抬升指数 LI（2.2.0） |
 
 ### `pymeteo.wind` 风
@@ -235,11 +235,11 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 
 沙氏 / K / SWEAT 等指数在 NCL 中没有与本库一一对应的同名内建函数，因此**只保留现代 API**，本模块不伪造 NCL 名字。需要灵活单位时请直接调用现代函数。
 
-数值回归**含 NCL 官网例题回归**：`tests/test_ncl_official_examples.py` 对照 dewtemp_trh、mixhum_ptrh、pot_temp、wetbulb_stull、lclvl 文档打印值；接线测试仍在 `tests/test_ncl.py`。
+`tests/test_ncl_official_examples.py` 把 dewtemp_trh、mixhum_ptrh、pot_temp、wetbulb_stull、lclvl 在 NCL 文档例题中的预期数值写进断言；接线测试在 `tests/test_ncl.py`。
 
-## 科学来源与相对旧代码的订正
+## 科学来源与实现要点
 
-公式意图仍来自：
+公式来自：
 
 - NCL 相关例程（`relhum`、`mixhum_ptrh`、`dewtemp_trh` 等）
 - 李社宏. 用 C 语言开发的气象常用参数和物理量计算函数库（一）[J]. 陕西气象, 1994(03):42-45.
@@ -248,36 +248,16 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 - Rothfusz, L. P., 1990: The heat index equation. NWS Technical Attachment SR 90-23.
 - NWS / Environment Canada, 2001: 风寒公式。
 
-2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。2.2.2 曾将 PyPI 发行名改为 `py-meteo`，但因与已有 `pymeteo` 过于相似被拒。2.2.3 改为 `pymeteo-kit`，导入仍为 `import pymeteo`。2.3.0 把支持的 Python 下限降到 3.6。
+2.2.0 起新增算法按上述文献用 NumPy 自行实现，未粘贴 MetPy 或 NCL 源码。2.2.1 增加对照 NCL 文档例题的测试，公式未改。2.2.2 曾将 PyPI 发行名改为 `py-meteo`，但因与已有 `pymeteo` 过于相似被拒。2.2.3 改为 `pymeteo-kit`，导入仍为 `import pymeteo`。2.3.0 把支持的 Python 下限降到 3.6。
 
-在保持上述公式意图的前提下，重写时修正了若干会误导结果的问题：
+当前实现里需要按字面理解的几点：
 
-1. **SWEAT**：标准形式为 `12·Td850(°C) + 20·(TT−49) + 2·f850(kt) + f500(kt) + 125·(S+0.2)`。旧代码把开尔文露点直接乘 12，并用 m/s 风速去套接近“两倍系数”的 4 与 2，结果可偏大约一个量级。新实现按 NWS / Miller (1972) 使用 °C 与节；负项置零；切变项还要求风向差为正且两层风速 ≥ 15 kt。
-2. **`earth_distance`**：去掉 `geopy` 与 `eval("a."+unit)`，改为 Vincenty。
-3. **`gravity`**：纬度按度输入并先化为弧度。旧代码把度数直接交给 `sin`。
-4. **能见度 RUC**：按 60 km × 指数衰减给出千米量级，再换算到 `output_distance_unit`，不再把千米结果误标成再乘 1000。
-5. **数组**：闭合公式用 NumPy 广播；迭代型沙氏指数 / 凝结温度按元素迭代并设最大步数，避免无限循环。
-6. **混合比 / 比湿**：用 `from_quantity` / `to_quantity` 与单位字符串，取代含义与文档互相矛盾的整型 `ISWIT` / `wqType`。
-
-## 从旧单文件 API 迁移
-
-| 旧（`pyMeteo.py`） | 新 |
-|--------------------|----|
-| `showalter` | `showalter_index(..., temperature_unit="C")` |
-| `E_WATER` | `saturation_vapor_pressure` |
-| `Tc` | `condensation_temperature` |
-| `K` / `A` / `TT` | `k_index` / `a_index` / `total_totals_index` |
-| `dewtemp_trh` / `relhum_ttd` | `dewpoint_from_relative_humidity` / `relative_humidity_from_dewpoint` |
-| `relhum` | `relative_humidity_from_mixing_ratio` |
-| `mixhum_ptrh` | `mixing_ratio_from_relative_humidity` 或 `specific_humidity_from_relative_humidity` |
-| `mixhum_convert` | `convert_humidity` |
-| `ws` / `wd` / `u` / `v` | `wind_speed` / `wind_direction` / `uv_from_speed_direction` |
-| `SWEAT_calculate` | `sweat_index`（单位语义已修正，数值不可与旧结果逐点对比） |
-| `earth_distance` | 同名，但无 geopy；用 `output_distance_unit` |
-| `g` | `gravity(..., latitude_unit="deg")` |
-| `ttd850` 等 | `temperature_dewpoint_depression` |
-
-旧文件 `pyMeteo.py` 已删除。`import pyMeteo` 不再可用。
+1. **SWEAT**：`12·Td850(°C) + 20·(TT−49) + 2·f850(kt) + f500(kt) + 125·(S+0.2)`（NWS / Miller 1972）。露点用 °C，风速用节；负项置零；切变项还要求风向差为正且两层风速 ≥ 15 kt。
+2. **`earth_distance`**：WGS84 Vincenty 反解，无 geopy。对极少数对跖点迭代失败时回退到平均地球半径的 haversine。
+3. **`gravity`**：纬度默认按度输入，先化为弧度再代入 `g = 9.7803 · (1 + 0.0053024 sin²φ - 0.000005 sin²2φ)`。
+4. **能见度 RUC**：按 60 km × 指数衰减给出千米量级，再换算到 `output_distance_unit`。
+5. **数组**：闭合公式用 NumPy 广播；迭代型沙氏指数 / 凝结温度按元素迭代并设最大步数。
+6. **混合比 / 比湿**：顶层 API 用 `from_quantity` / `to_quantity` 与单位字符串；`pymeteo.ncl` 仍走 NCL 的 `iswit` / `wqType` 整数开关。
 
 ## 已知限制
 
