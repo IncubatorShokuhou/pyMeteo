@@ -1,8 +1,6 @@
 # Install
 
-[中文](Install_zh.md)
-
-Python **3.7+**. NumPy only at runtime.
+Python 3.7+. Runtime dependency is NumPy.
 
 ```bash
 pip install pymeteo-kit
@@ -12,4 +10,13 @@ pip install pymeteo-kit
 import pymeteo as pm
 ```
 
-From a checkout: `pip install -e ".[dev]"` then `pytest`.
+The PyPI name is `pymeteo-kit`; the import is `pymeteo`.
+
+From a git checkout:
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+[中文](Install_zh.md)
