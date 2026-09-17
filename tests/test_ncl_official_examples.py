@@ -58,7 +58,8 @@ def test_mixhum_ptrh_ncl_example_1() -> None:
     # iswit=-1 → 6.018462 g/kg
     # iswit=2  → 0.005982457 kg/kg（比湿）
     # iswit=-2 → 5.982456 g/kg
-    # NCL 最后一位受打印舍入影响（-2 的 g/kg 与 2×1000 差 0.001 g/kg 量级），
+    # NCL 最后一位受打印舍入影响（iswit=-2 印刷 5.982456 g/kg，
+    # 而 iswit=2 的 0.005982457 kg/kg ×1000 = 5.982457 g/kg，差 1e-6 g/kg），
     # 相对 1e-6 仍覆盖；本库 Tetens 实现已达约 3e-7。
     mix_kg = pm.ncl.mixhum_ptrh(_P_HPA_WH, _TK_18C, _RH_WH, 1)
     mix_g = pm.ncl.mixhum_ptrh(_P_HPA_WH, _TK_18C, _RH_WH, -1)
