@@ -10,7 +10,7 @@
 <body>
 <header class="site">
   <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+  <div class="meta">function notes · Python 3.7+ · NumPy only · import pymeteo</div>
 </header>
 <div class="wrap">
   <nav class="side">
@@ -36,25 +36,12 @@
   <main>
     <h1>Publishing and contributing</h1>
 <p><a href="../zh/Publishing.html">中文</a></p>
-<h2>Install for users</h2>
 <pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
-<p>Import remains <code>import pymeteo</code>. Python 3.6+. NumPy only at runtime.</p>
-<h2>PyPI</h2>
-<p>Distribution name: <a href="https://pypi.org/project/pymeteo-kit/"><code>pymeteo-kit</code></a>. Publishing is GitHub Actions:</p>
-<ul>
-<li>Trigger: a GitHub <strong>Release</strong>, or <strong>Actions → Publish → Run workflow</strong></li>
-<li>Workflow: <code>.github/workflows/publish.yml</code></li>
-<li>Environment: <code>pypi</code> (URL https://pypi.org/p/pymeteo-kit)</li>
-<li>Secret: <code>PYPI_API_TOKEN</code></li>
-<li>Build: Python 3.12, <code>python -m build</code> (hatchling ≥ 1.18)</li>
-</ul>
-<p>Wheels/sdists set <code>core-metadata-version = "2.1"</code> so pip 21.3 on CPython 3.6 can still read metadata.</p>
-<h2>CI</h2>
-<p><code>.github/workflows/ci.yml</code>: ruff on 3.12; pytest on 3.8 / 3.10 / 3.12 / 3.13; a 3.6 job installs the 3.12-built wheel into <code>python:3.6.15-buster</code>.</p>
+<p>Import remains <code>import pymeteo</code>. Python 3.7+. NumPy only at runtime.</p>
+<p>Distribution name: <a href="https://pypi.org/project/pymeteo-kit/"><code>pymeteo-kit</code></a>. A GitHub Release (or <strong>Actions → Publish → Run workflow</strong>) uploads to PyPI. Workflow: <code>.github/workflows/publish.yml</code>.</p>
 <pre><code class="language-bash">pip install -e &quot;.[dev]&quot;
 pytest
-ruff check src tests
 </code></pre>
 <h2>Contributing (brief)</h2>
 <ul>

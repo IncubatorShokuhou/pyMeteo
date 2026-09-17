@@ -11,7 +11,7 @@
 <body>
 <header class="site">
   <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">Python 3.6+ · NumPy only · import pymeteo</div>
+  <div class="meta">Python 3.7+ · NumPy only · import pymeteo</div>
 </header>
 <div class="wrap">
   <nav class="side">
@@ -36,21 +36,21 @@
   <main>
     <p class="lang"><a href="zh/index.html">中文</a></p>
     <h1>pymeteo</h1>
-    <p class="lead">Pointwise meteorological diagnostics with explicit string unit parameters. Runtime dependency: NumPy. PyPI name <code>pymeteo-kit</code>; import name <code>pymeteo</code>.</p>
+    <p class="lead">Pointwise meteorological diagnostics for Python 3.7+. Public functions take string unit parameters. Runtime dependency: NumPy. PyPI name <code>pymeteo-kit</code>; import name <code>pymeteo</code>.</p>
     <p>No Pint, no Sounding/Wind objects, no MetPy, no NCL runtime. Not an I/O, plotting, or full CAPE/CIN package.</p>
 
     <h2>Install</h2>
 <pre><code>pip install pymeteo-kit</code></pre>
-    <p>Python 3.6+. On 3.6 the NumPy pin is 1.19.x. Building from a git checkout needs Python 3.8+ (hatchling ≥ 1.18); 3.6/3.7 should install the wheel.</p>
+    <p>Python 3.7+. The PyPI name is <code>pymeteo-kit</code> because <code>pymeteo</code> was already taken. Import remains <code>import pymeteo</code>.</p>
 
     <h2>Example</h2>
 <pre><code>import pymeteo as pm
 
 td = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
-)  # about 6.30 °C
+)
 
-si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")  # about 1.1
+si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
 
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 
@@ -76,7 +76,7 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # K in, K out
     <div class="actions">
       <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
       <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
-      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a>
+      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/blob/gh-pages/wiki/Home.md">Wiki</a>
       <a class="alt" href="en/Install.html">Install notes</a>
     </div>
   </main>

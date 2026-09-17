@@ -1,6 +1,6 @@
 # pymeteo
 
-点上气象诊断函数，使用**字符串单位参数**。运行时依赖只有 **NumPy**。导入名：`pymeteo`。PyPI 发行名：[`pymeteo-kit`](https://pypi.org/project/pymeteo-kit/)。
+点上气象诊断函数（**Python 3.7+**），使用**字符串单位参数**。运行时依赖只有 **NumPy**。导入名：`pymeteo`。PyPI 发行名：[`pymeteo-kit`](https://pypi.org/project/pymeteo-kit/)。
 
 不提供 Pint 单位对象、Sounding / Wind 类封装、MetPy 或 NCL 运行时。本库不是 I/O、绘图、地图投影或完整 CAPE/CIN 探空套件。
 
@@ -22,7 +22,7 @@ English: [Home](Home).
 
 | 页面 | 模块 | 内容 |
 |------|------|------|
-| [安装](Install_zh) | — | `pip install pymeteo-kit`，Python 3.6+，开发 |
+| [安装](Install_zh) | — | `pip install pymeteo-kit`，Python 3.7+，开发 |
 | [单位](Units_zh) | `pymeteo.units` | 别名、内部量纲、`UnitError` |
 | [热力学](Thermo_zh) | `pymeteo.thermo` | 水汽、θ、θe、LCL、湿球、能见度 |
 | [指数](Indices_zh) | `pymeteo.indices` | 沙氏、K、A、TT、SWEAT、LI |

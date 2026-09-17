@@ -11,7 +11,7 @@
 <body>
 <header class="site">
   <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">Python 3.6+ · 仅 NumPy · import pymeteo</div>
+  <div class="meta">Python 3.7+ · 仅 NumPy · import pymeteo</div>
 </header>
 <div class="wrap">
   <nav class="side">
@@ -36,21 +36,21 @@
   <main>
     <p class="lang"><a href="../index.html">English</a></p>
     <h1>pymeteo</h1>
-    <p class="lead">点上气象诊断函数，使用明确的字符串单位参数。运行时依赖只有 NumPy。PyPI 发行名 <code>pymeteo-kit</code>，导入名 <code>pymeteo</code>。</p>
+    <p class="lead">点上气象诊断函数，Python 3.7+。公开函数使用字符串单位参数。运行时依赖只有 NumPy。PyPI 发行名 <code>pymeteo-kit</code>，导入名 <code>pymeteo</code>。</p>
     <p>不提供 Pint、Sounding / Wind 类封装、MetPy 或 NCL 运行时。不是 I/O、绘图或完整 CAPE/CIN 探空包。</p>
 
     <h2>安装</h2>
 <pre><code>pip install pymeteo-kit</code></pre>
-    <p>Python 3.6+。CPython 3.6 上的 NumPy 上限是 1.19.x。从 git 检出构建需要 Python 3.8+（hatchling ≥ 1.18）；3.6 / 3.7 请安装 wheel。</p>
+    <p>Python 3.7+。PyPI 名是 <code>pymeteo-kit</code>（<code>pymeteo</code> 已被占用）。导入仍为 <code>import pymeteo</code>。</p>
 
     <h2>例子</h2>
 <pre><code>import pymeteo as pm
 
 td = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
-)  # 约 6.30 °C
+)
 
-si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")  # 约 1.1
+si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
 
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 
@@ -76,7 +76,7 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # 开尔文进、开尔文出
     <div class="actions">
       <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
       <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
-      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/wiki/Home_zh">Wiki</a>
+      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/blob/gh-pages/wiki/Home_zh.md">Wiki</a>
       <a class="alt" href="Install.html">安装说明</a>
     </div>
   </main>

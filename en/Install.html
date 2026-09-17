@@ -10,7 +10,7 @@
 <body>
 <header class="site">
   <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">function notes · Python 3.6+ · NumPy only · import pymeteo</div>
+  <div class="meta">function notes · Python 3.7+ · NumPy only · import pymeteo</div>
 </header>
 <div class="wrap">
   <nav class="side">
@@ -36,25 +36,17 @@
   <main>
     <h1>Install</h1>
 <p><a href="../zh/Install.html">中文</a></p>
-<h2>Runtime</h2>
-<p>Python <strong>3.6+</strong>. The only runtime dependency is NumPy. On CPython 3.6 the NumPy pin is <strong>1.19.x</strong> (last line that fully supports 3.6).</p>
+<p>Python <strong>3.7+</strong>. Runtime dependency: NumPy only.</p>
 <pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
-<p>The PyPI project is <code>pymeteo-kit</code> because <code>pymeteo</code> was already taken and <code>py-meteo</code> was rejected as too similar. The import is still:</p>
+<p>PyPI name is <code>pymeteo-kit</code> (<code>pymeteo</code> was taken). Import:</p>
 <pre><code class="language-python">import pymeteo as pm
 </code></pre>
-<h2>From a git checkout</h2>
-<p>Current <code>[build-system]</code> requires <code>hatchling&gt;=1.18</code>, which needs <strong>Python 3.8+</strong>. Do not build the sdist with 3.6/3.7; those interpreters should install the <code>py3-none-any</code> wheel from PyPI.</p>
-<pre><code class="language-bash">pip install -e .
-pip install -e &quot;.[dev]&quot;   # pytest; ruff on 3.8+
+<p>From a git checkout:</p>
+<pre><code class="language-bash">pip install -e &quot;.[dev]&quot;
 pytest
-ruff check src tests
 </code></pre>
-<p>Lint in CI runs on Python 3.12 only. ruff’s oldest <code>target-version</code> in this tree is <code>py37</code>.</p>
-<h2>CI note (3.6)</h2>
-<p>GitHub-hosted <code>ubuntu-20.04</code> and <code>actions/setup-python</code> 3.6 were removed in 2025. CI still runs 3.6 tests in the <code>python:3.6.15-buster</code> container against a wheel built on 3.12. Wheels set <code>core-metadata-version = "2.1"</code> so pip 21.3 (last pip on 3.6) can read the metadata.</p>
-<h2>Publishing</h2>
-<p>A GitHub Release, or <strong>Actions → Publish → Run workflow</strong>, builds the sdist/wheel and uploads to PyPI from the <code>pypi</code> environment using the <code>PYPI_API_TOKEN</code> secret. Workflow: <code>.github/workflows/publish.yml</code>. See <a href="Publishing.html">Publishing</a>.</p>
+<p>Releases go to PyPI from GitHub Actions. See <a href="Publishing.html">Publishing</a>.</p>
   </main>
 </div>
 <footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
