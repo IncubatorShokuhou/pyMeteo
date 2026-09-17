@@ -1,66 +1,60 @@
 # pymeteo
 
-点上气象诊断函数库，单位用字符串关键字传入（Python 3.7+）。
-
-函数内部完成单位换算，返回普通 `float` 或 NumPy 数组。运行时只依赖 NumPy。不做 I/O、绘图、地图投影或完整 CAPE/CIN 探空套件，也不引入 Pint、MetPy 或 NCL 运行时。
+一组用 NumPy 算的气象诊断量：露点、相对湿度、位温、稳定度指数、风速风向、大圆距离等。
+适合探空点算、批量网格点诊断；不做读资料、不做绘图、不做完整探空对象模型。
 
 [English](README.md)
 
 ## 安装
 
+Python 3.7+（PyPI 包名是 `pymeteo-kit`）：
+
 ```bash
 pip install pymeteo-kit
 ```
 
-PyPI 发行名是 `pymeteo-kit`（`pymeteo` 已被占用）；导入仍为 `import pymeteo`。
+```python
+import pymeteo as pm
+```
 
-## 快速开始
+## 例子
 
 ```python
 import pymeteo as pm
 
-dewpoint = pm.dewpoint_from_relative_humidity(
+td = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
 )
 si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
-speed = pm.wind_speed(3.0, 4.0, speed_unit="m/s")
-km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
+ws = pm.wind_speed(3.0, 4.0)
+km = pm.earth_distance(39.9, 116.4, 31.2, 121.5)
 ```
 
 ## 单位
 
-带量纲的量用字符串关键字（`temperature_unit`、`pressure_unit`、`output_*_unit` 等）。无法识别时抛出 `pymeteo.UnitError`。默认值：
+函数用字符串参数声明单位（如 `temperature_unit="C"`），在函数内换算。默认单位写在各函数的文档字符串里。不引入 Pint。
 
-| 物理量 | 默认 | 常用别名 |
-|--------|------|----------|
-| 温度 | `C` | `K`、`F` |
-| 气压 | `hPa` | `mb`、`Pa` |
-| 风 | `m/s` | `kt`、`km/h` |
-| 相对湿度 | `%` | `fraction` |
-| 混合比 | `kg/kg` | `g/kg` |
-| 距离 | `km` | `m`、`nmi`（气层厚度默认 `m`） |
-| 角度 | 度 | `rad` |
+## 主要接口
 
-## 模块
+公开函数从包顶层导入。参数说明见源码文档字符串。
 
-`pymeteo.thermo`、`indices`、`wind`、`geo`、`dynamics`、`comfort` 的公开函数从包顶层再导出。参数说明见源码中的中文文档字符串。
+| 模块 | 内容 |
+|------|------|
+| `pymeteo.thermo` | 露点、相对湿度、混合比、饱和水汽压、位温、相当位温、LCL、湿球、虚温 |
+| `pymeteo.indices` | 沙氏指数、K / A / TT、SWEAT、抬升指数 |
+| `pymeteo.wind` | 风速、风向、uv 分量、风切变 |
+| `pymeteo.geo` | 大圆距离、重力、海平面气压、气层厚度 |
+| `pymeteo.dynamics` | 科氏参数、ω ↔ w |
+| `pymeteo.comfort` | 热指数、风寒 |
 
-`pymeteo.ncl` 用 NCL 内建函数名和固定单位（K、Pa/hPa、%、kg/kg）做薄封装，这些名字不会出现在 `pymeteo` 顶层。
+## NCL 名字
+
+一部分 NCL 内建名在 `pymeteo.ncl` 里，单位按 NCL 约定（温度 K、湿度 % 等）：
 
 ```python
 from pymeteo.ncl import dewtemp_trh
 
 td_k = dewtemp_trh(18.0 + 273.15, 46.5)
-```
-
-## 开发
-
-在 Python 3.8+ 的源码目录中：
-
-```bash
-pip install -e ".[dev]"
-pytest
-ruff check src tests
 ```
 
 ## 许可
