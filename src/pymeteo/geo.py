@@ -286,3 +286,54 @@ def sea_level_pressure(
         temperature,
         temperature_12h_ago,
     )
+
+
+# 干空气气体常数与标准重力，用于压高公式（SI）
+_RD = 287.058  # J·K⁻¹·kg⁻¹
+_G0 = 9.80665  # m·s⁻²
+
+
+def height_thickness(
+    pressure_bottom: ArrayLike,
+    pressure_top: ArrayLike,
+    mean_temperature: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_distance_unit: str = "m",
+) -> ArrayOrScalar:
+    """由压高方程计算两等压面之间的厚度。
+
+    参数
+    ----
+    pressure_bottom:
+        下层气压（较大）。
+    pressure_top:
+        上层气压（较小）。
+    mean_temperature:
+        气层平均温度；有水汽时应传入**虚温**。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    temperature_unit:
+        温度单位，默认 ``C``。
+    output_distance_unit:
+        输出厚度单位，默认 ``m``。
+
+    返回
+    ----
+    float 或 ndarray
+        气层厚度 ``ΔZ = (R_d T̄ / g) ln(p_bottom / p_top)``，
+        ``R_d = 287.058 J·K⁻¹·kg⁻¹``，``g = 9.80665 m·s⁻²``。
+        静力平衡下的经典压高公式（hypsometric equation）。
+    """
+
+    p_bottom = to_pascal(pressure_bottom, pressure_unit)
+    p_top = to_pascal(pressure_top, pressure_unit)
+    t_mean = to_kelvin(mean_temperature, temperature_unit)
+    thickness_m = (_RD * t_mean / _G0) * np.log(p_bottom / p_top)
+    return restore_shape(
+        from_meters(thickness_m, output_distance_unit),
+        pressure_bottom,
+        pressure_top,
+        mean_temperature,
+    )

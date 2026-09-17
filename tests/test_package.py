@@ -8,17 +8,30 @@ def test_public_api_exports() -> None:
         "UnitError",
         "__version__",
         "a_index",
+        "bulk_wind_shear",
         "condensation_temperature",
         "convert_humidity",
+        "coriolis_parameter",
         "dewpoint_from_relative_humidity",
         "earth_distance",
+        "equivalent_potential_temperature",
         "gravity",
+        "heat_index",
+        "height_thickness",
         "k_index",
         "layer_temperature_difference",
+        "lifting_condensation_level",
+        "lifted_index",
+        "lifted_index_from_surface",
+        "mixing_ratio_from_dewpoint",
         "mixing_ratio_from_relative_humidity",
         "ncl",
+        "omega_to_w",
+        "parcel_temperature_at_pressure",
+        "potential_temperature",
         "relative_humidity_from_dewpoint",
         "relative_humidity_from_mixing_ratio",
+        "saturation_mixing_ratio",
         "saturation_vapor_pressure",
         "sea_level_pressure",
         "showalter_index",
@@ -27,7 +40,13 @@ def test_public_api_exports() -> None:
         "temperature_dewpoint_depression",
         "total_totals_index",
         "uv_from_speed_direction",
+        "vapor_pressure_from_mixing_ratio",
+        "vapor_pressure_from_relative_humidity",
+        "virtual_temperature",
         "visibility",
+        "w_to_omega",
+        "wet_bulb_temperature",
+        "wind_chill",
         "wind_components",
         "wind_direction",
         "wind_speed",
@@ -41,7 +60,7 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.1.0"
+    assert pymeteo.__version__ == "2.2.0"
 
 
 def test_old_single_file_names_are_gone() -> None:

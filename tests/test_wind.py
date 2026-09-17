@@ -3,7 +3,13 @@
 import numpy as np
 import pytest
 
-from pymeteo import uv_from_speed_direction, wind_components, wind_direction, wind_speed
+from pymeteo import (
+    bulk_wind_shear,
+    uv_from_speed_direction,
+    wind_components,
+    wind_direction,
+    wind_speed,
+)
 
 
 def test_wind_speed_from_components() -> None:
@@ -43,3 +49,12 @@ def test_knot_unit_conversion_on_speed() -> None:
 def test_wind_arrays() -> None:
     speed = wind_speed(np.array([3.0, 0.0]), np.array([4.0, 5.0]))
     np.testing.assert_allclose(speed, [5.0, 5.0])
+
+
+def test_bulk_wind_shear_vector_difference() -> None:
+    shear = bulk_wind_shear(0.0, 0.0, 3.0, 4.0)
+    assert shear == pytest.approx(5.0)
+    shear_kt = bulk_wind_shear(10.0, 0.0, 0.0, 0.0, speed_unit="m/s", output_speed_unit="kt")
+    assert shear_kt == pytest.approx(10.0 * 3600.0 / 1852.0)
+    # 同向同速 → 0
+    assert bulk_wind_shear(5.0, 5.0, 5.0, 5.0) == pytest.approx(0.0)

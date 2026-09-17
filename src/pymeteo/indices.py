@@ -14,6 +14,7 @@ from pymeteo.thermo import (
     _condensation_temperature_c,
     _saturation_vapor_pressure_hpa,
     dewpoint_from_relative_humidity,
+    parcel_temperature_at_pressure,
 )
 from pymeteo.units import (
     ArrayOrScalar,
@@ -411,4 +412,63 @@ def sweat_index(
     extras = [item for item in (dewpoint_850, relative_humidity_850) if item is not None]
     return restore_shape(
         result, temperature_850, temperature_500, u_850, v_850, u_500, v_500, *extras
+    )
+
+
+def lifted_index(
+    temperature_500: ArrayLike,
+    parcel_temperature_500: ArrayLike,
+    *,
+    temperature_unit: str = "C",
+) -> ArrayOrScalar:
+    """由 500 hPa 环境温度与气块温度计算抬升指数。
+
+    ``LI = T_env(500) - T_parcel(500)``。负值表示气块暖于环境、层结不稳定。
+    温度无论用摄氏度还是开尔文，LI 数值相同（都是开尔文温差）。
+
+    参数
+    ----
+    temperature_500:
+        500 hPa 环境温度。
+    parcel_temperature_500:
+        气块到达 500 hPa 时的温度（需由调用方完成抬升，或使用
+        :func:`lifted_index_from_surface`）。
+    temperature_unit:
+        二者单位，默认 ``C``。
+    """
+
+    env_k = to_kelvin(temperature_500, temperature_unit)
+    parcel_k = to_kelvin(parcel_temperature_500, temperature_unit)
+    return restore_shape(env_k - parcel_k, temperature_500, parcel_temperature_500)
+
+
+def lifted_index_from_surface(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    dewpoint: ArrayLike,
+    temperature_500: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+) -> ArrayOrScalar:
+    """由近地层气压、温度、露点与 500 hPa 环境温度计算抬升指数。
+
+    气块先按 Bolton（1980）求 LCL，未饱和段干绝热、饱和段按李社宏（1994）
+    湿熵抬到 500 hPa，再 ``LI = T_500 - T_parcel(500)``。这是最常用的地面
+    抬升指数定义；完整 CAPE / 最不稳定气块等探空套件不在本库范围。
+    """
+
+    parcel_500 = parcel_temperature_at_pressure(
+        pressure,
+        temperature,
+        dewpoint,
+        500.0,
+        pressure_unit=pressure_unit,
+        temperature_unit=temperature_unit,
+        output_temperature_unit="K",
+    )
+    return lifted_index(
+        to_kelvin(temperature_500, temperature_unit),
+        parcel_500,
+        temperature_unit="K",
     )

@@ -1,11 +1,15 @@
 """pymeteo：带显式单位参数的轻量气象诊断函数库。"""
 
 from pymeteo import ncl
-from pymeteo.geo import earth_distance, gravity, sea_level_pressure
+from pymeteo.comfort import heat_index, wind_chill
+from pymeteo.dynamics import coriolis_parameter, omega_to_w, w_to_omega
+from pymeteo.geo import earth_distance, gravity, height_thickness, sea_level_pressure
 from pymeteo.indices import (
     a_index,
     k_index,
     layer_temperature_difference,
+    lifted_index,
+    lifted_index_from_surface,
     showalter_index,
     sweat_index,
     temperature_dewpoint_depression,
@@ -15,38 +19,62 @@ from pymeteo.thermo import (
     condensation_temperature,
     convert_humidity,
     dewpoint_from_relative_humidity,
+    equivalent_potential_temperature,
+    lifting_condensation_level,
+    mixing_ratio_from_dewpoint,
     mixing_ratio_from_relative_humidity,
+    parcel_temperature_at_pressure,
+    potential_temperature,
     relative_humidity_from_dewpoint,
     relative_humidity_from_mixing_ratio,
+    saturation_mixing_ratio,
     saturation_vapor_pressure,
     specific_humidity_from_relative_humidity,
+    vapor_pressure_from_mixing_ratio,
+    vapor_pressure_from_relative_humidity,
+    virtual_temperature,
     visibility,
+    wet_bulb_temperature,
 )
 from pymeteo.units import UnitError
 from pymeteo.wind import (
+    bulk_wind_shear,
     uv_from_speed_direction,
     wind_components,
     wind_direction,
     wind_speed,
 )
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 
 __all__ = [
     "UnitError",
     "__version__",
     "a_index",
+    "bulk_wind_shear",
     "condensation_temperature",
     "convert_humidity",
+    "coriolis_parameter",
     "dewpoint_from_relative_humidity",
     "earth_distance",
+    "equivalent_potential_temperature",
     "gravity",
+    "heat_index",
+    "height_thickness",
     "k_index",
     "layer_temperature_difference",
+    "lifting_condensation_level",
+    "lifted_index",
+    "lifted_index_from_surface",
+    "mixing_ratio_from_dewpoint",
     "mixing_ratio_from_relative_humidity",
     "ncl",
+    "omega_to_w",
+    "parcel_temperature_at_pressure",
+    "potential_temperature",
     "relative_humidity_from_dewpoint",
     "relative_humidity_from_mixing_ratio",
+    "saturation_mixing_ratio",
     "saturation_vapor_pressure",
     "sea_level_pressure",
     "showalter_index",
@@ -55,7 +83,13 @@ __all__ = [
     "temperature_dewpoint_depression",
     "total_totals_index",
     "uv_from_speed_direction",
+    "vapor_pressure_from_mixing_ratio",
+    "vapor_pressure_from_relative_humidity",
+    "virtual_temperature",
     "visibility",
+    "w_to_omega",
+    "wet_bulb_temperature",
+    "wind_chill",
     "wind_components",
     "wind_direction",
     "wind_speed",
