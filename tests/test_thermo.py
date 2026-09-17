@@ -271,8 +271,9 @@ def test_lifting_condensation_level_wallace_hobbs() -> None:
     # Wallace & Hobbs / NCL lclvl：1000 hPa、15 °C、Td=4 °C → 约 848 hPa
     p_lcl, t_lcl = lifting_condensation_level(1000.0, 15.0, 4.0)
     assert p_lcl == pytest.approx(848.0, abs=3.0)
+    # 干绝热抬升中露点随气压下降，T_LCL 低于起始 T 与 Td
     assert t_lcl < 15.0
-    assert t_lcl > 4.0 - 0.5
+    assert t_lcl < 4.0
 
 
 def test_parcel_temperature_dry_adiabatic_when_lcl_above_target() -> None:
