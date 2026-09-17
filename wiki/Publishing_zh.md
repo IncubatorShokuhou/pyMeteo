@@ -1,0 +1,29 @@
+# 发布与贡献
+
+[English](Publishing.md)
+
+```bash
+pip install pymeteo-kit
+```
+
+`import pymeteo`。Python 3.7+。
+
+发布走 [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions) 上传 PyPI。
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+## 贡献（简）
+
+* 问题与 PR 对着 https://github.com/IncubatorShokuhou/pyMeteo 的 `master`
+* 包根公开 API 保持英文蛇形名。NCL 名字只放在 `pymeteo.ncl`；NCL 没有的名字不要伪造（热指数、风寒、沙氏、K、SWEAT 等）
+* 单位用字符串。不要加 Pint、MetPy 或额外运行时依赖
+* 只做点上诊断：除非经过明确评审的扩围，否则不做 I/O、绘图、地图投影、FAO56 全套、网格平流或完整 CAPE/CIN 探空套件
+* 公式按公开文献自行实现，不要粘贴 MetPy 或 NCL 源码
+* 改到的函数要有测试。NCL 文档例题数值放在 `tests/test_ncl_official_examples.py`
+
+## 许可
+
+MIT License。版权人 IncubatorShokuhou，2019–2026。见源码树中的 `LICENSE`。

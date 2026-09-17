@@ -262,7 +262,7 @@ _RELHUM_ES_TABLE = np.array(
     dtype=float,
 )
 
-# Python 3.6 has no typing.Literal (3.8+). Values are checked at runtime.
+# typing.Literal is 3.8+; values are checked at runtime.
 HumidityKind = str
 VisibilityMethod = str
 
