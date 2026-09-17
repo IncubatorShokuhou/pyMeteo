@@ -6,9 +6,9 @@
 pip install pymeteo-kit
 ```
 
-导入仍为 `import pymeteo`。Python 3.7+。运行时只有 NumPy。
+`import pymeteo`。Python 3.7+。
 
-发行名：[`pymeteo-kit`](https://pypi.org/project/pymeteo-kit/)。GitHub Release（或 **Actions → Publish → Run workflow**）会上传到 PyPI。工作流：`.github/workflows/publish.yml`。
+发布走 [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions) 上传 PyPI。
 
 ```bash
 pip install -e ".[dev]"
@@ -26,4 +26,4 @@ pytest
 
 ## 许可
 
-MIT。版权人 IncubatorShokuhou，2019–2026。见源码树中的 `LICENSE`。
+MIT License。版权人 IncubatorShokuhou，2019–2026。见源码树中的 `LICENSE`。

@@ -17,16 +17,15 @@
   <nav class="side">
     <h2>函数</h2>
     <ul>
-      <li><a href="Units.html">单位</a></li>
       <li><a href="Thermo.html">热力学</a></li>
       <li><a href="Indices.html">指数</a></li>
       <li><a href="Wind.html">风</a></li>
       <li><a href="Geo.html">几何与气压</a></li>
       <li><a href="Comfort.html">体感</a></li>
       <li><a href="Dynamics.html">动力学</a></li>
+      <li><a href="Units.html">单位</a></li>
       <li><a href="NCL.html">NCL 兼容</a></li>
       <li><a href="Install.html">安装</a></li>
-      <li><a href="Publishing.html">发布与贡献</a></li>
     </ul>
     <h2>语言</h2>
     <ul>
@@ -36,12 +35,8 @@
   <main>
     <p class="lang"><a href="../index.html">English</a></p>
     <h1>pymeteo</h1>
-    <p class="lead">点上气象诊断函数，Python 3.7+。公开函数使用字符串单位参数。运行时依赖只有 NumPy。PyPI 发行名 <code>pymeteo-kit</code>，导入名 <code>pymeteo</code>。</p>
-    <p>不提供 Pint、Sounding / Wind 类封装、MetPy 或 NCL 运行时。不是 I/O、绘图或完整 CAPE/CIN 探空包。</p>
-
-    <h2>安装</h2>
-<pre><code>pip install pymeteo-kit</code></pre>
-    <p>Python 3.7+。PyPI 名是 <code>pymeteo-kit</code>（<code>pymeteo</code> 已被占用）。导入仍为 <code>import pymeteo</code>。</p>
+    <p class="lead">露点、水汽混合比、位温与相当位温、LCL、湿球、能见度、沙氏 / K / A / TT / SWEAT / 抬升指数、风、大地线距离、海平面气压、NWS 热指数与风寒、科里奥利、静力近似 ω ↔ w。</p>
+    <p>Python 3.7+。运行时只有 NumPy。单位写在调用参数里。返回 <code>float</code> 或 NumPy 数组。</p>
 
     <h2>例子</h2>
 <pre><code>import pymeteo as pm
@@ -49,27 +44,27 @@
 td = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
 )
-
 si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
-
+u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit="kt")
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
-
-from pymeteo.ncl import dewtemp_trh
-td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # 开尔文进、开尔文出
 </code></pre>
-    <p>默认单位：温度 <code>C</code>、气压 <code>hPa</code>、风 <code>m/s</code>、相对湿度 <code>%</code>、混合比 <code>kg/kg</code>、距离 <code>km</code>（气层厚度默认 <code>m</code>）、角度为度。无法识别的单位抛出 <code>pymeteo.UnitError</code>。</p>
+    <p>默认：温度 <code>C</code>、气压 <code>hPa</code>、风 <code>m/s</code>、相对湿度 <code>%</code>、混合比 <code>kg/kg</code>、距离 <code>km</code>（气层厚度默认 <code>m</code>）、角度为度。</p>
+
+    <h2>安装</h2>
+<pre><code>pip install pymeteo-kit</code></pre>
+    <p><code>import pymeteo</code>。NCL 内建名在 <code>pymeteo.ncl</code>，不在包根。</p>
 
     <h2>模块</h2>
     <table>
-      <thead><tr><th>页面</th><th>导入</th><th></th></tr></thead>
+      <thead><tr><th>页面</th><th></th></tr></thead>
       <tbody>
-        <tr><td><a href="Thermo.html">热力学</a></td><td><code>pymeteo.thermo</code></td><td>水汽、θ、θe、LCL、湿球、能见度</td></tr>
-        <tr><td><a href="Indices.html">指数</a></td><td><code>pymeteo.indices</code></td><td>沙氏、K、A、TT、SWEAT、LI</td></tr>
-        <tr><td><a href="Wind.html">风</a></td><td><code>pymeteo.wind</code></td><td>风速、来向、u/v、体风切变</td></tr>
-        <tr><td><a href="Geo.html">几何与气压</a></td><td><code>pymeteo.geo</code></td><td>Vincenty 距离、重力、海平面气压、厚度</td></tr>
-        <tr><td><a href="Comfort.html">体感</a></td><td><code>pymeteo.comfort</code></td><td>NWS 热指数、风寒</td></tr>
-        <tr><td><a href="Dynamics.html">动力学</a></td><td><code>pymeteo.dynamics</code></td><td>科里奥利、ω ↔ w</td></tr>
-        <tr><td><a href="NCL.html">NCL</a></td><td><code>pymeteo.ncl</code></td><td>固定单位的名字封装，不导出到顶层</td></tr>
+        <tr><td><a href="Thermo.html">热力学</a></td><td>水汽、θ、θe、LCL、湿球、能见度</td></tr>
+        <tr><td><a href="Indices.html">指数</a></td><td>沙氏、K、A、TT、SWEAT、LI</td></tr>
+        <tr><td><a href="Wind.html">风</a></td><td>风速、来向、u/v、体风切变</td></tr>
+        <tr><td><a href="Geo.html">几何与气压</a></td><td>Vincenty 距离、重力、海平面气压、厚度</td></tr>
+        <tr><td><a href="Comfort.html">体感</a></td><td>NWS 热指数、风寒</td></tr>
+        <tr><td><a href="Dynamics.html">动力学</a></td><td>科里奥利、ω ↔ w</td></tr>
+        <tr><td><a href="NCL.html">NCL</a></td><td>固定单位的名字封装</td></tr>
       </tbody>
     </table>
 
@@ -77,10 +72,9 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # 开尔文进、开尔文出
       <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
       <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
       <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/blob/gh-pages/wiki/Home_zh.md">Wiki</a>
-      <a class="alt" href="Install.html">安装说明</a>
     </div>
   </main>
 </div>
-<footer class="site">MIT 许可 · IncubatorShokuhou 2019–2026</footer>
+<footer class="site">MIT License · IncubatorShokuhou 2019–2026</footer>
 </body>
 </html>

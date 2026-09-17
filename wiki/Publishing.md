@@ -6,9 +6,9 @@
 pip install pymeteo-kit
 ```
 
-Import remains `import pymeteo`. Python 3.7+. NumPy only at runtime.
+`import pymeteo`. Python 3.7+.
 
-Distribution name: [`pymeteo-kit`](https://pypi.org/project/pymeteo-kit/). A GitHub Release (or **Actions → Publish → Run workflow**) uploads to PyPI. Workflow: `.github/workflows/publish.yml`.
+Releases are published to PyPI from [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions).
 
 ```bash
 pip install -e ".[dev]"
@@ -26,4 +26,4 @@ pytest
 
 ## License
 
-MIT. Copyright IncubatorShokuhou, 2019–2026. See `LICENSE` in the source tree.
+MIT License. Copyright IncubatorShokuhou, 2019–2026. See `LICENSE` in the source tree.
