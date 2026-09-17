@@ -69,7 +69,7 @@ km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 from pymeteo import showalter_index, wind_speed
 ```
 
-`from pymeteo import showalter` 之类的旧名**已删除**，没有兼容别名。
+`from pymeteo import showalter` 之类的旧名**已从顶层删除**。若需要 NCL 原名与固定单位，请使用 ``pymeteo.ncl``（见下一节），不要从 ``pymeteo`` 顶层导入。
 
 ### `pymeteo.thermo` 水汽
 
@@ -114,6 +114,35 @@ from pymeteo import showalter_index, wind_speed
 | `sea_level_pressure` | 本站气压订正到海平面 |
 
 完整参数说明见源码中的中文文档字符串。
+
+## NCL 兼容层（`pymeteo.ncl`）
+
+部分用户习惯 NCL 内建函数名与**固定单位**。`pymeteo.ncl` 提供一层薄封装：只翻译参数和单位，再调用上表中的现代函数，**不重复实现物理公式**。NCL 名字**不会**再导出到 `pymeteo` 顶层，以免污染现代 API。
+
+```python
+import pymeteo as pm
+from pymeteo.ncl import dewtemp_trh, relhum_ttd, mixhum_ptrh, wind_speed
+
+# 温度开尔文、相对湿度百分数 → 露点开尔文
+td_k = dewtemp_trh(18.0 + 273.15, 46.5)
+td_k = pm.ncl.dewtemp_trh(18.0 + 273.15, 46.5)
+
+# opt=0 → 百分数；opt=1 → 0–1 小数
+rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
+```
+
+| NCL 名 | NCL 单位 / 开关 | 调用的现代函数 |
+|--------|-----------------|----------------|
+| `dewtemp_trh(tk, rh)` | `tk` 为 K，`rh` 为 %，返回露点 K | `dewpoint_from_relative_humidity` |
+| `relhum_ttd(t, td, opt)` | `t`/`td` 为 K；`opt=0` → %，`opt=1` → 小数 | `relative_humidity_from_dewpoint` |
+| `relhum(t, w, p)` | `t` 为 K，`w` 为 kg/kg，`p` 为 Pa，返回 % | `relative_humidity_from_mixing_ratio` |
+| `mixhum_ptrh(p, tk, rh, iswit)` | `p` 为 hPa，`tk` 为 K，`rh` 为 %；`iswit` ±1 混合比、±2 比湿；负号 → g/kg，正号 → kg/kg | `mixing_ratio_from_relative_humidity` / `specific_humidity_from_relative_humidity` |
+| `mixhum_convert(wq, wqType, iounit)` | `wqType` 为 `"w"` 混合比→比湿、`"q"` 相反；`iounit=(in,out)` 中 0=kg/kg、1=g/kg | `convert_humidity` |
+| `wind_speed(u, v)` | m/s → m/s | `wind_speed` |
+| `wind_direction(u, v, opt=0)` | 气象学来向（度）；静风时 `opt=0` 为 0，`opt=1` 为 nan | `wind_direction` |
+| `wind_component(wspd, wdir, opt=0)` | 风速 + 来向 → `(u, v)`（Python 返回元组；NCL 的 `opt` 未使用） | `uv_from_speed_direction` |
+
+沙氏 / K / SWEAT 等指数在 NCL 中没有与本库一一对应的同名内建函数，因此**只保留现代 API**，本模块不伪造 NCL 名字。需要灵活单位时请直接调用现代函数。
 
 ## 科学来源与相对旧代码的订正
 

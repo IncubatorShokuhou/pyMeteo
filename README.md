@@ -27,7 +27,22 @@ km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 
 Default units: temperature `C`, pressure `hPa`, wind `m/s`, relative humidity `%`, mixing ratio `kg/kg`, distance `km`, angles in degrees. Aliases such as `K`/`kelvin`, `hPa`/`mb`, `kt`, `fraction`, `g/kg`, `m`/`nmi` are documented in [README_zh.md](README_zh.md).
 
-The old names (`showalter`, `E_WATER`, `SWEAT_calculate`, …) are **gone**—no compatibility aliases.
+The old names (`showalter`, `E_WATER`, `SWEAT_calculate`, …) are **gone** from the top-level modern API—no compatibility aliases there.
+
+## NCL names (`pymeteo.ncl`)
+
+Optional **thin wrappers** with NCL builtin names and **fixed NCL units** (K, Pa/hPa, %, kg/kg). They only translate arguments and call the modern functions. These names are **not** re-exported from top-level `pymeteo`.
+
+```python
+import pymeteo as pm
+from pymeteo.ncl import dewtemp_trh, relhum_ttd, mixhum_ptrh, wind_speed
+
+td_k = dewtemp_trh(18.0 + 273.15, 46.5)   # tk in K, rh in % → dewpoint K
+td_k = pm.ncl.dewtemp_trh(18.0 + 273.15, 46.5)
+rh = pm.ncl.relhum_ttd(291.15, 279.45, 0)  # opt=0 → %, opt=1 → fraction
+```
+
+Full mapping (NCL name → modern function and units) is in [README_zh.md](README_zh.md).
 
 ## License
 
