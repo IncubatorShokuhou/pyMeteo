@@ -1,101 +1,123 @@
-# 热力学（`pymeteo.thermo`）
+# 热力学
 
-[English](Thermo)
+[English](Thermo.md)
 
-水汽、位温、LCL、湿球、能见度。水面饱和水汽压沿用李社宏（1994）；露点与相对湿度互换用 Dutton 经验潜热；由混合比求相对湿度用 NCL `relhum` 查表；由相对湿度求混合比用 Tetens（同 NCL `mixhum_ptrh`）。位温为 Poisson，κ = 0.286。相当位温与 LCL 用 Bolton（1980）。湿球为 Stull（2011）海平面经验式。均为按文献自行实现，不拷贝 MetPy / NCL 源码。
+水汽和气块温度。库里大部分热力学计算在这一页。
 
-可从包根（`import pymeteo as pm`）或 `pymeteo.thermo` 导入。
+函数可以从包根导入（`import pymeteo as pm`）。没特别说明时，默认单位是 °C、hPa、%、kg/kg。
 
----
+饱和水汽压用李社宏（1994）水面公式。露点与相对湿度互换走 Dutton 的潜热关系。由混合比求 RH 用 NCL `relhum` 那张表；由 RH 求混合比用 Tetens。位温是 Poisson（κ = 0.286）。θe 和 LCL 跟 Bolton（1980）。湿球是 Stull（2011），只适用于海平面附近。
 
-### `saturation_vapor_pressure(temperature, *, temperature_unit="C", output_pressure_unit="hPa")`
+## saturation_vapor_pressure
 
-水面饱和水汽压，未区分冰面。0 °C 时结果为 6.1078 hPa。
+水面饱和水汽压。不单独处理冰面。
+
+`temperature` 默认 `C`，结果默认 `hPa`。0 °C 时是 6.1078 hPa。
 
 ```python
 import pymeteo as pm
-pm.saturation_vapor_pressure(0.0)                 # 6.1078 hPa
+pm.saturation_vapor_pressure(0.0)
 pm.saturation_vapor_pressure(0.0, output_pressure_unit="Pa")  # 610.78
 ```
 
-### `condensation_temperature(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="C")`
+## condensation_temperature
 
-抬升凝结高度上的温度（李社宏 1994 迭代）。网格插值导致露点高于温度或出现负混合比时可能不收敛，此时返回最后一次迭代值。
+抬升凝结高度上的温度，李社宏 1994 迭代。
+
+参数是起始 `pressure`、`temperature`、`dewpoint`。网格插值若给出 Td > T 或负混合比，迭代可能停不下来，这时返回最后一次结果。
 
 ```python
 pm.condensation_temperature(850.0, 16.6, 0.6)
 ```
 
-### `relative_humidity_from_dewpoint(temperature, dewpoint, *, temperature_unit="C", output_humidity_unit="%")`
+## relative_humidity_from_dewpoint
 
-温度 + 露点 → 相对湿度（Dutton）。
+温度和露点 → 相对湿度。输出默认 `%`；要 0–1 就设 `output_humidity_unit="fraction"`。
 
-### `dewpoint_from_relative_humidity(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit="C")`
+## dewpoint_from_relative_humidity
 
-温度 + 相对湿度 → 露点。相对湿度为 0 时返回 `nan`。
-
-```python
-pm.dewpoint_from_relative_humidity(18.0, 46.5)   # 约 6.30 °C
-```
-
-### `relative_humidity_from_mixing_ratio(temperature, mixing_ratio, pressure, *, temperature_unit="C", mixing_ratio_unit="kg/kg", pressure_unit="hPa", output_humidity_unit="%")`
-
-NCL `relhum` 饱和水汽压表（自 173.16 K 起每隔 1 K）。
-
-### `mixing_ratio_from_relative_humidity(pressure, temperature, relative_humidity, *, pressure_unit="hPa", temperature_unit="C", humidity_unit="%", output_humidity_unit="kg/kg")`
-
-Tetens 混合比。
+反过来。相对湿度 ≤ 0 的位置是 `nan`。
 
 ```python
-pm.mixing_ratio_from_relative_humidity(1000.0, 18.0, 46.5)  # 约 0.006018 kg/kg
+pm.dewpoint_from_relative_humidity(18.0, 46.5)  # 大约 6.30 °C
 ```
 
-### `specific_humidity_from_relative_humidity(...)`
+## relative_humidity_from_mixing_ratio
 
-参数同由相对湿度求混合比。`q = w / (1 + w)`。1000 hPa、18 °C、46.5%、`output_humidity_unit="g/kg"` 时约 5.982 g/kg。
+温度、混合比、气压 → RH。饱和水汽压在 173.16–375.16 K 查表线性内插（和 NCL `relhum` 同一张表）。允许大于 100%；小于 0 截成 0.0001%。
 
-### `convert_humidity(value, *, from_quantity="mixing_ratio", to_quantity="specific_humidity", humidity_unit="kg/kg", output_humidity_unit="kg/kg")`
+`mixing_ratio_unit` 默认 `kg/kg`，也认 `g/kg`。
 
-`from_quantity` / `to_quantity` 为 `"mixing_ratio"` 或 `"specific_humidity"`。`q = w/(1+w)`，`w = q/(1-q)`。比湿 ≥ 1 时对应元素为 `nan`。
+## mixing_ratio_from_relative_humidity
 
-### `visibility(relative_humidity, temperature, method="RUC", *, humidity_unit="%", temperature_unit="C", output_distance_unit="km")`
+气压、温度、RH → 混合比。Tetens，对应 NCL `mixhum_ptrh`。
 
-`method` 为 `"RUC"`（60 km × 指数衰减）或 `"FSL"`（露点差公式）。例：相对湿度 80%、18 °C、RUC 约 11.8 km。
+```python
+pm.mixing_ratio_from_relative_humidity(1000.0, 18.0, 46.5)  # 约 0.00602 kg/kg
+```
 
-### `saturation_mixing_ratio(pressure, temperature, *, pressure_unit="hPa", temperature_unit="C", output_humidity_unit="kg/kg")`
+## specific_humidity_from_relative_humidity
 
-饱和混合比 `w_s(p, T)`。
+参数一样，然后 `q = w / (1 + w)`。1000 hPa、18 °C、46.5% 时，`output_humidity_unit="g/kg"` 大约是 5.98 g/kg。
 
-### `mixing_ratio_from_dewpoint(pressure, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_humidity_unit="kg/kg")`
+## convert_humidity
 
-与饱和混合比相同，温度实参为露点。
+混合比和比湿互转，同时可以换质量单位。
 
-### `vapor_pressure_from_mixing_ratio(pressure, mixing_ratio, *, pressure_unit="hPa", mixing_ratio_unit="kg/kg", output_pressure_unit="hPa")`
+`from_quantity` / `to_quantity` 取 `"mixing_ratio"` 或 `"specific_humidity"`。比湿 ≥ 1 再转混合比会得到 `nan`。
 
-### `vapor_pressure_from_relative_humidity(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_pressure_unit="hPa")`
+## visibility
 
-`e = RH · e_s(T)`。
+用 RH 和温度估能见度。`method="RUC"` 是 60 km 乘指数衰减；`"FSL"` 用露点差。默认输出 km。
 
-### `potential_temperature(pressure, temperature, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="K")`
+80%、18 °C、RUC 大约 11.8 km。
 
-Poisson 位温，κ = 0.286，p0 = 1000 hPa。默认输出为 **K**。1000 hPa、301.25 K → 301.25 K。
+## saturation_mixing_ratio
 
-### `equivalent_potential_temperature(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="K")`
+`w_s = ε e_s(T) / (p − e_s)`，ε = 0.622。`e_s` 仍是李社宏水面公式。`e_s ≥ p` 时该点为 `nan`。
 
-Bolton（1980）式 (43)，含 LCL。默认输出 **K**。
+## mixing_ratio_from_dewpoint
 
-### `virtual_temperature(temperature, mixing_ratio, *, temperature_unit="C", mixing_ratio_unit="kg/kg", output_temperature_unit=None)`
+把温度换成露点，公式相同。对应 NCL `mixhum_ptd` 那条路。
 
-`T_v = T (1 + r/ε) / (1 + r)`。输出单位默认与 `temperature_unit` 相同。
+## vapor_pressure_from_mixing_ratio
 
-### `wet_bulb_temperature(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit="C")`
+`e = w p / (ε + w)`。混合比定义的代数逆。
 
-Stull 2011 海平面经验式。20 °C、50% → 约 13.70 °C。
+## vapor_pressure_from_relative_humidity
 
-### `lifting_condensation_level(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_pressure_unit="hPa", output_temperature_unit="C")`
+`e = RH · e_s(T)`，`e_s` 还是李社宏公式。
 
-返回 `(p_lcl, T_lcl)`。Bolton LCL 温度再沿干绝热求气压。1000 hPa、15 °C、露点 4 °C 时 p_LCL 约 847–849 hPa（Bolton 与 Stipanuk 差约 1.5 hPa）。
+## potential_temperature
 
-### `parcel_temperature_at_pressure(pressure, temperature, dewpoint, pressure_target, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="C")`
+Poisson 位温：`θ = T (1000 hPa / p)^0.286`。输出默认是 **K**，不是 °C。
 
-气块干绝热抬到 LCL，再湿绝热抬到 `pressure_target`。`lifted_index_from_surface` 用它。
+```python
+pm.potential_temperature(1000.0, 28.1)  # 301.25 K
+```
+
+## equivalent_potential_temperature
+
+Bolton（1980）式 (43)，里面含他式 (22) 的 LCL 温度。输出默认 K。
+
+## virtual_temperature
+
+`T_v = T (1 + r/ε) / (1 + r)`。输出单位默认跟 `temperature_unit` 走。这是湿空气状态方程的精确形式，不用 NCL 文档里的 `T (1 + 0.61 r)` 近似。
+
+## wet_bulb_temperature
+
+Stull（2011）海平面经验湿球。大约按 1013 hPa 想的。比较靠谱的范围大致是 −20–50 °C、相对湿度 5–99%；又干又冷时偏差会大。
+
+```python
+pm.wet_bulb_temperature(20.0, 50.0)  # 大约 13.7 °C
+```
+
+## lifting_condensation_level
+
+返回 `(p_lcl, T_lcl)`。`T_L` 用 Bolton（1980）式 (22)，再 `p_L = p (T_L / T)^{1/κ}`，κ = 0.286。
+
+Wallace & Hobbs 那个 1000 hPa、15 °C、露点 4 °C 的例子，这里算出来大约 847 hPa。NCL `lclvl` 用 Stipanuk（1973），差几个 hPa 是正常的。
+
+## parcel_temperature_at_pressure
+
+气块先干绝热抬到 LCL，再湿绝热抬到 `pressure_target`。若目标气压还高于 LCL（`p_target ≥ p_LCL`），全程干绝热。`lifted_index_from_surface` 用的就是它。

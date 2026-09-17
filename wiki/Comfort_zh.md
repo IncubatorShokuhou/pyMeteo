@@ -1,34 +1,32 @@
-# 体感（`pymeteo.comfort`）
+# 体感
 
-[English](Comfort)
+[English](Comfort.md)
 
-NWS 业务回归式，自行实现（不拷贝 MetPy）。内部先换到华氏度与英里每小时再算，再换回调用方单位。**没有 NCL 名封装**——NCL 无对应内建函数，`pymeteo.ncl` 也不伪造。
+两个 NWS 业务回归：热指数和风寒。
 
----
+内部先换成华氏度和英里每小时，再换回你要的单位。NCL 没有对应内建名，所以 `pymeteo.ncl` 里也没有这两项。
 
-### `heat_index(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit=None)`
+## heat_index
 
-Rothfusz（1990）/ NWS SR 90-23，基于 Steadman（1979）：
+Rothfusz（1990）/ NWS SR 90-23，源自 Steadman（1979）。
 
-1. 先算简化式 `HI = 0.5 {T + 61 + (T−68)·1.2 + RH·0.094}`（`T` 为 °F，`RH` 为百分数），再与气温平均；
-2. 若该均值 ≥ 80 °F，改用 Rothfusz 全式，并在低湿（RH<13%、80–112 °F）或高湿（RH>85%、80–87 °F）时加减订正项。
+先用一个和气温平均的简化式。若该均值 ≥ 80 °F，改用 Rothfusz 全式，并加上常见的低湿、高湿订正。
 
-Steadman 原表范围外不可靠。90 °F、60% 时约 100 °F。
+超出 Steadman 原表范围（又热又湿的极端）时，公式不可靠。输出单位默认跟 `temperature_unit` 相同。
 
 ```python
-pm.heat_index(90.0, 60.0, temperature_unit="F", output_temperature_unit="F")
+import pymeteo as pm
+pm.heat_index(90.0, 60.0, temperature_unit="F")  # 大约 100 °F
 ```
 
-输出单位默认与 `temperature_unit` 相同。
+## wind_chill
 
-### `wind_chill(temperature, wind_speed, *, temperature_unit="C", speed_unit="m/s", output_temperature_unit=None)`
-
-NWS / Environment Canada 2001：
+NWS / Environment Canada 2001，针对大约 10 m 高度的风：
 
 `WC = 35.74 + 0.6215 T − 35.75 V^0.16 + 0.4275 T V^0.16`
 
-（`T` 为 °F，`V` 为 mph；业务公式针对约 10 m 高度的风）。有效范围约 `T ≤ 50 °F` 且 `V ≥ 3 mph`；超出范围仍返回公式值。0 °F、10 mph 时约 −16 °F。
+（`T` 为 °F，`V` 为 mph。）大致适用于 `T ≤ 50 °F` 且 `V ≥ 3 mph`。超出范围仍会返回公式值，只是物理意义弱一些。
 
 ```python
-pm.wind_chill(0.0, 10.0, temperature_unit="F", speed_unit="mph", output_temperature_unit="F")
+pm.wind_chill(0.0, 10.0, temperature_unit="F", speed_unit="mph")  # 大约 −16 °F
 ```

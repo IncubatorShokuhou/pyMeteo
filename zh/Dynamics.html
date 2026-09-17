@@ -3,57 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>动力学（`pymeteo.dynamics`） · pymeteo</title>
+  <title>动力学 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li class="here"><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Dynamics.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html" class="here">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Dynamics.html">English</a></p>
+  </aside>
   <main>
-    <h1>动力学（<code>pymeteo.dynamics</code>）</h1>
+<h1>动力学</h1>
 <p><a href="../en/Dynamics.html">English</a></p>
-<p>只做点上诊断：不做网格平流、球谐或有限差分。ω ↔ w 采用静力、理想气体近似，与 NCL <code>omega_to_w</code> / <code>w_to_omega</code> 同一关系式，按文献自行实现。</p>
-<hr />
-<h3><code>coriolis_parameter(latitude, *, latitude_unit="deg")</code></h3>
-<p><code>f = 2 Ω sin φ</code>，<code>Ω = 7.292×10⁻⁵</code> rad s⁻¹，结果单位 s⁻¹。赤道为 0；35° 约 8.365×10⁻⁵；45° 约 1.031×10⁻⁴；北极约 1.458×10⁻⁴。</p>
-<pre><code class="language-python">pm.coriolis_parameter(35.0)
-pm.coriolis_parameter(45.0, latitude_unit=&quot;deg&quot;)
+<p>只做点上的量：科氏参数，以及静力近似下的 ω ↔ w。没有网格平流、球谐或有限差分。</p>
+<h2>coriolis_parameter</h2>
+<p><code>f = 2 Ω sin φ</code>，<code>Ω = 7.292×10⁻⁵</code> rad s⁻¹。结果单位 s⁻¹。赤道是 0；45° 大约 <code>1.031×10⁻⁴</code>。</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.coriolis_parameter(35.0)
+pm.coriolis_parameter(45.0)
 </code></pre>
-<p>NCL 名：<code>pymeteo.ncl.coriolis_param(lat)</code>（纬度度，返回 s⁻¹）。</p>
-<h3><code>omega_to_w(omega, temperature, pressure, *, omega_unit="Pa/s", temperature_unit="C", pressure_unit="hPa", output_speed_unit="m/s")</code></h3>
-<p><code>w = −ω / (ρ g)</code>，<code>ρ = p / (Rd T)</code>，<code>Rd = 287.058</code> J K⁻¹ kg⁻¹，<code>g = 9.80665</code> m s⁻²。下沉 ω&gt;0 → w&lt;0。</p>
-<p><strong>现代参数顺序</strong>是 <code>(omega, temperature, pressure)</code>。NCL 封装是 <code>(omega, p, t)</code>，见 <a href="NCL.html">NCL 兼容</a>。</p>
-<p><code>omega_unit</code> 默认 <code>Pa/s</code>，也接受 <code>hPa/s</code>。</p>
-<pre><code class="language-python">w = pm.omega_to_w(0.1, 0.0, 850.0)
+<p>NCL 名：<code>pymeteo.ncl.coriolis_param(lat)</code>，纬度用度，结果 s⁻¹。</p>
+<h2>omega_to_w</h2>
+<p>气压坐标垂直速度换成几何 <code>w</code>：</p>
+<p><code>w = −ω / (ρ g)</code>，<code>ρ = p / (Rd T)</code></p>
+<p><code>Rd = 287.058</code> J K⁻¹ kg⁻¹，<code>g = 9.80665</code> m s⁻²。ω 为正（下沉）时 w 为负。</p>
+<p>现代接口参数顺序是 <code>(omega, temperature, pressure)</code>。NCL 封装是 <code>(omega, p, t)</code>，见 <a href="NCL.html">NCL</a>。</p>
+<p><code>omega_unit</code> 默认 <code>Pa/s</code>，也认 <code>hPa/s</code>。温度默认 <code>C</code>，气压默认 <code>hPa</code>。</p>
+<pre><code class="language-python">pm.omega_to_w(0.1, 0.0, 850.0)
 </code></pre>
-<h3><code>w_to_omega(w, temperature, pressure, *, speed_unit="m/s", temperature_unit="C", pressure_unit="hPa", output_omega_unit="Pa/s")</code></h3>
-<p>代数逆：<code>ω = −ρ g w</code>。现代参数顺序同样是 <code>(w, temperature, pressure)</code>。</p>
+<h2>w_to_omega</h2>
+<p>代数逆：<code>ω = −ρ g w</code>。现代顺序同样是 <code>(w, temperature, pressure)</code>。</p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

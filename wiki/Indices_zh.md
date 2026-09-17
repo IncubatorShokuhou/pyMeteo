@@ -1,75 +1,80 @@
-# 指数（`pymeteo.indices`）
+# 指数
 
-[English](Indices)
+[English](Indices.md)
 
-稳定度指数。沙氏、K、A、TT 无论温度用 `C` 还是 `K` 传入，数值相同。SWEAT 在内部按 °C 与节定义。
+用几层规定高度上的温度（SWEAT 还要风）算稳定度指数。
 
-这些指数在 `pymeteo.ncl` 里**没有**对应的 NCL 内建名。
+沙氏、K、A、TT、抬升指数用 `C` 或 `K` 传入，数值一样。SWEAT 内部按摄氏度和节来定义。这些指数没有 NCL 名封装——NCL 本身就没有对应内建函数，`pymeteo.ncl` 也不会去编。
 
----
+## temperature_dewpoint_depression
 
-### `temperature_dewpoint_depression(temperature, dewpoint, *, temperature_unit="C", output_temperature_unit="C")`
-
-`T − Td`。选用 `F` 时按华氏度差（乘 9/5）返回。
+`T − Td`。输出用华氏度时，差值乘 9/5。
 
 ```python
+import pymeteo as pm
 pm.temperature_dewpoint_depression(7.0, -2.0)  # 9.0
 ```
 
-### `layer_temperature_difference(temperature_lower, temperature_upper, *, temperature_unit="C", output_temperature_unit="C")`
+## layer_temperature_difference
 
-下层减上层。
+下层减上层。常见用法是 850 hPa 减 500 hPa。
 
 ```python
 pm.layer_temperature_difference(16.6, -15.9)  # 32.5
 ```
 
-### `k_index(temperature_850, dewpoint_850, temperature_700, dewpoint_700, temperature_500, *, temperature_unit="C")`
+## k_index
 
-`K = T850 − T500 + Td850 − (T700 − Td700)`，按摄氏度计算。
+`K = T850 − T500 + Td850 − (T700 − Td700)`，按摄氏度组合。
 
 ```python
 pm.k_index(16.6, 0.6, 7.0, -2.0, -15.9)  # 24.1
 ```
 
-文档字符串中的经验：K<20 无雷暴；20–25 零星；25–30 分散；30–35 成片。
+文档字符串里的经验（不是预报结论）：K < 20 基本无雷暴；20–25 零星；25–30 分散；30–35 成片。
 
-### `a_index(temperature_850, dewpoint_850, temperature_700, dewpoint_700, temperature_500, dewpoint_500, *, temperature_unit="C")`
+## a_index
 
-`A = (T850 − T500) − (T850 − Td850) − (T700 − Td700) − (T500 − Td500)`。
+`A = (T850 − T500) − (T850 − Td850) − (T700 − Td700) − (T500 − Td500)`。还需要 Td500。
 
 ```python
 pm.a_index(16.6, 0.6, 7.0, -2.0, -15.9, -20.0)  # 3.4
 ```
 
-### `total_totals_index(temperature_850, temperature_500, *, dewpoint_850=None, relative_humidity_850=None, temperature_unit="C", humidity_unit="%")`
+## total_totals_index
 
-`TT = T850 + Td850 − 2·T500`。`dewpoint_850` 与 `relative_humidity_850` **必须提供其一**。相对湿度按 Dutton 公式反推露点。
-
-```python
-pm.total_totals_index(18.0, -15.9, relative_humidity_850=46.5)
-```
-
-### `showalter_index(temperature_850, dewpoint_850, temperature_500, *, temperature_unit="C")`
-
-850 hPa 气块抬到 500 hPa；SI = T500 − T_parcel(500)。按元素迭代并设最大步数。
+`TT = T850 + Td850 − 2·T500`。`dewpoint_850` 和 `relative_humidity_850` 只能给一个。湿度走 Dutton 公式反推露点。
 
 ```python
-pm.showalter_index(16.6, 0.6, -15.9)  # 约 1.1
+pm.total_totals_index(18.0, -15.9, dewpoint_850=6.3)
 ```
 
-### `sweat_index(temperature_850, temperature_500, u_850, v_850, u_500, v_500, *, dewpoint_850=None, relative_humidity_850=None, temperature_unit="C", humidity_unit="%", speed_unit="m/s")`
+## showalter_index
 
-NWS / Miller（1972）：
+从 850 hPa 抬到 500 hPa 的气块。SI = T500 − T_parcel(500)。湿绝热段是李社宏（1994）。
+
+```python
+pm.showalter_index(16.6, 0.6, -15.9)  # 大约 1.1
+```
+
+网格插值出负混合比时迭代会难受。那是资料问题，不是单位问题。
+
+## sweat_index
+
+Miller（1972）/ NWS：
 
 `12·Td850(°C) + 20·(TT−49) + 2·f850(kt) + f500(kt) + 125·(S+0.2)`
 
-负项置零。切变项还要求风向差为正且两层风速 ≥ 15 kt。提供 Td850 **或** RH850。风分量默认 `m/s`，内部换成节。
+负的项置零。切变项只在这些条件同时成立时保留：850 风向 130–250°、500 风向 210–310°、风向差为正、两层风速都 ≥ 15 kt。
 
-### `lifted_index(temperature_500, parcel_temperature_500, *, temperature_unit="C")`
+Td850 **或** RH850 二选一。风分量默认 `m/s`，内部换成节。文档里的经验：>300 有强对流潜势，>400 有龙卷潜势。
 
-已知 500 hPa 气块温度时：`LI = T500 − T_parcel(500)`。
+## lifted_index
 
-### `lifted_index_from_surface(pressure, temperature, dewpoint, temperature_500, *, pressure_unit="hPa", temperature_unit="C")`
+已经有 500 hPa 气块温度时：`LI = T500 − T_parcel(500)`。负值表示气块比环境暖。
 
-把近地层气块抬到 500 hPa（目标层固定 500 hPa，与 `pressure_unit` 无关），再调用 `lifted_index`。
+## lifted_index_from_surface
+
+近地层气压、温度、露点，再加上 T500。气块先按 Bolton 求 LCL，再按李社宏湿熵抬到 500 hPa。目标层固定是 500 hPa；`pressure_unit` 只说明你传入的地面气压用什么单位。
+
+这是常用的地面抬升指数。CAPE、最不稳定气块、混合层气块都不在这个库里。

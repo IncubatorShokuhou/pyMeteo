@@ -5,45 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>安装 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li class="here"><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Install.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html" class="here">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Install.html">English</a></p>
+  </aside>
   <main>
-    <h1>安装</h1>
-<p><a href="../en/Install.html">English</a></p>
-<p>Python <strong>3.7+</strong>。运行时只有 NumPy。</p>
+<h1>安装</h1>
+<p>Python 3.7+。运行时只依赖 NumPy。</p>
 <pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
 <pre><code class="language-python">import pymeteo as pm
 </code></pre>
-<p>从检出开发：<code>pip install -e ".[dev]"</code>，然后 <code>pytest</code>。</p>
+<p>PyPI 上的名字是 <code>pymeteo-kit</code>，导入名是 <code>pymeteo</code>。</p>
+<p>从仓库安装：</p>
+<pre><code class="language-bash">pip install -e &quot;.[dev]&quot;
+pytest
+</code></pre>
+<p><a href="../en/Install.html">English</a></p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

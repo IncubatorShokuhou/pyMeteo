@@ -3,59 +3,47 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>体感（`pymeteo.comfort`） · pymeteo</title>
+  <title>体感 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li class="here"><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Comfort.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html" class="here">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Comfort.html">English</a></p>
+  </aside>
   <main>
-    <h1>体感（<code>pymeteo.comfort</code>）</h1>
+<h1>体感</h1>
 <p><a href="../en/Comfort.html">English</a></p>
-<p>NWS 业务回归式，自行实现（不拷贝 MetPy）。内部先换到华氏度与英里每小时再算，再换回调用方单位。<strong>没有 NCL 名封装</strong>——NCL 无对应内建函数，<code>pymeteo.ncl</code> 也不伪造。</p>
-<hr />
-<h3><code>heat_index(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit=None)</code></h3>
-<p>Rothfusz（1990）/ NWS SR 90-23，基于 Steadman（1979）：</p>
-<ol>
-<li>先算简化式 <code>HI = 0.5 {T + 61 + (T−68)·1.2 + RH·0.094}</code>（<code>T</code> 为 °F，<code>RH</code> 为百分数），再与气温平均；</li>
-<li>若该均值 ≥ 80 °F，改用 Rothfusz 全式，并在低湿（RH&lt;13%、80–112 °F）或高湿（RH&gt;85%、80–87 °F）时加减订正项。</li>
-</ol>
-<p>Steadman 原表范围外不可靠。90 °F、60% 时约 100 °F。</p>
-<pre><code class="language-python">pm.heat_index(90.0, 60.0, temperature_unit=&quot;F&quot;, output_temperature_unit=&quot;F&quot;)
+<p>两个 NWS 业务回归：热指数和风寒。</p>
+<p>内部先换成华氏度和英里每小时，再换回你要的单位。NCL 没有对应内建名，所以 <code>pymeteo.ncl</code> 里也没有这两项。</p>
+<h2>heat_index</h2>
+<p>Rothfusz（1990）/ NWS SR 90-23，源自 Steadman（1979）。</p>
+<p>先用一个和气温平均的简化式。若该均值 ≥ 80 °F，改用 Rothfusz 全式，并加上常见的低湿、高湿订正。</p>
+<p>超出 Steadman 原表范围（又热又湿的极端）时，公式不可靠。输出单位默认跟 <code>temperature_unit</code> 相同。</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.heat_index(90.0, 60.0, temperature_unit=&quot;F&quot;)  # 大约 100 °F
 </code></pre>
-<p>输出单位默认与 <code>temperature_unit</code> 相同。</p>
-<h3><code>wind_chill(temperature, wind_speed, *, temperature_unit="C", speed_unit="m/s", output_temperature_unit=None)</code></h3>
-<p>NWS / Environment Canada 2001：</p>
+<h2>wind_chill</h2>
+<p>NWS / Environment Canada 2001，针对大约 10 m 高度的风：</p>
 <p><code>WC = 35.74 + 0.6215 T − 35.75 V^0.16 + 0.4275 T V^0.16</code></p>
-<p>（<code>T</code> 为 °F，<code>V</code> 为 mph；业务公式针对约 10 m 高度的风）。有效范围约 <code>T ≤ 50 °F</code> 且 <code>V ≥ 3 mph</code>；超出范围仍返回公式值。0 °F、10 mph 时约 −16 °F。</p>
-<pre><code class="language-python">pm.wind_chill(0.0, 10.0, temperature_unit=&quot;F&quot;, speed_unit=&quot;mph&quot;, output_temperature_unit=&quot;F&quot;)
+<p>（<code>T</code> 为 °F，<code>V</code> 为 mph。）大致适用于 <code>T ≤ 50 °F</code> 且 <code>V ≥ 3 mph</code>。超出范围仍会返回公式值，只是物理意义弱一些。</p>
+<pre><code class="language-python">pm.wind_chill(0.0, 10.0, temperature_unit=&quot;F&quot;, speed_unit=&quot;mph&quot;)  # 大约 −16 °F
 </code></pre>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

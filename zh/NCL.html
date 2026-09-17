@@ -3,167 +3,149 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NCL 兼容（`pymeteo.ncl`） · pymeteo</title>
+  <title>NCL · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li class="here"><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/NCL.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html" class="here">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/NCL.html">English</a></p>
+  </aside>
   <main>
-    <h1>NCL 兼容（<code>pymeteo.ncl</code>）</h1>
+<h1>NCL</h1>
 <p><a href="../en/NCL.html">English</a></p>
-<p>一层薄封装：沿用 NCL 内建<strong>函数名</strong>和<strong>固定单位</strong>，只翻译参数再调用现代函数。这些名字<strong>不会</strong>导出到 <code>pymeteo</code> 顶层（<code>from pymeteo import dewtemp_trh</code> 会失败）。需要灵活单位时请直接调现代 API。</p>
-<pre><code class="language-python">import pymeteo as pm
-from pymeteo.ncl import dewtemp_trh, relhum_ttd, mixhum_ptrh, wind_speed
+<p>一层薄封装：保住 NCL 内建<strong>函数名</strong>和 NCL 的<strong>固定单位</strong>。它们只翻译参数，再调用现代接口。不会从顶层 <code>pymeteo</code> 再导出。</p>
+<p>需要灵活单位时，直接用现代函数。</p>
+<pre><code class="language-python">from pymeteo.ncl import dewtemp_trh
 
-td_k = dewtemp_trh(18.0 + 273.15, 46.5)        # tk 为 K，rh 为 % → 露点 K（约 279.45）
-td_k = pm.ncl.dewtemp_trh(18.0 + 273.15, 46.5)
-rh = pm.ncl.relhum_ttd(291.15, 279.45, 0)      # opt=0 → %，opt=1 → 小数
+td_k = dewtemp_trh(18.0 + 273.15, 46.5)  # tk 为 K，rh 为 %，露点为 K
 </code></pre>
-<p>沙氏 / K / SWEAT / 热指数 / 风寒在这里没有对应的 NCL 内建名，本模块不伪造。</p>
-<p>对照 NCL 文档例题数值的回归在 <code>tests/test_ncl_official_examples.py</code>；接线与单位开关在 <code>tests/test_ncl.py</code>。</p>
-<h2>对照表</h2>
+<p>沙氏、K、SWEAT、热指数、风寒这里没有对应的 NCL 内建名，也不会去编。</p>
+<p>NCL 文档例题的数字钉在 <code>tests/test_ncl_official_examples.py</code>。</p>
+<h2>对照</h2>
 <table>
 <thead>
 <tr>
 <th>NCL 名</th>
-<th>固定单位 / 开关</th>
-<th>调用的现代函数</th>
+<th>单位 / 开关</th>
+<th>转调</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>dewtemp_trh(tk, rh)</code></td>
-<td><code>tk</code> 为 K，<code>rh</code> 为 %，返回露点 K</td>
+<td><code>tk</code> K，<code>rh</code> %，露点 K</td>
 <td><code>dewpoint_from_relative_humidity</code></td>
 </tr>
 <tr>
 <td><code>relhum_ttd(t, td, opt)</code></td>
-<td><code>t</code>/<code>td</code> 为 K；<code>opt=0</code> → %，<code>opt=1</code> → 小数</td>
+<td><code>t</code>/<code>td</code> K；<code>opt=0</code> → %，<code>opt=1</code> → 小数</td>
 <td><code>relative_humidity_from_dewpoint</code></td>
 </tr>
 <tr>
 <td><code>relhum(t, w, p)</code></td>
-<td><code>t</code> 为 K，<code>w</code> 为 kg/kg，<code>p</code> 为 Pa，返回 %</td>
+<td><code>t</code> K，<code>w</code> kg/kg，<code>p</code> Pa，结果 %</td>
 <td><code>relative_humidity_from_mixing_ratio</code></td>
 </tr>
 <tr>
 <td><code>mixhum_ptrh(p, tk, rh, iswit)</code></td>
-<td><code>p</code> 为 <strong>hPa</strong>，<code>tk</code> 为 K，<code>rh</code> 为 %；<code>\|iswit\|=1</code> 混合比、<code>2</code> 比湿；负号 → g/kg，正号 → kg/kg</td>
-<td><code>mixing_ratio_from_relative_humidity</code> / <code>specific_humidity_from_relative_humidity</code></td>
+<td><code>p</code> 为 <strong>hPa</strong>，<code>tk</code> K，<code>rh</code> %；<code>\|iswit\|=1</code> 混合比，<code>2</code> 比湿；负号 → g/kg</td>
+<td>由 RH 求混合比 / 比湿</td>
 </tr>
 <tr>
 <td><code>mixhum_ptd(p, tdk, iswit)</code></td>
-<td><code>p</code> 为 <strong>Pa</strong>，<code>tdk</code> 为 K；<code>iswit</code> 同上</td>
-<td><code>mixing_ratio_from_dewpoint</code>（再转换）</td>
+<td><code>p</code> 为 <strong>Pa</strong>，<code>tdk</code> K；<code>iswit</code> 同上</td>
+<td><code>mixing_ratio_from_dewpoint</code></td>
 </tr>
 <tr>
 <td><code>mixhum_convert(wq, wqType, iounit)</code></td>
-<td><code>wqType</code> 为 <code>"w"</code> 混合比→比湿、<code>"q"</code> 相反；<code>iounit=(in,out)</code> 中 0=kg/kg、1=g/kg</td>
+<td><code>"w"</code> 混合比→比湿，<code>"q"</code> 反过来；<code>iounit=(in,out)</code> 0=kg/kg，1=g/kg</td>
 <td><code>convert_humidity</code></td>
 </tr>
 <tr>
 <td><code>vapor_pres_rh(rh, es)</code></td>
-<td><code>rh</code> 为 %；<code>es</code> 与返回同单位</td>
+<td><code>rh</code> %；<code>es</code> 与返回值单位相同</td>
 <td><code>RH/100 · e_s</code></td>
 </tr>
 <tr>
 <td><code>pot_temp(p, t, dim=-1, opt=False)</code></td>
-<td><code>p</code> 为 Pa，<code>t</code> 为 K，返回 K。<code>dim</code>/<code>opt</code> 忽略</td>
+<td><code>p</code> Pa，<code>t</code> K → K。<code>dim</code>/<code>opt</code> 忽略</td>
 <td><code>potential_temperature</code></td>
 </tr>
 <tr>
 <td><code>pot_temp_equiv(p, t, w, dim=-1, humVarType="r")</code></td>
-<td><code>p</code> 为 Pa，<code>t</code> 为 K；<code>humVarType</code>：<code>r</code>/<code>w</code> 混合比 kg/kg、<code>q</code> 比湿、<code>rh</code> 相对湿度 %。内部 Bolton 含 LCL（比 NCL 6.4 无 LCL 近似更接近 <code>pot_temp_equiv_tlcl</code>）。<code>dim</code> 忽略</td>
+<td><code>p</code> Pa，<code>t</code> K；<code>"r"</code>/<code>"w"</code> 混合比 kg/kg，<code>"q"</code> 比湿，<code>"rh"</code> RH %。内部仍用带 LCL 的 Bolton（比 NCL 6.4 无 LCL 近似更接近 <code>pot_temp_equiv_tlcl</code>）。<code>dim</code> 忽略</td>
 <td><code>equivalent_potential_temperature</code></td>
 </tr>
 <tr>
 <td><code>temp_virtual(t, w, iounit)</code></td>
-<td><code>iounit</code> 长度 3：温度 0=°C/1=K/2=°F，混合比 0=kg/kg 或 1=g/kg，输出温度。用 <code>T(1+r/ε)/(1+r)</code>，不是 NCL 文档里的 <code>T(1+0.61 r)</code> 近似</td>
+<td><code>iounit</code> 长度 3：温度 0=°C/1=K/2=°F，混合比 0=kg/kg 或 1=g/kg，输出温度。用 <code>T(1+r/ε)/(1+r)</code>，不用 <code>T(1+0.61 r)</code></td>
 <td><code>virtual_temperature</code></td>
 </tr>
 <tr>
 <td><code>wetbulb_stull(t, rh, iounit, opt=False)</code></td>
-<td><code>rh</code> 为 %；<code>iounit</code> 长度 2（0=°C、1=K、2=°F）。<code>opt</code> 未使用</td>
+<td><code>rh</code> %；<code>iounit</code> 长度 2（0=°C，1=K，2=°F）。<code>opt</code> 未使用</td>
 <td><code>wet_bulb_temperature</code></td>
 </tr>
 <tr>
 <td><code>lclvl(p, tk, tdk)</code></td>
-<td><code>p</code> 为 hPa，温度为 K，只返回 LCL 气压 hPa</td>
+<td><code>p</code> hPa，温度为 K，只返回 LCL 气压</td>
 <td><code>lifting_condensation_level</code></td>
 </tr>
 <tr>
 <td><code>wind_speed(u, v)</code></td>
-<td>m/s → m/s</td>
+<td>m/s</td>
 <td><code>wind_speed</code></td>
 </tr>
 <tr>
 <td><code>wind_direction(u, v, opt=0)</code></td>
-<td>来向（度）；静风：<code>opt=0</code> 为 0，<code>opt=1</code> 为 nan，其它标量为填充值</td>
+<td>来向，度；静风：<code>opt=0</code> → 0，<code>opt=1</code> → nan，其它标量当填充值</td>
 <td><code>wind_direction</code></td>
 </tr>
 <tr>
 <td><code>wind_component(wspd, wdir, opt=0)</code></td>
-<td>m/s + 来向 → <code>(u, v)</code> 元组。NCL 的 <code>opt</code> 未使用</td>
+<td>m/s、来向 → <code>(u, v)</code> 元组。NCL 的 <code>opt</code> 未使用</td>
 <td><code>uv_from_speed_direction</code></td>
 </tr>
 <tr>
 <td><code>coriolis_param(lat)</code></td>
-<td>纬度度 → s⁻¹</td>
+<td>纬度（度）→ s⁻¹</td>
 <td><code>coriolis_parameter</code></td>
 </tr>
 <tr>
 <td><code>omega_to_w(omega, p, t)</code></td>
-<td>Pa/s、<strong>Pa</strong>、K → m/s。顺序 <code>(omega, p, t)</code></td>
-<td><code>omega_to_w</code>（现代 API 温度在气压前）</td>
+<td>Pa/s，<strong>Pa</strong>，K → m/s。顺序 <code>(omega, p, t)</code></td>
+<td>现代 <code>omega_to_w</code> 是 <code>(omega, temperature, pressure)</code></td>
 </tr>
 <tr>
 <td><code>w_to_omega(w, p, t)</code></td>
-<td>上式之逆</td>
+<td>逆变换</td>
 <td><code>w_to_omega</code></td>
 </tr>
 </tbody>
 </table>
-<h2>与测试套件一致的例子</h2>
-<pre><code class="language-python"># mixhum_ptrh，1000 hPa / 18 °C / 46.5 %
-mix_kg = pm.ncl.mixhum_ptrh(1000.0, 18.0 + 273.15, 46.5, 1)   # 约 0.006018 kg/kg
-mix_g  = pm.ncl.mixhum_ptrh(1000.0, 18.0 + 273.15, 46.5, -1)  # 约 6.018 g/kg
+<pre><code class="language-python">import pymeteo as pm
 
-# pot_temp：100000 Pa、301.25 K → 301.25 K
-pm.ncl.pot_temp(100000.0, 301.25)
-
-# wetbulb_stull：20 °C、50 %、iounit (0,0) → 约 13.70 °C
-pm.ncl.wetbulb_stull(20.0, 50.0, (0, 0), False)
-
-# lclvl：1000 hPa、15 °C、露点 4 °C → 约 847–849 hPa（Bolton 与 Stipanuk 之差）
-pm.ncl.lclvl(1000.0, 15.0 + 273.15, 4.0 + 273.15)
+pm.ncl.mixhum_ptrh(1000.0, 18.0 + 273.15, 46.5, 1)   # 约 0.00602 kg/kg
+pm.ncl.pot_temp(100000.0, 301.25)                     # 301.25 K
+pm.ncl.wetbulb_stull(20.0, 50.0, (0, 0), False)       # 约 13.7 °C
+pm.ncl.lclvl(1000.0, 15.0 + 273.15, 4.0 + 273.15)     # 约 847 hPa
 </code></pre>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

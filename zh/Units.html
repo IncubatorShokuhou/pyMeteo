@@ -5,47 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>单位 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li class="here"><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Units.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html" class="here">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Units.html">English</a></p>
+  </aside>
   <main>
-    <h1>单位</h1>
+<h1>单位</h1>
 <p><a href="../en/Units.html">English</a></p>
-<p>每个带量纲的量都有对应的字符串单位关键字（或成对的输入 / 输出单位）。函数先换算到内部量纲再计算，返回普通 <code>float</code> 或 NumPy 数组（全部原始输入都是标量时，<code>restore_shape</code> 会还原成 Python <code>float</code>）。</p>
-<p>无法识别或不适用于当前物理量的单位会抛出 <strong><code>pymeteo.UnitError</code></strong>（<code>ValueError</code> 子类）。</p>
-<h2>默认值与内部量纲</h2>
+<p>带量纲的参数用字符串声明单位（有时是一对输入/输出单位）。先换到内部接近 SI 的量，再换回来。标量仍是 Python <code>float</code>，数组仍是数组。</p>
+<p>无法识别或不适用于该物理量的字符串会抛 <code>pymeteo.UnitError</code>，它是 <code>ValueError</code> 的子类。</p>
+<p>不用 Pint。</p>
+<h2>默认值</h2>
 <table>
 <thead>
 <tr>
 <th>物理量</th>
-<th>内部量纲</th>
-<th>默认公开单位</th>
-<th>常用别名（不完全）</th>
+<th>内部</th>
+<th>常见默认</th>
+<th>常用别名</th>
 </tr>
 </thead>
 <tbody>
@@ -53,61 +45,61 @@
 <td>温度</td>
 <td>K</td>
 <td><code>C</code></td>
-<td><code>degC</code> / <code>celsius</code> / <code>centigrade</code>、<code>K</code> / <code>kelvin</code>、<code>F</code> / <code>degF</code> / <code>fahrenheit</code></td>
+<td><code>degC</code>、<code>celsius</code>、<code>K</code>、<code>kelvin</code>、<code>F</code>、<code>fahrenheit</code></td>
 </tr>
 <tr>
 <td>气压</td>
 <td>Pa</td>
 <td><code>hPa</code></td>
-<td><code>mb</code> / <code>mbar</code> / <code>millibar</code>、<code>Pa</code> / <code>pascal</code>、<code>kPa</code>、<code>atm</code></td>
+<td><code>mb</code>、<code>mbar</code>、<code>Pa</code>、<code>kPa</code>、<code>atm</code></td>
 </tr>
 <tr>
 <td>风速</td>
 <td>m/s</td>
 <td><code>m/s</code></td>
-<td><code>ms-1</code> / <code>mps</code>、<code>kt</code> / <code>knot</code> / <code>knots</code> / <code>kn</code>、<code>km/h</code> / <code>kmh</code> / <code>kph</code>、<code>mph</code></td>
+<td><code>kt</code>、<code>knots</code>、<code>km/h</code>、<code>mph</code></td>
 </tr>
 <tr>
 <td>相对湿度</td>
-<td>小数 0–1</td>
+<td>0–1</td>
 <td><code>%</code></td>
-<td><code>percent</code> / <code>percentage</code>、<code>fraction</code> / <code>1</code> / <code>ratio</code></td>
+<td><code>percent</code>、<code>fraction</code></td>
 </tr>
 <tr>
 <td>混合比 / 比湿</td>
 <td>kg/kg</td>
 <td><code>kg/kg</code></td>
-<td><code>g/kg</code>、<code>mg/kg</code>、<code>kgkg-1</code>、<code>g/g</code></td>
+<td><code>g/kg</code>、<code>mg/kg</code></td>
 </tr>
 <tr>
 <td>距离</td>
 <td>m</td>
 <td><code>km</code></td>
-<td><code>m</code> / <code>meter</code>、<code>cm</code>、<code>mi</code> / <code>mile</code>、<code>ft</code> / <code>foot</code>、<code>nmi</code> / <code>nm</code> / <code>nauticalmile</code></td>
+<td><code>m</code>、<code>mi</code>、<code>ft</code>、<code>nmi</code></td>
 </tr>
 <tr>
-<td>角度（经纬度、风向来向）</td>
+<td>角度</td>
 <td>三角函数前转弧度</td>
 <td><code>deg</code></td>
-<td><code>degree</code> / <code>degrees</code>、<code>rad</code> / <code>radian</code></td>
+<td><code>degree</code>、<code>rad</code></td>
 </tr>
 </tbody>
 </table>
-<p>气层<strong>厚度</strong>（<code>height_thickness</code>）默认是 <strong><code>m</code></strong>，不是 <code>km</code>。</p>
-<p>稳定度指数（沙氏、K、A、TT、SWEAT）是温差或无量纲组合：在摄氏度与开尔文下 <strong>TT / K / A / 沙氏的数值相同</strong>。</p>
-<p>输出单位关键字形如 <code>output_temperature_unit</code>、<code>output_pressure_unit</code>、<code>output_speed_unit</code>、<code>output_distance_unit</code>、<code>output_humidity_unit</code>、<code>output_omega_unit</code>。</p>
-<h2>换算函数（<code>pymeteo.units</code>）</h2>
-<p>这些函数给内部用。除 <code>UnitError</code> 外，不从包根再导出。</p>
+<p>气层厚度（<code>height_thickness</code>）默认是 <strong><code>m</code></strong>，不是 <code>km</code>。位温输出默认是 <strong>K</strong>。</p>
+<p>沙氏、K、A、TT、抬升指数是温度差。<code>C</code> 和 <code>K</code> 得到同一个数。</p>
+<p>输出参数长这样：<code>output_temperature_unit</code>、<code>output_pressure_unit</code>、<code>output_speed_unit</code>、<code>output_distance_unit</code>、<code>output_humidity_unit</code>、<code>output_omega_unit</code>。</p>
+<h2><code>pymeteo.units</code> 里的辅助函数</h2>
+<p>给内部用的。包根只再导出 <code>UnitError</code>。</p>
 <p>规范化：<code>canonical_temperature_unit</code>、<code>canonical_pressure_unit</code>、<code>canonical_speed_unit</code>、<code>canonical_rh_unit</code>、<code>canonical_mass_humidity_unit</code>、<code>canonical_distance_unit</code>、<code>canonical_angle_unit</code>。</p>
 <p>换算：<code>to_kelvin</code> / <code>from_kelvin</code>、<code>to_pascal</code> / <code>from_pascal</code>、<code>to_mps</code> / <code>from_mps</code>、<code>to_rh_fraction</code> / <code>from_rh_fraction</code>、<code>to_kgkg</code> / <code>from_kgkg</code>、<code>to_meters</code> / <code>from_meters</code>、<code>to_radians</code>。</p>
-<p>节用 <code>1852/3600</code> m/s。法定英里 <code>1609.344</code> m。海里 <code>1852</code> m。标准大气压 <code>101325</code> Pa。</p>
-<pre><code class="language-python">from pymeteo.units import UnitError, to_kelvin, from_kelvin
+<p>节是 <code>1852/3600</code> m/s。法定英里 1609.344 m。海里 1852 m。标准大气压 101325 Pa。</p>
+<pre><code class="language-python">from pymeteo.units import to_kelvin, from_kelvin
 
-k = to_kelvin(18.0, &quot;C&quot;)          # 291.15
-c = from_kelvin(k, &quot;celsius&quot;)     # 18.0
+k = to_kelvin(18.0, &quot;C&quot;)       # 291.15
+c = from_kelvin(k, &quot;celsius&quot;)  # 18.0
 </code></pre>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

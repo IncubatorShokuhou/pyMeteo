@@ -3,78 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>pymeteo · 气象诊断函数</title>
+  <title>pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  <link rel="alternate" hreflang="en" href="../index.html">
-  <link rel="alternate" hreflang="zh-Hans" href="index.html">
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-    <h2>函数</h2>
-    <ul>
-      <li><a href="Thermo.html">热力学</a></li>
-      <li><a href="Indices.html">指数</a></li>
-      <li><a href="Wind.html">风</a></li>
-      <li><a href="Geo.html">几何与气压</a></li>
-      <li><a href="Comfort.html">体感</a></li>
-      <li><a href="Dynamics.html">动力学</a></li>
-      <li><a href="Units.html">单位</a></li>
-      <li><a href="NCL.html">NCL 兼容</a></li>
-      <li><a href="Install.html">安装</a></li>
-    </ul>
-    <h2>语言</h2>
-    <ul>
-      <li><a href="../index.html">English</a></li>
-    </ul>
-  </nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html" class="here">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../index.html">English</a></p>
+  </aside>
   <main>
-    <p class="lang"><a href="../index.html">English</a></p>
-    <h1>pymeteo</h1>
-    <p class="lead">露点、水汽混合比、位温与相当位温、LCL、湿球、能见度、沙氏 / K / A / TT / SWEAT / 抬升指数、风、大地线距离、海平面气压、NWS 热指数与风寒、科里奥利、静力近似 ω ↔ w。</p>
-    <p>Python 3.7+。运行时只有 NumPy。单位写在调用参数里。返回 <code>float</code> 或 NumPy 数组。</p>
-
-    <h2>例子</h2>
-<pre><code>import pymeteo as pm
-
-td = pm.dewpoint_from_relative_humidity(
-    18.0, 46.5, temperature_unit="C", humidity_unit="%"
-)
-si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
-u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit="kt")
-km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
+<h1>pymeteo</h1>
+<p>pymeteo 是一组在 NumPy 上做点诊断的气象计算。</p>
+<p>不读资料、不绘图，也不包一层完整的探空对象。传入标量或数组，返回标量或数组。</p>
+<h2>安装</h2>
+<pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
-    <p>默认：温度 <code>C</code>、气压 <code>hPa</code>、风 <code>m/s</code>、相对湿度 <code>%</code>、混合比 <code>kg/kg</code>、距离 <code>km</code>（气层厚度默认 <code>m</code>）、角度为度。</p>
+<pre><code class="language-python">import pymeteo as pm
+</code></pre>
+<p>Python 3.7+。导入名是 <code>pymeteo</code>。</p>
+<h2>例子</h2>
+<pre><code class="language-python">import pymeteo as pm
 
-    <h2>安装</h2>
-<pre><code>pip install pymeteo-kit</code></pre>
-    <p><code>import pymeteo</code>。NCL 内建名在 <code>pymeteo.ncl</code>，不在包根。</p>
-
-    <h2>模块</h2>
-    <table>
-      <thead><tr><th>页面</th><th></th></tr></thead>
-      <tbody>
-        <tr><td><a href="Thermo.html">热力学</a></td><td>水汽、θ、θe、LCL、湿球、能见度</td></tr>
-        <tr><td><a href="Indices.html">指数</a></td><td>沙氏、K、A、TT、SWEAT、LI</td></tr>
-        <tr><td><a href="Wind.html">风</a></td><td>风速、来向、u/v、体风切变</td></tr>
-        <tr><td><a href="Geo.html">几何与气压</a></td><td>Vincenty 距离、重力、海平面气压、厚度</td></tr>
-        <tr><td><a href="Comfort.html">体感</a></td><td>NWS 热指数、风寒</td></tr>
-        <tr><td><a href="Dynamics.html">动力学</a></td><td>科里奥利、ω ↔ w</td></tr>
-        <tr><td><a href="NCL.html">NCL</a></td><td>固定单位的名字封装</td></tr>
-      </tbody>
-    </table>
-
-    <div class="actions">
-      <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
-      <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
-      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/blob/gh-pages/wiki/Home_zh.md">Wiki</a>
-    </div>
+td = pm.dewpoint_from_relative_humidity(18.0, 46.5)
+# 大约 6.3 °C
+</code></pre>
+<p>单位写在调用参数里（<code>temperature_unit="C"</code>）。默认值在各函数的文档字符串中。</p>
+<h2>页面</h2>
+<ul>
+<li><a href="Thermo.html">热力学</a> — 水汽、位温、LCL、湿球</li>
+<li><a href="Indices.html">指数</a> — 沙氏、K、TT、SWEAT、抬升指数</li>
+<li><a href="Wind.html">风</a> — 风速、来向、uv、体风切变</li>
+<li><a href="Geo.html">几何与气压</a> — 大圆距离、重力、海平面气压</li>
+<li><a href="Comfort.html">体感</a> — 热指数、风寒</li>
+<li><a href="Dynamics.html">动力学</a> — 科氏参数、ω ↔ w</li>
+<li><a href="Units.html">单位</a> — 别名与 <code>UnitError</code></li>
+<li><a href="NCL.html">NCL</a> — NCL 函数名和它的单位约定</li>
+<li><a href="Install.html">安装</a></li>
+</ul>
+<p>English: <a href="../index.html">Home</a></p>
+<p>MIT License。<a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></p>
   </main>
 </div>
-<footer class="site">MIT License · IncubatorShokuhou 2019–2026</footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

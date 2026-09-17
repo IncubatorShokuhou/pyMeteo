@@ -3,62 +3,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Geo (`pymeteo.geo`) · pymeteo</title>
+  <title>Geo · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">function notes · Python 3.7+ · NumPy only · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li class="here"><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../zh/Geo.html">中文</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="../index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="Install.html">Install</a>
+        <a href="Thermo.html">Thermo</a>
+        <a href="Indices.html">Indices</a>
+        <a href="Wind.html">Wind</a>
+        <a href="Geo.html" class="here">Geo</a>
+        <a href="Comfort.html">Comfort</a>
+        <a href="Dynamics.html">Dynamics</a>
+        <a href="Units.html">Units</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../zh/Geo.html">中文</a></p>
+  </aside>
   <main>
-    <h1>Geo (<code>pymeteo.geo</code>)</h1>
+<h1>Geo</h1>
 <p><a href="../zh/Geo.html">中文</a></p>
-<p>Geodesy, gravity, station-to-sea-level pressure, hypsometric thickness.</p>
-<hr />
-<h3><code>earth_distance(latitude_1, longitude_1, latitude_2, longitude_2, *, angle_unit="deg", output_distance_unit="km")</code></h3>
-<p>WGS84 Vincenty inverse. A handful of antipodal pairs that fail iteration fall back to a mean-Earth-radius haversine. Identical points → 0.</p>
-<pre><code class="language-python">pm.earth_distance(0.0, 0.0, 0.0, 1.0, output_distance_unit=&quot;m&quot;)  # about 111319.5 m
-pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit=&quot;km&quot;)
+<p>Distance on the ellipsoid, gravity from latitude, station pressure reduced to sea level, and layer thickness from the hypsometric equation.</p>
+<h2>earth_distance</h2>
+<p>Geodesic distance between two lat/lon points. WGS84 Vincenty inverse, in NumPy — no geopy.</p>
+<p><code>angle_unit</code> default <code>deg</code> (<code>rad</code> accepted). Output default <code>km</code>. Identical points are 0. A handful of antipodal pairs that fail to converge fall back to a mean-Earth-radius haversine.</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.earth_distance(0.0, 0.0, 0.0, 1.0, output_distance_unit=&quot;m&quot;)  # ~111319 m
+pm.earth_distance(39.9, 116.4, 31.2, 121.5)  # ~1070 km
 </code></pre>
-<h3><code>gravity(latitude, *, latitude_unit="deg")</code></h3>
+<h2>gravity</h2>
 <p><code>g = 9.7803 · (1 + 0.0053024 sin²φ − 0.000005 sin²2φ)</code> m/s². Latitude is converted to radians first. Equator: 9.7803.</p>
 <pre><code class="language-python">pm.gravity(0.0)
-pm.gravity(45.0, latitude_unit=&quot;deg&quot;)
+pm.gravity(45.0)
 </code></pre>
-<h3><code>sea_level_pressure(station_pressure, station_height, temperature, temperature_12h_ago, *, lapse_rate=0.005, pressure_unit="hPa", height_unit="m", temperature_unit="C", output_pressure_unit="hPa")</code></h3>
-<p>Column mean temperature <code>tm = (t + t12)/2 + lapse_rate·h/2</code>, then <code>p0 = ph · 10^(h / (18400 · (1 + tm/273)))</code>. The 273 and 18400 are the original empirical constants; temperature is substituted in Celsius.</p>
-<p><code>lapse_rate</code> is <strong>per metre in <code>temperature_unit</code></strong>. Default 0.005 is 0.5 °C / 100 m. If you pass Fahrenheit temperatures, change the lapse rate too.</p>
-<pre><code class="language-python">pm.sea_level_pressure(1000.0, 100.0, 20.0, 18.0)  # about 1011.76 hPa
+<h2>sea_level_pressure</h2>
+<p>Reduce station pressure to sea level with a simple empirical column:</p>
+<p><code>tm = (t + t12) / 2 + lapse_rate · h / 2</code></p>
+<p><code>p0 = ph · 10^(h / (18400 · (1 + tm/273)))</code></p>
+<p>The 273 and 18400 are the original empirical constants; temperature is substituted in Celsius.</p>
+<p><code>lapse_rate</code> is <strong>per metre in <code>temperature_unit</code></strong>. The default 0.005 is 0.5 °C / 100 m. If you pass Fahrenheit temperatures, change the lapse rate too.</p>
+<pre><code class="language-python">pm.sea_level_pressure(1000.0, 100.0, 20.0, 18.0)  # about 1011.8 hPa
 </code></pre>
-<h3><code>height_thickness(pressure_bottom, pressure_top, mean_temperature, *, pressure_unit="hPa", temperature_unit="C", output_distance_unit="m")</code></h3>
-<p>Hypsometric: <code>Δz = (Rd T̄ / g0) ln(p_bottom / p_top)</code> with <code>Rd = 287.058</code> J K⁻¹ kg⁻¹, <code>g0 = 9.80665</code> m s⁻². Default output is <strong>metres</strong>.</p>
-<pre><code class="language-python">pm.height_thickness(1000.0, 500.0, 0.0, temperature_unit=&quot;C&quot;)
+<h2>height_thickness</h2>
+<p>Hypsometric thickness between two isobaric surfaces:</p>
+<p><code>ΔZ = (Rd T̄ / g0) ln(p_bottom / p_top)</code></p>
+<p><code>Rd = 287.058</code> J K⁻¹ kg⁻¹, <code>g0 = 9.80665</code> m s⁻². Output default is <strong>metres</strong>, not km. Pass virtual temperature as <code>mean_temperature</code> if the layer is moist.</p>
+<pre><code class="language-python">pm.height_thickness(1000.0, 500.0, 0.0)  # about 5542 m
 </code></pre>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

@@ -1,101 +1,123 @@
-# Thermo (`pymeteo.thermo`)
+# Thermo
 
-[中文](Thermo_zh)
+[中文](Thermo_zh.md)
 
-Vapour, potential temperature, LCL, wet-bulb, visibility. Surface saturation vapour pressure follows Li Shehong (1994); dewpoint ↔ RH uses Dutton’s latent-heat relation; mixing-ratio RH uses the NCL `relhum` table; mixing ratio from RH uses Tetens as in NCL `mixhum_ptrh`. Potential temperature is Poisson with κ = 0.286. Equivalent potential temperature and LCL use Bolton (1980). Wet-bulb is Stull (2011), sea-level empirical. All of these are reimplemented; they do not copy MetPy or NCL source.
+Humidity and parcel temperature. Most of the library’s thermodynamics lives here.
 
-Import from the package root (`import pymeteo as pm`) or from `pymeteo.thermo`.
+Functions are re-exported at the package root (`import pymeteo as pm`). Defaults are °C, hPa, %, kg/kg unless noted.
 
----
+Saturation vapour pressure follows Li Shehong (1994). Dewpoint ↔ RH uses Dutton’s latent-heat relation. Mixing-ratio RH uses the NCL `relhum` table; mixing ratio from RH uses Tetens. Potential temperature is Poisson (κ = 0.286). θe and LCL follow Bolton (1980). Wet-bulb is Stull (2011), sea-level only.
 
-### `saturation_vapor_pressure(temperature, *, temperature_unit="C", output_pressure_unit="hPa")`
+## saturation_vapor_pressure
 
-Water-surface saturation vapour pressure. Ice surface is not distinguished. At 0 °C the result is 6.1078 hPa.
+Saturation vapour pressure over liquid water. Ice is not treated separately.
+
+`temperature` default unit `C`; result default `hPa`. At 0 °C this is 6.1078 hPa.
 
 ```python
 import pymeteo as pm
-pm.saturation_vapor_pressure(0.0)                 # 6.1078 hPa
+pm.saturation_vapor_pressure(0.0)
 pm.saturation_vapor_pressure(0.0, output_pressure_unit="Pa")  # 610.78
 ```
 
-### `condensation_temperature(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="C")`
+## condensation_temperature
 
-Temperature at the lifting condensation level (Li Shehong 1994 iteration). If interpolation yields Td > T or a negative mixing ratio, the loop may not converge and the last iterate is returned.
+Temperature at the lifting condensation level, via Li Shehong’s 1994 iteration.
+
+Takes starting `pressure`, `temperature`, and `dewpoint`. If Td > T or the mixing ratio goes negative (common with sloppy grid interpolation), the loop may not settle; the last iterate is returned.
 
 ```python
 pm.condensation_temperature(850.0, 16.6, 0.6)
 ```
 
-### `relative_humidity_from_dewpoint(temperature, dewpoint, *, temperature_unit="C", output_humidity_unit="%")`
+## relative_humidity_from_dewpoint
 
-T and Td → RH (Dutton).
+T and Td → RH. Output default `%`; pass `output_humidity_unit="fraction"` for 0–1.
 
-### `dewpoint_from_relative_humidity(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit="C")`
+## dewpoint_from_relative_humidity
 
-T and RH → dewpoint. RH = 0 yields `nan`.
-
-```python
-pm.dewpoint_from_relative_humidity(18.0, 46.5)   # about 6.30 °C
-```
-
-### `relative_humidity_from_mixing_ratio(temperature, mixing_ratio, pressure, *, temperature_unit="C", mixing_ratio_unit="kg/kg", pressure_unit="hPa", output_humidity_unit="%")`
-
-Uses the NCL `relhum` saturation table (173.16 K onward, 1 K steps).
-
-### `mixing_ratio_from_relative_humidity(pressure, temperature, relative_humidity, *, pressure_unit="hPa", temperature_unit="C", humidity_unit="%", output_humidity_unit="kg/kg")`
-
-Tetens mixing ratio.
+The inverse. RH ≤ 0 yields `nan` on that element.
 
 ```python
-pm.mixing_ratio_from_relative_humidity(1000.0, 18.0, 46.5)  # about 0.006018 kg/kg
+pm.dewpoint_from_relative_humidity(18.0, 46.5)  # about 6.30 °C
 ```
 
-### `specific_humidity_from_relative_humidity(...)`
+## relative_humidity_from_mixing_ratio
 
-Same arguments as mixing ratio from RH. `q = w / (1 + w)`. At 1000 hPa, 18 °C, 46.5% the result is about 5.982 g/kg if `output_humidity_unit="g/kg"`.
+T, mixing ratio, and pressure → RH. Saturation vapour pressure is interpolated from a table spanning 173.16–375.16 K (same layout as NCL `relhum`). Values above 100% are left alone; negatives are clipped to 0.0001%.
 
-### `convert_humidity(value, *, from_quantity="mixing_ratio", to_quantity="specific_humidity", humidity_unit="kg/kg", output_humidity_unit="kg/kg")`
+`mixing_ratio_unit` default `kg/kg` (`g/kg` is accepted).
 
-`from_quantity` / `to_quantity`: `"mixing_ratio"` or `"specific_humidity"`. `q = w/(1+w)`, `w = q/(1-q)`. Specific humidity ≥ 1 → `nan`.
+## mixing_ratio_from_relative_humidity
 
-### `visibility(relative_humidity, temperature, method="RUC", *, humidity_unit="%", temperature_unit="C", output_distance_unit="km")`
+Pressure, T, RH → mixing ratio. Tetens, matching NCL `mixhum_ptrh`.
 
-`method` is `"RUC"` (60 km × exponential decay) or `"FSL"` (dewpoint-depression formula). Example: 80% RH, 18 °C, RUC ≈ 11.8 km.
+```python
+pm.mixing_ratio_from_relative_humidity(1000.0, 18.0, 46.5)  # ~0.00602 kg/kg
+```
 
-### `saturation_mixing_ratio(pressure, temperature, *, pressure_unit="hPa", temperature_unit="C", output_humidity_unit="kg/kg")`
+## specific_humidity_from_relative_humidity
 
-`w_s(p, T)`.
+Same arguments. Then `q = w / (1 + w)`. At 1000 hPa, 18 °C, 46.5% you get about 5.98 g/kg if you ask for `output_humidity_unit="g/kg"`.
 
-### `mixing_ratio_from_dewpoint(pressure, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_humidity_unit="kg/kg")`
+## convert_humidity
 
-Same as saturation mixing ratio with temperature = dewpoint.
+Mixes mixing ratio and specific humidity, and can change the mass unit at the same time.
 
-### `vapor_pressure_from_mixing_ratio(pressure, mixing_ratio, *, pressure_unit="hPa", mixing_ratio_unit="kg/kg", output_pressure_unit="hPa")`
+`from_quantity` / `to_quantity` are `"mixing_ratio"` or `"specific_humidity"`. Specific humidity ≥ 1 is `nan` when converting to mixing ratio.
 
-### `vapor_pressure_from_relative_humidity(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_pressure_unit="hPa")`
+## visibility
 
-`e = RH · e_s(T)`.
+A rough visibility estimate from RH and T. `method="RUC"` is a 60 km exponential decay; `"FSL"` uses dewpoint depression. Default output is km.
 
-### `potential_temperature(pressure, temperature, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="K")`
+80% RH at 18 °C, RUC, is about 11.8 km.
 
-Poisson θ, κ = 0.286, p0 = 1000 hPa. Default output is **K**. At 1000 hPa, 301.25 K → 301.25 K.
+## saturation_mixing_ratio
 
-### `equivalent_potential_temperature(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="K")`
+`w_s = ε e_s(T) / (p − e_s)`, ε = 0.622. `e_s` is the Li Shehong water-surface formula. If `e_s ≥ p`, that element is `nan`.
 
-Bolton (1980) eq. (43), including LCL. Default output **K**.
+## mixing_ratio_from_dewpoint
 
-### `virtual_temperature(temperature, mixing_ratio, *, temperature_unit="C", mixing_ratio_unit="kg/kg", output_temperature_unit=None)`
+Same formula with dewpoint in place of temperature. Equivalent to NCL `mixhum_ptd` in spirit.
 
-`T_v = T (1 + r/ε) / (1 + r)`. Output unit defaults to `temperature_unit`.
+## vapor_pressure_from_mixing_ratio
 
-### `wet_bulb_temperature(temperature, relative_humidity, *, temperature_unit="C", humidity_unit="%", output_temperature_unit="C")`
+`e = w p / (ε + w)`. Algebraic inverse of the mixing-ratio definition.
 
-Stull 2011 sea-level formula. 20 °C, 50% → about 13.70 °C.
+## vapor_pressure_from_relative_humidity
 
-### `lifting_condensation_level(pressure, temperature, dewpoint, *, pressure_unit="hPa", temperature_unit="C", output_pressure_unit="hPa", output_temperature_unit="C")`
+`e = RH · e_s(T)`, again with the Li Shehong `e_s`.
 
-Returns `(p_lcl, T_lcl)`. Bolton LCL temperature then dry-adiabatic pressure. 1000 hPa, 15 °C, Td 4 °C → p_LCL around 847–849 hPa (Bolton vs Stipanuk differs by ~1.5 hPa).
+## potential_temperature
 
-### `parcel_temperature_at_pressure(pressure, temperature, dewpoint, pressure_target, *, pressure_unit="hPa", temperature_unit="C", output_temperature_unit="C")`
+Poisson θ: `θ = T (1000 hPa / p)^0.286`. Output default is **K**, not °C.
 
-Dry adiabatic to LCL, then moist adiabatic to `pressure_target`. Used by `lifted_index_from_surface`.
+```python
+pm.potential_temperature(1000.0, 28.1)  # 301.25 K
+```
+
+## equivalent_potential_temperature
+
+Bolton (1980) eq. (43), including the LCL temperature from his eq. (22). Output default K.
+
+## virtual_temperature
+
+`T_v = T (1 + r/ε) / (1 + r)`. Output unit defaults to `temperature_unit`. This is the exact moist equation of state, not NCL’s `T (1 + 0.61 r)` approximation.
+
+## wet_bulb_temperature
+
+Stull (2011) empirical wet-bulb. Meant for ~1013 hPa. Useful roughly −20–50 °C and 5–99% RH; very cold and dry is where it drifts.
+
+```python
+pm.wet_bulb_temperature(20.0, 50.0)  # about 13.7 °C
+```
+
+## lifting_condensation_level
+
+Returns `(p_lcl, T_lcl)`. `T_L` from Bolton (1980) eq. (22), then `p_L = p (T_L / T)^{1/κ}` with κ = 0.286.
+
+Wallace & Hobbs’ 1000 hPa / 15 °C / Td 4 °C example comes out near 847 hPa here. NCL `lclvl` uses Stipanuk (1973); a couple of hPa of disagreement is expected.
+
+## parcel_temperature_at_pressure
+
+Lift a parcel dry-adiabatically to the LCL, then moist-adiabatically to `pressure_target`. If the target is still below the LCL (`p_target ≥ p_LCL`), the whole path is dry. Used by `lifted_index_from_surface`.

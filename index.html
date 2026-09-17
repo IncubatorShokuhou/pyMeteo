@@ -3,78 +3,60 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>pymeteo · meteorological diagnostics</title>
+  <title>pymeteo</title>
   <link rel="stylesheet" href="css/site.css">
-  <link rel="alternate" hreflang="zh-Hans" href="zh/index.html">
-  <link rel="alternate" hreflang="en" href="index.html">
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">Python 3.7+ · NumPy only · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-    <h2>Functions</h2>
-    <ul>
-      <li><a href="en/Thermo.html">Thermo</a></li>
-      <li><a href="en/Indices.html">Indices</a></li>
-      <li><a href="en/Wind.html">Wind</a></li>
-      <li><a href="en/Geo.html">Geo</a></li>
-      <li><a href="en/Comfort.html">Comfort</a></li>
-      <li><a href="en/Dynamics.html">Dynamics</a></li>
-      <li><a href="en/Units.html">Units</a></li>
-      <li><a href="en/NCL.html">NCL names</a></li>
-      <li><a href="en/Install.html">Install</a></li>
-    </ul>
-    <h2>Language</h2>
-    <ul>
-      <li><a href="zh/index.html">中文</a></li>
-    </ul>
-  </nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html" class="here">Home</a>
+        <a href="en/Install.html">Install</a>
+        <a href="en/Thermo.html">Thermo</a>
+        <a href="en/Indices.html">Indices</a>
+        <a href="en/Wind.html">Wind</a>
+        <a href="en/Geo.html">Geo</a>
+        <a href="en/Comfort.html">Comfort</a>
+        <a href="en/Dynamics.html">Dynamics</a>
+        <a href="en/Units.html">Units</a>
+        <a href="en/NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="zh/index.html">中文</a></p>
+  </aside>
   <main>
-    <p class="lang"><a href="zh/index.html">中文</a></p>
-    <h1>pymeteo</h1>
-    <p class="lead">Dewpoint, vapour mixing, potential and equivalent potential temperature, LCL, wet-bulb, visibility, Showalter / K / A / TT / SWEAT / lifted index, wind, geodetic distance, sea-level pressure, NWS heat index and wind chill, Coriolis, hydrostatic ω ↔ w.</p>
-    <p>Python 3.7+. NumPy only. Units are strings on the call. Returns <code>float</code> or NumPy arrays.</p>
-
-    <h2>Example</h2>
-<pre><code>import pymeteo as pm
-
-td = pm.dewpoint_from_relative_humidity(
-    18.0, 46.5, temperature_unit="C", humidity_unit="%"
-)
-si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
-u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit="kt")
-km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
+<h1>pymeteo</h1>
+<p>pymeteo is a set of pointwise meteorological calculations on NumPy arrays.</p>
+<p>It does not read files, plot maps, or wrap a full sounding object. You pass scalars or arrays in and get scalars or arrays back.</p>
+<h2>Install</h2>
+<pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
-    <p>Defaults: temperature <code>C</code>, pressure <code>hPa</code>, wind <code>m/s</code>, relative humidity <code>%</code>, mixing ratio <code>kg/kg</code>, distance <code>km</code> (thickness defaults to <code>m</code>), angles in degrees.</p>
+<pre><code class="language-python">import pymeteo as pm
+</code></pre>
+<p>Python 3.7+. The import name is <code>pymeteo</code>.</p>
+<h2>Example</h2>
+<pre><code class="language-python">import pymeteo as pm
 
-    <h2>Install</h2>
-<pre><code>pip install pymeteo-kit</code></pre>
-    <p><code>import pymeteo</code>. NCL builtin names live in <code>pymeteo.ncl</code>, not at the package root.</p>
-
-    <h2>Modules</h2>
-    <table>
-      <thead><tr><th>Page</th><th></th></tr></thead>
-      <tbody>
-        <tr><td><a href="en/Thermo.html">Thermo</a></td><td>Vapour, θ, θe, LCL, wet-bulb, visibility</td></tr>
-        <tr><td><a href="en/Indices.html">Indices</a></td><td>Showalter, K, A, TT, SWEAT, LI</td></tr>
-        <tr><td><a href="en/Wind.html">Wind</a></td><td>Speed, from-direction, u/v, bulk shear</td></tr>
-        <tr><td><a href="en/Geo.html">Geo</a></td><td>Vincenty distance, gravity, SLP, thickness</td></tr>
-        <tr><td><a href="en/Comfort.html">Comfort</a></td><td>NWS heat index, wind chill</td></tr>
-        <tr><td><a href="en/Dynamics.html">Dynamics</a></td><td>Coriolis, ω ↔ w</td></tr>
-        <tr><td><a href="en/NCL.html">NCL</a></td><td>Fixed-unit name shims</td></tr>
-      </tbody>
-    </table>
-
-    <div class="actions">
-      <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a>
-      <a class="alt" href="https://pypi.org/project/pymeteo-kit/">PyPI</a>
-      <a class="alt" href="https://github.com/IncubatorShokuhou/pyMeteo/blob/gh-pages/wiki/Home.md">Wiki</a>
-    </div>
+td = pm.dewpoint_from_relative_humidity(18.0, 46.5)
+# about 6.3 °C
+</code></pre>
+<p>Units are strings on the call (<code>temperature_unit="C"</code>). Defaults live in each function’s docstring.</p>
+<h2>Pages</h2>
+<ul>
+<li><a href="en/Thermo.html">Thermo</a> — vapour, θ, LCL, wet-bulb</li>
+<li><a href="en/Indices.html">Indices</a> — Showalter, K, TT, SWEAT, lifted index</li>
+<li><a href="en/Wind.html">Wind</a> — speed, from-direction, u/v, bulk shear</li>
+<li><a href="en/Geo.html">Geo</a> — great-circle distance, gravity, sea-level pressure</li>
+<li><a href="en/Comfort.html">Comfort</a> — heat index, wind chill</li>
+<li><a href="en/Dynamics.html">Dynamics</a> — Coriolis, ω ↔ w</li>
+<li><a href="en/Units.html">Units</a> — aliases and <code>UnitError</code></li>
+<li><a href="en/NCL.html">NCL</a> — NCL names with NCL’s unit conventions</li>
+<li><a href="en/Install.html">Install</a></li>
+</ul>
+<p>中文：<a href="zh/index.html">首页</a></p>
+<p>MIT License. <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></p>
   </main>
 </div>
-<footer class="site">MIT License · IncubatorShokuhou 2019–2026</footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

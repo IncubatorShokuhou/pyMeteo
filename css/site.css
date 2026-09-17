@@ -1,153 +1,136 @@
-/* Original stylesheet for pymeteo-kit docs. Inspired by the clarity of
-   traditional scientific function manuals (headings, prototypes, tables),
-   not copied from any third-party stylesheet. */
+/* Docs stylesheet for pymeteo. System UI, quiet borders, no branded serif. */
 :root {
-  --ink: #1b2430;
-  --muted: #4b5563;
-  --navy: #163a5f;
-  --teal: #0f6a7c;
-  --line: #d5dde5;
-  --paper: #f7f5f0;
-  --card: #ffffff;
-  --code-bg: #eef2f5;
-  --accent: #b45309;
+  --text: #1f2328;
+  --muted: #57606a;
+  --bg: #f6f8fa;
+  --paper: #ffffff;
+  --border: #d0d7de;
+  --link: #0969da;
+  --code-bg: #f3f4f6;
 }
 * { box-sizing: border-box; }
-html { font-size: 17px; }
+html { font-size: 16px; }
 body {
   margin: 0;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
 }
-code, kbd, pre, .proto {
-  font-family: "IBM Plex Mono", "Source Code Pro", "Menlo", "Consolas", monospace;
-  font-size: 0.88em;
-}
-a { color: var(--teal); text-decoration-thickness: 1px; }
-a:hover { color: var(--navy); }
-header.site {
-  background: var(--navy);
-  color: #f3f6f8;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 4px solid var(--accent);
-}
-header.site a { color: #e8eef3; }
-header.site h1 {
-  margin: 0;
-  font-size: 1.45rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-header.site h1 span { font-weight: 400; opacity: 0.85; }
-header.site .meta {
-  margin-top: 0.35rem;
-  font-size: 0.92rem;
-  font-family: "IBM Plex Mono", Menlo, Consolas, monospace;
-  opacity: 0.9;
-}
-.wrap {
+a { color: var(--link); }
+a:hover { text-decoration-thickness: 2px; }
+.layout {
   display: grid;
-  grid-template-columns: 14rem minmax(0, 52rem);
-  gap: 1.5rem;
-  max-width: 72rem;
+  grid-template-columns: 12.5rem minmax(0, 42rem);
+  gap: 2rem;
+  max-width: 60rem;
   margin: 0 auto;
-  padding: 1.25rem 1.25rem 3rem;
+  padding: 1.5rem 1.25rem 2.5rem;
 }
-nav.side {
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 0.88rem;
+.brand {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
 }
-nav.side h2 {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-  margin: 1.1rem 0 0.35rem;
+.brand a {
+  color: var(--text);
+  text-decoration: none;
 }
-nav.side ul { list-style: none; margin: 0; padding: 0; }
-nav.side li { margin: 0.15rem 0; }
-nav.side a { color: var(--navy); text-decoration: none; }
-nav.side a:hover { text-decoration: underline; }
+.brand a:hover { text-decoration: underline; }
+aside nav {
+  font-size: 0.92rem;
+}
+aside nav a {
+  display: block;
+  padding: 0.18rem 0;
+  color: var(--text);
+  text-decoration: none;
+}
+aside nav a:hover { text-decoration: underline; }
+aside nav a.here { font-weight: 600; }
+.langswitch {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+}
 main {
-  background: var(--card);
-  border: 1px solid var(--line);
-  padding: 1.4rem 1.6rem 2rem;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.35rem 1.6rem 2rem;
 }
-main h1 { margin-top: 0; color: var(--navy); font-size: 1.7rem; }
+main h1 {
+  margin-top: 0;
+  font-size: 1.65rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
 main h2 {
   margin-top: 1.6rem;
-  padding-bottom: 0.2rem;
-  border-bottom: 1px solid var(--line);
-  color: var(--navy);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  font-weight: 650;
 }
 main h3 {
   margin-top: 1.35rem;
-  color: var(--teal);
-  font-family: "IBM Plex Mono", Menlo, Consolas, monospace;
-  font-size: 0.98rem;
-  font-weight: 600;
-  overflow-wrap: anywhere;
+  font-size: 1.02rem;
+  font-weight: 650;
 }
-p.lead { font-size: 1.05rem; color: var(--muted); }
+main p, main li { max-width: 42rem; }
+code, pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.88em;
+}
+code {
+  background: var(--code-bg);
+  padding: 0.1em 0.32em;
+  border-radius: 3px;
+}
 pre {
   background: var(--code-bg);
-  border: 1px solid var(--line);
-  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.8rem 1rem;
   overflow-x: auto;
 }
-code { background: var(--code-bg); padding: 0.05em 0.28em; }
-pre code { background: none; padding: 0; }
+pre code {
+  background: none;
+  padding: 0;
+}
 table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 0.92rem;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  margin: 0.8rem 0 1.2rem;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 1.1rem;
 }
 th, td {
-  border: 1px solid var(--line);
-  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.5rem;
   text-align: left;
   vertical-align: top;
 }
-th { background: #e8eef4; color: var(--navy); }
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0 0.5rem;
-}
-.actions a {
-  display: inline-block;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid var(--navy);
-  background: var(--navy);
-  color: #fff;
-  text-decoration: none;
-  font-family: system-ui, sans-serif;
-  font-size: 0.85rem;
-}
-.actions a.alt {
-  background: #fff;
-  color: var(--navy);
-}
-.lang {
-  float: right;
-  font-family: system-ui, sans-serif;
-  font-size: 0.85rem;
+th { background: var(--bg); font-weight: 600; }
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.4rem 0;
 }
 footer.site {
-  max-width: 72rem;
+  max-width: 60rem;
   margin: 0 auto;
   padding: 0 1.25rem 2rem;
   color: var(--muted);
   font-size: 0.85rem;
-  font-family: system-ui, sans-serif;
 }
 @media (max-width: 800px) {
-  .wrap { grid-template-columns: 1fr; }
-  nav.side { order: 2; }
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem 0.9rem 2rem;
+  }
+  aside nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.9rem;
+  }
+  aside nav a { display: inline; }
+  .langswitch { margin-top: 0.6rem; }
 }

@@ -3,62 +3,57 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>风（`pymeteo.wind`） · pymeteo</title>
+  <title>风 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li class="here"><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Wind.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html">指数</a>
+        <a href="Wind.html" class="here">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Wind.html">English</a></p>
+  </aside>
   <main>
-    <h1>风（<code>pymeteo.wind</code>）</h1>
+<h1>风</h1>
 <p><a href="../en/Wind.html">English</a></p>
-<p>气象学<strong>来向</strong>，单位度，范围 <code>[0, 360)</code>。静风（风速为 0）时现代 API 返回风向 0。</p>
-<hr />
-<h3><code>wind_speed(u, v, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
-<p><code>sqrt(u²+v²)</code>。输出单位默认与 <code>speed_unit</code> 相同。</p>
-<pre><code class="language-python">pm.wind_speed(3.0, 4.0)  # 5.0 m/s
+<p>点上的水平风：风速、气象来向、uv 分量。</p>
+<p>风向是风从哪来。0° 为正北，顺时针增加，范围 <code>[0, 360)</code>。静风（风速为 0）在现代接口里风向返回 0。</p>
+<p><code>u = −speed · sin(direction)</code>，<code>v = −speed · cos(direction)</code>，三角函数用弧度。</p>
+<h2>wind_speed</h2>
+<p><code>sqrt(u² + v²)</code>。<code>speed_unit</code> 是输入分量的单位；<code>output_speed_unit</code> 默认跟它相同。别名包括 <code>kt</code> / <code>knots</code>、<code>km/h</code>、<code>mph</code>。</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.wind_speed(3.0, 4.0)  # 5.0 m/s
 pm.wind_speed(10.0, 0.0, speed_unit=&quot;m/s&quot;, output_speed_unit=&quot;kt&quot;)
 </code></pre>
-<h3><code>wind_direction(u, v, *, speed_unit="m/s")</code></h3>
-<p>来向，度。<code>speed_unit</code> 仅为接口一致；风向与单位无关。</p>
-<pre><code class="language-python">pm.wind_direction(3.0, 4.0)  # 约 216.87°
+<h2>wind_direction</h2>
+<p>来向，单位度。<code>speed_unit</code> 只是为了和其它风函数签名一致，风向跟单位无关。</p>
+<pre><code class="language-python">pm.wind_direction(3.0, 4.0)  # 大约 216.9°
 pm.wind_direction(0.0, 0.0)  # 0.0
 </code></pre>
-<p><a href="NCL.html"><code>pymeteo.ncl</code></a> 里的 <code>wind_direction</code> 另有 <code>opt</code>，用于静风填充（0 / nan / 自定义）。</p>
-<h3><code>uv_from_speed_direction(speed, direction, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
-<p>风向为<strong>度</strong>（来向）。气象学约定：90° → u = −speed，v = 0；0° → u = 0，v = −speed。</p>
-<pre><code class="language-python">u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit=&quot;kt&quot;, output_speed_unit=&quot;m/s&quot;)
+<p>NCL 封装（<code>pymeteo.ncl.wind_direction</code>）多一个 <code>opt</code>，用来填静风：0、<code>nan</code> 或自定义标量。见 <a href="NCL.html">NCL</a>。</p>
+<h2>uv_from_speed_direction</h2>
+<p>风速和来向（度）→ <code>(u, v)</code>。90° 是东风：u = −speed，v = 0。0° 是北风：u = 0，v = −speed。</p>
+<pre><code class="language-python">u, v = pm.uv_from_speed_direction(10.0, 270.0, speed_unit=&quot;kt&quot;)
 </code></pre>
-<h3><code>wind_components(speed, direction, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
-<p>与 <code>uv_from_speed_direction</code> 相同。</p>
-<h3><code>bulk_wind_shear(u_bottom, v_bottom, u_top, v_top, *, speed_unit="m/s", output_speed_unit=None)</code></h3>
-<p>两层水平风矢量差的模。</p>
+<h2>wind_components</h2>
+<p>和 <code>uv_from_speed_direction</code> 是同一个函数。用哪个名字都行。</p>
+<h2>bulk_wind_shear</h2>
+<p>两层水平风矢量差的模：</p>
+<p><code>S = sqrt((u_top − u_bottom)² + (v_top − v_bottom)²)</code></p>
+<p>有两层风就可以当 0–6 km 体切变用。它不沿高度积分。</p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

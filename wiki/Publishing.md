@@ -1,29 +1,7 @@
-# Publishing and contributing
+# Publishing
 
-[中文](Publishing_zh)
+Releases are uploaded to PyPI from [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions). See `.github/workflows/publish.yml`.
 
-```bash
-pip install pymeteo-kit
-```
+Python 3.7+. MIT License.
 
-`import pymeteo`. Python 3.7+.
-
-Releases are published to PyPI from [GitHub Actions](https://github.com/IncubatorShokuhou/pyMeteo/actions).
-
-```bash
-pip install -e ".[dev]"
-pytest
-```
-
-## Contributing (brief)
-
-* Open issues and pull requests against `master` on https://github.com/IncubatorShokuhou/pyMeteo
-* Keep the public API English snake_case at the package root. NCL names belong in `pymeteo.ncl` only; do not invent NCL names that NCL does not have (heat index, wind chill, Showalter, K, SWEAT, …).
-* Units are strings. Do not add Pint, MetPy, or extra runtime dependencies.
-* Pointwise diagnostics only: no I/O, plotting, map projections, FAO56 suite, grid advection, or a full CAPE/CIN sounding kit unless that is an explicit, reviewed expansion.
-* Formulas should be reimplemented from public literature, not pasted from MetPy or NCL sources.
-* Tests should cover the function you touch. NCL documentation example numbers belong in `tests/test_ncl_official_examples.py`.
-
-## License
-
-MIT License. Copyright IncubatorShokuhou, 2019–2026. See `LICENSE` in the source tree.
+[中文](Publishing_zh.md)

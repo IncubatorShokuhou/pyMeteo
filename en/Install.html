@@ -5,45 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Install · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">function notes · Python 3.7+ · NumPy only · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li class="here"><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../zh/Install.html">中文</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="../index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="Install.html" class="here">Install</a>
+        <a href="Thermo.html">Thermo</a>
+        <a href="Indices.html">Indices</a>
+        <a href="Wind.html">Wind</a>
+        <a href="Geo.html">Geo</a>
+        <a href="Comfort.html">Comfort</a>
+        <a href="Dynamics.html">Dynamics</a>
+        <a href="Units.html">Units</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../zh/Install.html">中文</a></p>
+  </aside>
   <main>
-    <h1>Install</h1>
-<p><a href="../zh/Install.html">中文</a></p>
-<p>Python <strong>3.7+</strong>. NumPy only at runtime.</p>
+<h1>Install</h1>
+<p>Python 3.7+. Runtime dependency is NumPy.</p>
 <pre><code class="language-bash">pip install pymeteo-kit
 </code></pre>
 <pre><code class="language-python">import pymeteo as pm
 </code></pre>
-<p>From a checkout: <code>pip install -e ".[dev]"</code> then <code>pytest</code>.</p>
+<p>The PyPI name is <code>pymeteo-kit</code>; the import is <code>pymeteo</code>.</p>
+<p>From a git checkout:</p>
+<pre><code class="language-bash">pip install -e &quot;.[dev]&quot;
+pytest
+</code></pre>
+<p><a href="../zh/Install.html">中文</a></p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

@@ -3,77 +3,71 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>指数（`pymeteo.indices`） · pymeteo</title>
+  <title>指数 · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">函数说明 · Python 3.7+ · 仅 NumPy · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li class="here"><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../en/Indices.html">English</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">首页</a>
+        <a href="Install.html">安装</a>
+        <a href="Thermo.html">热力学</a>
+        <a href="Indices.html" class="here">指数</a>
+        <a href="Wind.html">风</a>
+        <a href="Geo.html">几何与气压</a>
+        <a href="Comfort.html">体感</a>
+        <a href="Dynamics.html">动力学</a>
+        <a href="Units.html">单位</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../en/Indices.html">English</a></p>
+  </aside>
   <main>
-    <h1>指数（<code>pymeteo.indices</code>）</h1>
+<h1>指数</h1>
 <p><a href="../en/Indices.html">English</a></p>
-<p>稳定度指数。沙氏、K、A、TT 无论温度用 <code>C</code> 还是 <code>K</code> 传入，数值相同。SWEAT 在内部按 °C 与节定义。</p>
-<p>这些指数在 <code>pymeteo.ncl</code> 里<strong>没有</strong>对应的 NCL 内建名。</p>
-<hr />
-<h3><code>temperature_dewpoint_depression(temperature, dewpoint, *, temperature_unit="C", output_temperature_unit="C")</code></h3>
-<p><code>T − Td</code>。选用 <code>F</code> 时按华氏度差（乘 9/5）返回。</p>
-<pre><code class="language-python">pm.temperature_dewpoint_depression(7.0, -2.0)  # 9.0
+<p>用几层规定高度上的温度（SWEAT 还要风）算稳定度指数。</p>
+<p>沙氏、K、A、TT、抬升指数用 <code>C</code> 或 <code>K</code> 传入，数值一样。SWEAT 内部按摄氏度和节来定义。这些指数没有 NCL 名封装——NCL 本身就没有对应内建函数，<code>pymeteo.ncl</code> 也不会去编。</p>
+<h2>temperature_dewpoint_depression</h2>
+<p><code>T − Td</code>。输出用华氏度时，差值乘 9/5。</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.temperature_dewpoint_depression(7.0, -2.0)  # 9.0
 </code></pre>
-<h3><code>layer_temperature_difference(temperature_lower, temperature_upper, *, temperature_unit="C", output_temperature_unit="C")</code></h3>
-<p>下层减上层。</p>
+<h2>layer_temperature_difference</h2>
+<p>下层减上层。常见用法是 850 hPa 减 500 hPa。</p>
 <pre><code class="language-python">pm.layer_temperature_difference(16.6, -15.9)  # 32.5
 </code></pre>
-<h3><code>k_index(temperature_850, dewpoint_850, temperature_700, dewpoint_700, temperature_500, *, temperature_unit="C")</code></h3>
-<p><code>K = T850 − T500 + Td850 − (T700 − Td700)</code>，按摄氏度计算。</p>
+<h2>k_index</h2>
+<p><code>K = T850 − T500 + Td850 − (T700 − Td700)</code>，按摄氏度组合。</p>
 <pre><code class="language-python">pm.k_index(16.6, 0.6, 7.0, -2.0, -15.9)  # 24.1
 </code></pre>
-<p>文档字符串中的经验：K&lt;20 无雷暴；20–25 零星；25–30 分散；30–35 成片。</p>
-<h3><code>a_index(temperature_850, dewpoint_850, temperature_700, dewpoint_700, temperature_500, dewpoint_500, *, temperature_unit="C")</code></h3>
-<p><code>A = (T850 − T500) − (T850 − Td850) − (T700 − Td700) − (T500 − Td500)</code>。</p>
+<p>文档字符串里的经验（不是预报结论）：K &lt; 20 基本无雷暴；20–25 零星；25–30 分散；30–35 成片。</p>
+<h2>a_index</h2>
+<p><code>A = (T850 − T500) − (T850 − Td850) − (T700 − Td700) − (T500 − Td500)</code>。还需要 Td500。</p>
 <pre><code class="language-python">pm.a_index(16.6, 0.6, 7.0, -2.0, -15.9, -20.0)  # 3.4
 </code></pre>
-<h3><code>total_totals_index(temperature_850, temperature_500, *, dewpoint_850=None, relative_humidity_850=None, temperature_unit="C", humidity_unit="%")</code></h3>
-<p><code>TT = T850 + Td850 − 2·T500</code>。<code>dewpoint_850</code> 与 <code>relative_humidity_850</code> <strong>必须提供其一</strong>。相对湿度按 Dutton 公式反推露点。</p>
-<pre><code class="language-python">pm.total_totals_index(18.0, -15.9, relative_humidity_850=46.5)
+<h2>total_totals_index</h2>
+<p><code>TT = T850 + Td850 − 2·T500</code>。<code>dewpoint_850</code> 和 <code>relative_humidity_850</code> 只能给一个。湿度走 Dutton 公式反推露点。</p>
+<pre><code class="language-python">pm.total_totals_index(18.0, -15.9, dewpoint_850=6.3)
 </code></pre>
-<h3><code>showalter_index(temperature_850, dewpoint_850, temperature_500, *, temperature_unit="C")</code></h3>
-<p>850 hPa 气块抬到 500 hPa；SI = T500 − T_parcel(500)。按元素迭代并设最大步数。</p>
-<pre><code class="language-python">pm.showalter_index(16.6, 0.6, -15.9)  # 约 1.1
+<h2>showalter_index</h2>
+<p>从 850 hPa 抬到 500 hPa 的气块。SI = T500 − T_parcel(500)。湿绝热段是李社宏（1994）。</p>
+<pre><code class="language-python">pm.showalter_index(16.6, 0.6, -15.9)  # 大约 1.1
 </code></pre>
-<h3><code>sweat_index(temperature_850, temperature_500, u_850, v_850, u_500, v_500, *, dewpoint_850=None, relative_humidity_850=None, temperature_unit="C", humidity_unit="%", speed_unit="m/s")</code></h3>
-<p>NWS / Miller（1972）：</p>
+<p>网格插值出负混合比时迭代会难受。那是资料问题，不是单位问题。</p>
+<h2>sweat_index</h2>
+<p>Miller（1972）/ NWS：</p>
 <p><code>12·Td850(°C) + 20·(TT−49) + 2·f850(kt) + f500(kt) + 125·(S+0.2)</code></p>
-<p>负项置零。切变项还要求风向差为正且两层风速 ≥ 15 kt。提供 Td850 <strong>或</strong> RH850。风分量默认 <code>m/s</code>，内部换成节。</p>
-<h3><code>lifted_index(temperature_500, parcel_temperature_500, *, temperature_unit="C")</code></h3>
-<p>已知 500 hPa 气块温度时：<code>LI = T500 − T_parcel(500)</code>。</p>
-<h3><code>lifted_index_from_surface(pressure, temperature, dewpoint, temperature_500, *, pressure_unit="hPa", temperature_unit="C")</code></h3>
-<p>把近地层气块抬到 500 hPa（目标层固定 500 hPa，与 <code>pressure_unit</code> 无关），再调用 <code>lifted_index</code>。</p>
+<p>负的项置零。切变项只在这些条件同时成立时保留：850 风向 130–250°、500 风向 210–310°、风向差为正、两层风速都 ≥ 15 kt。</p>
+<p>Td850 <strong>或</strong> RH850 二选一。风分量默认 <code>m/s</code>，内部换成节。文档里的经验：&gt;300 有强对流潜势，&gt;400 有龙卷潜势。</p>
+<h2>lifted_index</h2>
+<p>已经有 500 hPa 气块温度时：<code>LI = T500 − T_parcel(500)</code>。负值表示气块比环境暖。</p>
+<h2>lifted_index_from_surface</h2>
+<p>近地层气压、温度、露点，再加上 T500。气块先按 Bolton 求 LCL，再按李社宏湿熵抬到 500 hPa。目标层固定是 500 hPa；<code>pressure_unit</code> 只说明你传入的地面气压用什么单位。</p>
+<p>这是常用的地面抬升指数。CAPE、最不稳定气块、混合层气块都不在这个库里。</p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>

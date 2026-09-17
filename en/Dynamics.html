@@ -3,57 +3,50 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dynamics (`pymeteo.dynamics`) · pymeteo</title>
+  <title>Dynamics · pymeteo</title>
   <link rel="stylesheet" href="../css/site.css">
-  
 </head>
 <body>
-<header class="site">
-  <h1>pymeteo <span>pymeteo-kit</span></h1>
-  <div class="meta">function notes · Python 3.7+ · NumPy only · import pymeteo</div>
-</header>
-<div class="wrap">
-  <nav class="side">
-      <h2>Modules</h2>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-<li><a href="Install.html">Install</a></li>
-<li><a href="Units.html">Units</a></li>
-<li><a href="Thermo.html">Thermo</a></li>
-<li><a href="Indices.html">Indices</a></li>
-<li><a href="Wind.html">Wind</a></li>
-<li><a href="Geo.html">Geo</a></li>
-<li><a href="Comfort.html">Comfort</a></li>
-<li class="here"><a href="Dynamics.html">Dynamics</a></li>
-<li><a href="NCL.html">NCL names</a></li>
-<li><a href="Publishing.html">Publishing</a></li>
-      </ul>
-      <h2>Language</h2>
-      <ul>
-        <li><a href="../zh/Dynamics.html">中文</a></li>
-      </ul>
-</nav>
+<div class="layout">
+  <aside>
+    <p class="brand"><a href="../index.html">pymeteo</a></p>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="Install.html">Install</a>
+        <a href="Thermo.html">Thermo</a>
+        <a href="Indices.html">Indices</a>
+        <a href="Wind.html">Wind</a>
+        <a href="Geo.html">Geo</a>
+        <a href="Comfort.html">Comfort</a>
+        <a href="Dynamics.html" class="here">Dynamics</a>
+        <a href="Units.html">Units</a>
+        <a href="NCL.html">NCL</a>
+    </nav>
+    <p class="langswitch"><a href="../zh/Dynamics.html">中文</a></p>
+  </aside>
   <main>
-    <h1>Dynamics (<code>pymeteo.dynamics</code>)</h1>
+<h1>Dynamics</h1>
 <p><a href="../zh/Dynamics.html">中文</a></p>
-<p>Pointwise only: no grid advection, spherical harmonics, or finite differences. ω ↔ w uses the hydrostatic ideal-gas relation also used by NCL <code>omega_to_w</code> / <code>w_to_omega</code>, reimplemented here.</p>
-<hr />
-<h3><code>coriolis_parameter(latitude, *, latitude_unit="deg")</code></h3>
-<p><code>f = 2 Ω sin φ</code> with <code>Ω = 7.292×10⁻⁵</code> rad s⁻¹. Result in s⁻¹. Equator 0; 35° ≈ 8.365×10⁻⁵; 45° ≈ 1.031×10⁻⁴; north pole ≈ 1.458×10⁻⁴.</p>
-<pre><code class="language-python">pm.coriolis_parameter(35.0)
-pm.coriolis_parameter(45.0, latitude_unit=&quot;deg&quot;)
+<p>Pointwise only: Coriolis parameter and hydrostatic ω ↔ w. No grid advection, spherical harmonics, or finite differences.</p>
+<h2>coriolis_parameter</h2>
+<p><code>f = 2 Ω sin φ</code> with <code>Ω = 7.292×10⁻⁵</code> rad s⁻¹. Result in s⁻¹. Equator is 0; 45° is about <code>1.031×10⁻⁴</code>.</p>
+<pre><code class="language-python">import pymeteo as pm
+pm.coriolis_parameter(35.0)
+pm.coriolis_parameter(45.0)
 </code></pre>
-<p>NCL name: <code>pymeteo.ncl.coriolis_param(lat)</code> (degrees in, s⁻¹ out).</p>
-<h3><code>omega_to_w(omega, temperature, pressure, *, omega_unit="Pa/s", temperature_unit="C", pressure_unit="hPa", output_speed_unit="m/s")</code></h3>
-<p><code>w = −ω / (ρ g)</code> with <code>ρ = p / (Rd T)</code>, <code>Rd = 287.058</code> J K⁻¹ kg⁻¹, <code>g = 9.80665</code> m s⁻². Positive ω (subsidence) → negative w.</p>
-<p><strong>Argument order</strong> is <code>(omega, temperature, pressure)</code>. The NCL shim is <code>(omega, p, t)</code> — see <a href="NCL.html">NCL</a>.</p>
-<p><code>omega_unit</code> default <code>Pa/s</code>; <code>hPa/s</code> is accepted.</p>
-<pre><code class="language-python">w = pm.omega_to_w(0.1, 0.0, 850.0)
+<p>NCL name: <code>pymeteo.ncl.coriolis_param(lat)</code> — degrees in, s⁻¹ out.</p>
+<h2>omega_to_w</h2>
+<p>Pressure-coordinate vertical velocity to geometric <code>w</code>:</p>
+<p><code>w = −ω / (ρ g)</code>, <code>ρ = p / (Rd T)</code></p>
+<p><code>Rd = 287.058</code> J K⁻¹ kg⁻¹, <code>g = 9.80665</code> m s⁻². Positive ω (subsidence) gives negative w.</p>
+<p>Modern argument order is <code>(omega, temperature, pressure)</code>. The NCL shim is <code>(omega, p, t)</code> — see <a href="NCL.html">NCL</a>.</p>
+<p><code>omega_unit</code> default <code>Pa/s</code>; <code>hPa/s</code> is accepted. Temperature default <code>C</code>, pressure default <code>hPa</code>.</p>
+<pre><code class="language-python">pm.omega_to_w(0.1, 0.0, 850.0)
 </code></pre>
-<h3><code>w_to_omega(w, temperature, pressure, *, speed_unit="m/s", temperature_unit="C", pressure_unit="hPa", output_omega_unit="Pa/s")</code></h3>
-<p>Algebraic inverse: <code>ω = −ρ g w</code>. Same modern argument order <code>(w, temperature, pressure)</code>.</p>
+<h2>w_to_omega</h2>
+<p>The inverse: <code>ω = −ρ g w</code>. Same modern order <code>(w, temperature, pressure)</code>.</p>
   </main>
 </div>
-<footer class="site">MIT · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI pymeteo-kit</a> · <a href="https://github.com/IncubatorShokuhou/pyMeteo/wiki">Wiki</a></footer>
+<footer class="site">MIT License · <a href="https://github.com/IncubatorShokuhou/pyMeteo">GitHub</a> · <a href="https://pypi.org/project/pymeteo-kit/">PyPI</a></footer>
 </body>
 </html>
