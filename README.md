@@ -9,6 +9,14 @@ This is a **breaking rewrite** of the old single-file `pyMeteo.py`. The import n
 ## Install
 
 ```bash
+pip install py-meteo
+```
+
+The PyPI project name is `py-meteo` because `pymeteo` was already taken. The import is still `import pymeteo`.
+
+For local development:
+
+```bash
 pip install -e .
 pip install -e ".[dev]"   # pytest, ruff
 ```
@@ -30,6 +38,8 @@ Default units: temperature `C`, pressure `hPa`, wind `m/s`, relative humidity `%
 **v2.2.0** adds pointwise thermodynamic, stability, kinematic and NWS comfort algorithms (potential/equivalent potential temperature, LCL, wet-bulb, lifted index, Coriolis, hypsometric thickness, ω↔w, heat index, wind chill) plus NCL name shims. See the “新增” section in [README_zh.md](README_zh.md). No MetPy, NCL, Pint, or extra runtime dependencies — NumPy only, string unit kwargs.
 
 **v2.2.1** adds NCL official-documentation example regression tests (`tests/test_ncl_official_examples.py`).
+
+**v2.2.2** publishes the package on PyPI as `py-meteo` (`pymeteo` was taken). The import remains `import pymeteo`.
 
 The old names (`showalter`, `E_WATER`, `SWEAT_calculate`, …) are **gone** from the top-level modern API—no compatibility aliases there.
 

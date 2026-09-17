@@ -1,6 +1,6 @@
 # pymeteo
 
-轻量气象诊断函数库（Python 3.10+）。由原先单文件 `pyMeteo.py` **不兼容重写** 而来：包名改为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
+轻量气象诊断函数库（Python 3.10+）。由原先单文件 `pyMeteo.py` **不兼容重写** 而来：导入包名为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
 
 更短的英文说明见 [README.md](README.md)。
 
@@ -9,8 +9,10 @@
 需要 Python ≥ 3.10 与 NumPy。运行时**只有** `numpy` 依赖，不再需要 `geopy`。
 
 ```bash
-pip install -e .
+pip install py-meteo
 ```
+
+PyPI 发行名是 `py-meteo`（`pymeteo` 已被其他项目占用）；导入仍为 `import pymeteo`。
 
 开发（测试与 lint）：
 
@@ -242,7 +244,7 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 - Rothfusz, L. P., 1990: The heat index equation. NWS Technical Attachment SR 90-23.
 - NWS / Environment Canada, 2001: 风寒公式。
 
-2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。
+2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。2.2.2 仅将 PyPI 发行名改为 `py-meteo`（`pymeteo` 已被占用），导入仍为 `import pymeteo`。
 
 在保持上述公式意图的前提下，重写时修正了若干会误导结果的问题：
 
