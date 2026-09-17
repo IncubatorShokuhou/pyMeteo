@@ -14,7 +14,7 @@ pip install pymeteo-kit
 
 PyPI 发行名是 `pymeteo-kit`（`pymeteo` 已被占用，`py-meteo` 因过于相似被拒）；导入仍为 `import pymeteo`。
 
-发布：在 GitHub 上发布 Release（或手动 **Actions → Publish → Run workflow**）后，由 Actions 通过 Trusted Publishing（OIDC）上传到 PyPI。仓库不保存 PyPI token。
+发布：在 GitHub 上发布 Release（或手动 **Actions → Publish → Run workflow**）后，Actions 使用 `pypi` 环境与 `PYPI_API_TOKEN` 将构建产物上传到 PyPI。
 
 开发（测试与 lint）：
 
