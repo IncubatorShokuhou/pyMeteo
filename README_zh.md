@@ -55,6 +55,8 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)
 
 ## 开发
 
+在 Python 3.8+ 的源码目录中：
+
 ```bash
 pip install -e ".[dev]"
 pytest

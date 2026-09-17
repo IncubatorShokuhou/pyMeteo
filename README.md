@@ -23,6 +23,7 @@ dewpoint = pm.dewpoint_from_relative_humidity(
     18.0, 46.5, temperature_unit="C", humidity_unit="%"
 )
 si = pm.showalter_index(16.6, 0.6, -15.9, temperature_unit="C")
+speed = pm.wind_speed(3.0, 4.0, speed_unit="m/s")
 km = pm.earth_distance(39.9, 116.4, 31.2, 121.5, output_distance_unit="km")
 ```
 
@@ -53,6 +54,8 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)
 ```
 
 ## Development
+
+From a checkout on Python 3.8+:
 
 ```bash
 pip install -e ".[dev]"
