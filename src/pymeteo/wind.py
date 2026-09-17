@@ -6,12 +6,12 @@
 * ``v = -speed · cos(direction)``
 """
 
-from __future__ import annotations
+from typing import Optional, Tuple
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     as_float_array,
     from_mps,
@@ -25,7 +25,7 @@ def wind_speed(
     v: ArrayLike,
     *,
     speed_unit: str = "m/s",
-    output_speed_unit: str | None = None,
+    output_speed_unit: Optional[str] = None,
 ) -> ArrayOrScalar:
     """由 u、v 分量计算风速。
 
@@ -87,8 +87,8 @@ def uv_from_speed_direction(
     direction: ArrayLike,
     *,
     speed_unit: str = "m/s",
-    output_speed_unit: str | None = None,
-) -> tuple[ArrayOrScalar, ArrayOrScalar]:
+    output_speed_unit: Optional[str] = None,
+) -> Tuple[ArrayOrScalar, ArrayOrScalar]:
     """由风速和气象风向计算 u、v 分量。
 
     参数
@@ -124,8 +124,8 @@ def wind_components(
     direction: ArrayLike,
     *,
     speed_unit: str = "m/s",
-    output_speed_unit: str | None = None,
-) -> tuple[ArrayOrScalar, ArrayOrScalar]:
+    output_speed_unit: Optional[str] = None,
+) -> Tuple[ArrayOrScalar, ArrayOrScalar]:
     """由风速风向得到 u、v 分量，与 :func:`uv_from_speed_direction` 相同。"""
 
     return uv_from_speed_direction(
@@ -143,7 +143,7 @@ def bulk_wind_shear(
     v_top: ArrayLike,
     *,
     speed_unit: str = "m/s",
-    output_speed_unit: str | None = None,
+    output_speed_unit: Optional[str] = None,
 ) -> ArrayOrScalar:
     """计算两层水平风的矢量差模（体风切变）。
 

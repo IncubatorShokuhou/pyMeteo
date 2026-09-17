@@ -4,12 +4,10 @@
 重力公式近似；海平面气压沿用原经验公式。
 """
 
-from __future__ import annotations
-
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     as_float_array,
     from_kelvin,

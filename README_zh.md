@@ -1,12 +1,12 @@
 # pymeteo
 
-轻量气象诊断函数库（Python 3.10+）。由原先单文件 `pyMeteo.py` **不兼容重写** 而来：导入包名为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
+气象诊断函数库（Python 3.6+）。由原先单文件 `pyMeteo.py` **不兼容重写** 而来：导入包名为 `pymeteo`，公开函数使用明确的英文蛇形命名，并用**字符串单位参数**在函数内部完成换算（不依赖 Pint，也不提供 Sounding / Wind 面向对象封装）。
 
 更短的英文说明见 [README.md](README.md)。
 
 ## 安装
 
-需要 Python ≥ 3.10 与 NumPy。运行时**只有** `numpy` 依赖，不再需要 `geopy`。
+需要 Python ≥ 3.6 与 NumPy。运行时**只有** `numpy` 依赖，不再需要 `geopy`。CPython 3.6 上的 NumPy 上限是 1.19.x（最后一条完整支持 3.6 的发行线）。
 
 ```bash
 pip install pymeteo-kit
@@ -14,7 +14,9 @@ pip install pymeteo-kit
 
 PyPI 发行名是 `pymeteo-kit`（`pymeteo` 已被占用，`py-meteo` 因过于相似被拒）；导入仍为 `import pymeteo`。
 
-发布：在 GitHub 上发布 Release（或手动 **Actions → Publish → Run workflow**）后，Actions 使用 `pypi` 环境与 `PYPI_API_TOKEN` 将构建产物上传到 PyPI。
+发布：在 GitHub 上发布 Release（或手动 **Actions → Publish → Run workflow**）后，Actions 使用 `pypi` 环境与 `PYPI_API_TOKEN` 将构建产物上传到 PyPI。工作流文件：[`.github/workflows/publish.yml`](.github/workflows/publish.yml)。
+
+从源码做可编辑安装需要 hatchling，因此需要 Python 3.8+。3.6 / 3.7 请安装 PyPI 上的 wheel，不要对 sdist 做 `pip install -e .`。
 
 开发（测试与 lint）：
 
@@ -24,7 +26,7 @@ pytest
 ruff check src tests
 ```
 
-`tests/test_ncl_official_examples.py` **含 NCL 官网例题回归**（黄金值硬编码自公开文档，不依赖 MetPy / NCL / Pint）；`tests/test_ncl.py` 只测兼容层接线与单位。
+`tests/test_ncl_official_examples.py` **含 NCL 官网例题回归**（黄金值硬编码自公开文档，不依赖 MetPy / NCL / Pint）；`tests/test_ncl.py` 只测兼容层接线与单位。lint 在 CI 里只跑 Python 3.12：当前 ruff 的 `target-version` 最低是 `py37`，不能在 3.6 上跑。
 
 ## 快速开始
 
@@ -246,7 +248,7 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 - Rothfusz, L. P., 1990: The heat index equation. NWS Technical Attachment SR 90-23.
 - NWS / Environment Canada, 2001: 风寒公式。
 
-2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。2.2.2 曾将 PyPI 发行名改为 `py-meteo`，但因与已有 `pymeteo` 过于相似被拒。2.2.3 改为 `pymeteo-kit`，导入仍为 `import pymeteo`。
+2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。2.2.1 增加 NCL 官网例题回归测试，公式未改。2.2.2 曾将 PyPI 发行名改为 `py-meteo`，但因与已有 `pymeteo` 过于相似被拒。2.2.3 改为 `pymeteo-kit`，导入仍为 `import pymeteo`。2.3.0 把支持的 Python 下限降到 3.6。
 
 在保持上述公式意图的前提下，重写时修正了若干会误导结果的问题：
 
@@ -277,6 +279,12 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 
 旧文件 `pyMeteo.py` 已删除。`import pyMeteo` 不再可用。
 
+## 已知限制
+
+- GitHub 托管的 `ubuntu-20.04` 与 `actions/setup-python` 的 3.6 镜像已于 2025 年下线。CI 仍用 `python:3.6.15-buster` 容器、对 3.12 构建的 wheel 跑 3.6 测试。若该镜像消失，或未来 hatchling 默认把 core metadata 升到 pip 21.3（3.6 上最后一版 pip）读不了的版本，这条 job 会碎。本仓库把 wheel/sdist 的 `core-metadata-version` 钉在 `2.1`，就是为了让 3.6 的 pip 能装。
+- 可编辑安装 / 从 sdist 构建需要 Python 3.8+（hatchling 的限制）。3.6 / 3.7 请装 `py3-none-any` wheel。
+- 3.6 只能配 NumPy 1.19.x。
+
 ## 许可
 
-GNU General Public License v3.0，见 [LICENSE](LICENSE)。
+GNU General Public License v3.0，见 [LICENSE](LICENSE)。问题跟踪：[GitHub Issues](https://github.com/IncubatorShokuhou/pyMeteo/issues)。

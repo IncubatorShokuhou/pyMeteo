@@ -12,21 +12,23 @@
 * 角度：度（deg），三角函数计算前再转为弧度
 """
 
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Dict, Union
 
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
 
-ArrayOrScalar = float | NDArray[np.floating[Any]]
+try:
+    from numpy.typing import ArrayLike
+except ImportError:  # NumPy 1.19 (last line that fully supports CPython 3.6)
+    ArrayLike = Any  # type: ignore[misc,assignment]
+
+ArrayOrScalar = Union[float, np.ndarray]
 
 
 class UnitError(ValueError):
     """无法识别或不适用于当前物理量的单位字符串。"""
 
 
-def as_float_array(value: ArrayLike) -> NDArray[np.floating[Any]]:
+def as_float_array(value: ArrayLike) -> np.ndarray:
     """将输入转为 ``float`` 类型的 ``ndarray``。"""
 
     return np.asarray(value, dtype=float)
@@ -50,7 +52,7 @@ def _strip_unit(unit: str) -> str:
     return text
 
 
-def _lookup(unit: str, table: dict[str, str], kind: str) -> str:
+def _lookup(unit: str, table: Dict[str, str], kind: str) -> str:
     key = _strip_unit(unit)
     if key not in table:
         supported = ", ".join(sorted(set(table)))
@@ -197,7 +199,7 @@ def canonical_angle_unit(unit: str) -> str:
     return _lookup(unit, _ANGLE_ALIASES, "角度")
 
 
-def to_kelvin(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_kelvin(value: ArrayLike, unit: str) -> np.ndarray:
     """把温度换算为开尔文。"""
 
     arr = as_float_array(value)
@@ -209,7 +211,7 @@ def to_kelvin(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return (arr + 459.67) * (5.0 / 9.0)
 
 
-def from_kelvin(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_kelvin(value: ArrayLike, unit: str) -> np.ndarray:
     """把开尔文温度换算为指定单位。"""
 
     arr = as_float_array(value)
@@ -221,7 +223,7 @@ def from_kelvin(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * (9.0 / 5.0) - 459.67
 
 
-def to_pascal(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_pascal(value: ArrayLike, unit: str) -> np.ndarray:
     """把气压换算为帕斯卡。"""
 
     arr = as_float_array(value)
@@ -235,7 +237,7 @@ def to_pascal(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * _ATM_TO_PA
 
 
-def from_pascal(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_pascal(value: ArrayLike, unit: str) -> np.ndarray:
     """把帕斯卡换算为指定气压单位。"""
 
     arr = as_float_array(value)
@@ -249,7 +251,7 @@ def from_pascal(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr / _ATM_TO_PA
 
 
-def to_mps(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_mps(value: ArrayLike, unit: str) -> np.ndarray:
     """把风速换算为米每秒。"""
 
     arr = as_float_array(value)
@@ -263,7 +265,7 @@ def to_mps(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * _MILE_TO_M / 3600.0
 
 
-def from_mps(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_mps(value: ArrayLike, unit: str) -> np.ndarray:
     """把米每秒换算为指定风速单位。"""
 
     arr = as_float_array(value)
@@ -277,7 +279,7 @@ def from_mps(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * 3600.0 / _MILE_TO_M
 
 
-def to_rh_fraction(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_rh_fraction(value: ArrayLike, unit: str) -> np.ndarray:
     """把相对湿度换算为 0–1 小数。"""
 
     arr = as_float_array(value)
@@ -287,7 +289,7 @@ def to_rh_fraction(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr / 100.0
 
 
-def from_rh_fraction(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_rh_fraction(value: ArrayLike, unit: str) -> np.ndarray:
     """把相对湿度小数换算为指定单位。"""
 
     arr = as_float_array(value)
@@ -297,7 +299,7 @@ def from_rh_fraction(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * 100.0
 
 
-def to_kgkg(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_kgkg(value: ArrayLike, unit: str) -> np.ndarray:
     """把混合比或比湿换算为 kg/kg。"""
 
     arr = as_float_array(value)
@@ -309,7 +311,7 @@ def to_kgkg(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr / 1.0e6
 
 
-def from_kgkg(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_kgkg(value: ArrayLike, unit: str) -> np.ndarray:
     """把 kg/kg 换算为指定水汽质量单位。"""
 
     arr = as_float_array(value)
@@ -321,7 +323,7 @@ def from_kgkg(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * 1.0e6
 
 
-def to_meters(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def to_meters(value: ArrayLike, unit: str) -> np.ndarray:
     """把距离换算为米。"""
 
     arr = as_float_array(value)
@@ -330,7 +332,7 @@ def to_meters(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr * factors[kind]
 
 
-def from_meters(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
+def from_meters(value: ArrayLike, unit: str) -> np.ndarray:
     """把米换算为指定距离单位。"""
 
     arr = as_float_array(value)
@@ -339,7 +341,7 @@ def from_meters(value: ArrayLike, unit: str) -> NDArray[np.floating[Any]]:
     return arr / factors[kind]
 
 
-def to_radians(value: ArrayLike, unit: str = "deg") -> NDArray[np.floating[Any]]:
+def to_radians(value: ArrayLike, unit: str = "deg") -> np.ndarray:
     """把角度换算为弧度。"""
 
     arr = as_float_array(value)

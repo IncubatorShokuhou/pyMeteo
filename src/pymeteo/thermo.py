@@ -8,14 +8,12 @@
 采用 Stull（2011）海平面经验式。公式均按文献自行实现，不依赖 MetPy / NCL 源码。
 """
 
-from __future__ import annotations
-
-from typing import Literal
+from typing import Optional, Tuple
 
 import numpy as np
-from numpy.typing import ArrayLike
 
 from pymeteo.units import (
+    ArrayLike,
     ArrayOrScalar,
     as_float_array,
     from_kelvin,
@@ -264,8 +262,9 @@ _RELHUM_ES_TABLE = np.array(
     dtype=float,
 )
 
-HumidityKind = Literal["mixing_ratio", "specific_humidity"]
-VisibilityMethod = Literal["RUC", "FSL"]
+# Python 3.6 has no typing.Literal (3.8+). Values are checked at runtime.
+HumidityKind = str
+VisibilityMethod = str
 
 
 def _saturation_vapor_pressure_hpa(temperature_c: ArrayLike) -> np.ndarray:
@@ -989,7 +988,7 @@ def virtual_temperature(
     *,
     temperature_unit: str = "C",
     mixing_ratio_unit: str = "kg/kg",
-    output_temperature_unit: str | None = None,
+    output_temperature_unit: Optional[str] = None,
 ) -> ArrayOrScalar:
     """计算虚温 ``T_v``。
 
@@ -1092,7 +1091,7 @@ def lifting_condensation_level(
     temperature_unit: str = "C",
     output_pressure_unit: str = "hPa",
     output_temperature_unit: str = "C",
-) -> tuple[ArrayOrScalar, ArrayOrScalar]:
+) -> Tuple[ArrayOrScalar, ArrayOrScalar]:
     """计算抬升凝结高度（LCL）的气压与温度。
 
     参数
