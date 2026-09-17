@@ -16,7 +16,7 @@ PyPI 发行名是 `pymeteo-kit`（`pymeteo` 已被占用，`py-meteo` 因过于�
 
 发布：在 GitHub 上发布 Release（或手动 **Actions → Publish → Run workflow**）后，Actions 使用 `pypi` 环境与 `PYPI_API_TOKEN` 将构建产物上传到 PyPI。工作流文件：[`.github/workflows/publish.yml`](.github/workflows/publish.yml)。
 
-从源码做可编辑安装需要 hatchling，因此需要 Python 3.8+。3.6 / 3.7 请安装 PyPI 上的 wheel，不要对 sdist 做 `pip install -e .`。
+从源码做可编辑安装或 `python -m build` 需要当前 `[build-system]` 里的 `hatchling>=1.18`，因此需要 Python 3.8+。3.6 / 3.7 请安装 PyPI 上的 wheel，不要用这两个解释器构建 sdist。
 
 开发（测试与 lint）：
 
@@ -282,7 +282,7 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 ## 已知限制
 
 - GitHub 托管的 `ubuntu-20.04` 与 `actions/setup-python` 的 3.6 镜像已于 2025 年下线。CI 仍用 `python:3.6.15-buster` 容器、对 3.12 构建的 wheel 跑 3.6 测试。若该镜像消失，或未来 hatchling 默认把 core metadata 升到 pip 21.3（3.6 上最后一版 pip）读不了的版本，这条 job 会碎。本仓库把 wheel/sdist 的 `core-metadata-version` 钉在 `2.1`，就是为了让 3.6 的 pip 能装。
-- 可编辑安装 / 从 sdist 构建需要 Python 3.8+（hatchling 的限制）。3.6 / 3.7 请装 `py3-none-any` wheel。
+- 从本仓库构建（可编辑安装或 `python -m build`）需要 Python 3.8+，因为 `[build-system]` 要求 `hatchling>=1.18`。3.6 / 3.7 请装 `py3-none-any` wheel。
 - 3.6 只能配 NumPy 1.19.x。
 
 ## 许可

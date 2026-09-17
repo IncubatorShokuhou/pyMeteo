@@ -91,7 +91,9 @@ def test_packaging_declares_python_36() -> None:
     assert 'requires-python = ">=3.6"' in text
     assert "Programming Language :: Python :: 3.6" in text
     assert "numpy>=1.19,<1.20" in text
+    assert "numpy>=2.1" in text
     assert 'core-metadata-version = "2.1"' in text
+    assert 'requires = ["hatchling>=1.18"]' in text
 
 
 def test_hatchling_wheel_maps_src_pymeteo() -> None:

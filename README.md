@@ -18,7 +18,7 @@ The PyPI project is `pymeteo-kit` because `pymeteo` was already taken and `py-me
 
 A GitHub Release (or **Actions → Publish → Run workflow**) builds the sdist/wheel and uploads to PyPI from the `pypi` environment using the `PYPI_API_TOKEN` secret. Workflow: [`.github/workflows/publish.yml`](.github/workflows/publish.yml).
 
-From a git checkout, hatchling needs Python 3.8+. On 3.6/3.7 install the wheel from PyPI instead of an editable sdist build.
+From a git checkout, current hatchling (`>=1.18` in `[build-system]`) needs Python 3.8+. On 3.6/3.7 install the wheel from PyPI; do not build the sdist with those interpreters.
 
 ```bash
 pip install -e .
@@ -67,7 +67,7 @@ Full mapping (NCL name → modern function and units) is in [README_zh.md](READM
 ## Known limits
 
 - GitHub-hosted `ubuntu-20.04` and `actions/setup-python` 3.6 were removed in 2025. CI still runs 3.6 tests in the `python:3.6.15-buster` container against a wheel built on 3.12. That job can break if the image disappears or if a future hatchling default raises core metadata above 2.1 (pip 21.3 is the last pip on 3.6). Wheels in this repo set `core-metadata-version = "2.1"` for that reason.
-- Editable / sdist installs need Python 3.8+ because hatchling does. 3.6/3.7 should install the `py3-none-any` wheel.
+- Building this tree (editable install or `python -m build`) needs Python 3.8+ because `[build-system]` requires `hatchling>=1.18`. 3.6/3.7 should install the `py3-none-any` wheel.
 - 3.6 is capped at NumPy 1.19.x. Newer NumPy dropped 3.6.
 - ruff’s oldest `target-version` is `py37`; lint runs on Python 3.12 only.
 - No Pint. Units are strings. Scope limits (no FAO56 suite, no grid advection, no full CAPE/CIN) are listed in [README_zh.md](README_zh.md).
