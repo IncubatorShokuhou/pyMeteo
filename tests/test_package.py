@@ -60,7 +60,7 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.2.0"
+    assert pymeteo.__version__ == "2.2.1"
 
 
 def test_old_single_file_names_are_gone() -> None:
