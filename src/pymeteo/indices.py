@@ -21,9 +21,11 @@ from pymeteo.units import (
     as_float_array,
     canonical_temperature_unit,
     from_kelvin,
+    from_pascal,
     restore_shape,
     to_kelvin,
     to_mps,
+    to_pascal,
 )
 from pymeteo.wind import wind_direction, wind_speed
 
@@ -456,13 +458,15 @@ def lifted_index_from_surface(
     气块先按 Bolton（1980）求 LCL，未饱和段干绝热、饱和段按李社宏（1994）
     湿熵抬到 500 hPa，再 ``LI = T_500 - T_parcel(500)``。这是最常用的地面
     抬升指数定义；完整 CAPE / 最不稳定气块等探空套件不在本库范围。
+    目标层固定为 500 hPa，与 ``pressure_unit`` 无关。
     """
 
+    target_500 = from_pascal(to_pascal(500.0, "hPa"), pressure_unit)
     parcel_500 = parcel_temperature_at_pressure(
         pressure,
         temperature,
         dewpoint,
-        500.0,
+        target_500,
         pressure_unit=pressure_unit,
         temperature_unit=temperature_unit,
         output_temperature_unit="K",
