@@ -134,3 +134,28 @@ def wind_components(
         speed_unit=speed_unit,
         output_speed_unit=output_speed_unit,
     )
+
+
+def bulk_wind_shear(
+    u_bottom: ArrayLike,
+    v_bottom: ArrayLike,
+    u_top: ArrayLike,
+    v_top: ArrayLike,
+    *,
+    speed_unit: str = "m/s",
+    output_speed_unit: str | None = None,
+) -> ArrayOrScalar:
+    """计算两层水平风的矢量差模（体风切变）。
+
+    ``S = sqrt((u_top - u_bottom)² + (v_top - v_bottom)²)``。
+    常用于探空 0–6 km 等体切变诊断；此处只做点上的矢量差，不做高度积分。
+    """
+
+    if output_speed_unit is None:
+        output_speed_unit = speed_unit
+    u1 = to_mps(u_bottom, speed_unit)
+    v1 = to_mps(v_bottom, speed_unit)
+    u2 = to_mps(u_top, speed_unit)
+    v2 = to_mps(v_top, speed_unit)
+    shear = np.hypot(u2 - u1, v2 - v1)
+    return restore_shape(from_mps(shear, output_speed_unit), u_bottom, v_bottom, u_top, v_top)

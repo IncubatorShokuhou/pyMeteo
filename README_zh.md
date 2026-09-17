@@ -71,6 +71,52 @@ from pymeteo import showalter_index, wind_speed
 
 `from pymeteo import showalter` 之类的旧名**已从顶层删除**。若需要 NCL 原名与固定单位，请使用 ``pymeteo.ncl``（见下一节），不要从 ``pymeteo`` 顶层导入。
 
+## 新增（2.2.0）
+
+在 2.1.0 水汽 / 指数 / 风 / 几何之外，补充一批**点上或一维廓线**算法。全部按公开文献公式用 NumPy 自行实现（Bolton 1980、Tetens、Stull 2011、压高方程、NWS Rothfusz / 风寒 2001 等），**不拷贝** MetPy（BSD-3）或 NCL 源码，也**不引入** Pint 单位对象。运行时依赖仍只有 `numpy`。
+
+刻意不做：I/O、绘图、地图投影、网格球谐平流、FAO56 辐射/蒸散全套、剖面 cross-section、完整 CAPE / CIN 探空套件。
+
+### 现代 API（`import pymeteo as pm`）
+
+| 函数 | 模块 | 作用 |
+|------|------|------|
+| `saturation_mixing_ratio` | thermo | 饱和混合比 \(w_s(p,T)\) |
+| `mixing_ratio_from_dewpoint` | thermo | 气压 + 露点 → 混合比 |
+| `vapor_pressure_from_mixing_ratio` | thermo | 气压 + 混合比 → 水汽压 |
+| `vapor_pressure_from_relative_humidity` | thermo | 温度 + 相对湿度 → 水汽压 |
+| `potential_temperature` | thermo | 位温 θ（Poisson，κ=0.286） |
+| `equivalent_potential_temperature` | thermo | 相当位温 θ_e（Bolton 1980 式 43） |
+| `virtual_temperature` | thermo | 虚温 \(T_v=T(1+r/\varepsilon)/(1+r)\) |
+| `wet_bulb_temperature` | thermo | 湿球温度（Stull 2011，仅近海平面） |
+| `lifting_condensation_level` | thermo | LCL 气压与温度（Bolton） |
+| `parcel_temperature_at_pressure` | thermo | 气块干+湿绝热抬到目标气压 |
+| `lifted_index` | indices | 已知 \(T_{500}\) 与气块 \(T_{500}\) 的抬升指数 |
+| `lifted_index_from_surface` | indices | 由地面 \(p,T,T_d\) 抬到 500 hPa 再算 LI |
+| `bulk_wind_shear` | wind | 两层风矢量差的模 |
+| `coriolis_parameter` | dynamics | \(f=2\Omega\sin\phi\) |
+| `height_thickness` | geo | 压高方程气层厚度 |
+| `omega_to_w` / `w_to_omega` | dynamics | 静力近似 ω ↔ w（现代参数顺序为温度在气压前） |
+| `heat_index` | comfort | NWS 热指数（无对应 NCL 名） |
+| `wind_chill` | comfort | NWS 2001 风寒（无对应 NCL 名） |
+
+### 新增 NCL 名（`pymeteo.ncl`，固定 NCL 单位）
+
+| NCL 名 | NCL 单位 | 调用的现代函数 |
+|--------|----------|----------------|
+| `mixhum_ptd(p, tdk, iswit)` | `p` 为 Pa，`tdk` 为 K；`iswit` 同 `mixhum_ptrh` | `mixing_ratio_from_dewpoint` |
+| `vapor_pres_rh(rh, es)` | `rh` 为 %，`es` 与返回值同单位 | `RH/100 · e_s` |
+| `pot_temp(p, t)` | `p` 为 Pa，`t` 为 K，返回 K | `potential_temperature` |
+| `pot_temp_equiv(p, t, w, dim=-1, humVarType="r")` | `p` 为 Pa，`t` 为 K；`humVarType` 为 `"r"` 混合比 kg/kg、`"q"` 比湿、`"rh"` 相对湿度 %。内部 Bolton 含 LCL | `equivalent_potential_temperature` |
+| `temp_virtual(t, w, iounit)` | `iounit` 长度 3：温度 C/K/F、混合比 kg/kg 或 g/kg、输出温度 | `virtual_temperature` |
+| `wetbulb_stull(t, rh, iounit, opt=False)` | `rh` 为 %；`iounit` 长度 2 指定输入/输出温度（0=°C、1=K、2=°F） | `wet_bulb_temperature` |
+| `lclvl(p, tk, tdk)` | `p` 为 hPa，温度 K，返回 LCL 气压 hPa | `lifting_condensation_level` |
+| `coriolis_param(lat)` | 纬度度，返回 s⁻¹ | `coriolis_parameter` |
+| `omega_to_w(omega, p, t)` | ω 为 Pa/s，`p` 为 Pa，`t` 为 K，返回 m/s | `omega_to_w`（注意参数顺序与现代 API 不同） |
+| `w_to_omega(w, p, t)` | 上式之逆 | `w_to_omega` |
+
+热指数、风寒、抬升指数在 NCL 中没有与本库一一对应的同名内建函数，**不伪造** NCL 名字。
+
 ### `pymeteo.thermo` 水汽
 
 | 函数 | 作用 |
@@ -84,6 +130,16 @@ from pymeteo import showalter_index, wind_speed
 | `specific_humidity_from_relative_humidity` | 同上，返回比湿 |
 | `convert_humidity` | 混合比 ↔ 比湿，并换算 `kg/kg` / `g/kg` |
 | `visibility` | RUC / FSL 能见度估算 |
+| `saturation_mixing_ratio` | 饱和混合比（2.2.0） |
+| `mixing_ratio_from_dewpoint` | 气压 + 露点 → 混合比（2.2.0） |
+| `vapor_pressure_from_mixing_ratio` | 气压 + 混合比 → 水汽压（2.2.0） |
+| `vapor_pressure_from_relative_humidity` | 温度 + 相对湿度 → 水汽压（2.2.0） |
+| `potential_temperature` | 位温 θ（2.2.0） |
+| `equivalent_potential_temperature` | 相当位温 θ_e，Bolton 1980（2.2.0） |
+| `virtual_temperature` | 虚温（2.2.0） |
+| `wet_bulb_temperature` | Stull 湿球温度（2.2.0） |
+| `lifting_condensation_level` | LCL 气压与温度（2.2.0） |
+| `parcel_temperature_at_pressure` | 气块抬升到目标气压（2.2.0） |
 
 ### `pymeteo.indices` 指数
 
@@ -96,6 +152,7 @@ from pymeteo import showalter_index, wind_speed
 | `sweat_index` | SWEAT（露点用 °C，风速用节；见下方订正说明） |
 | `temperature_dewpoint_depression` | 温度露点差（替代旧 `ttd850` 等） |
 | `layer_temperature_difference` | 两层温度差（替代旧 `tt500`） |
+| `lifted_index` / `lifted_index_from_surface` | 抬升指数 LI（2.2.0） |
 
 ### `pymeteo.wind` 风
 
@@ -104,6 +161,21 @@ from pymeteo import showalter_index, wind_speed
 | `wind_speed` | u、v → 风速 |
 | `wind_direction` | u、v → 气象风向（来向，度） |
 | `uv_from_speed_direction` / `wind_components` | 风速 + 风向 → u、v |
+| `bulk_wind_shear` | 两层风矢量差模（2.2.0） |
+
+### `pymeteo.dynamics` 轻量动力学（2.2.0）
+
+| 函数 | 作用 |
+|------|------|
+| `coriolis_parameter` | 科里奥利参数 f(φ) |
+| `omega_to_w` / `w_to_omega` | 静力近似垂直速度换算 |
+
+### `pymeteo.comfort` 体感（2.2.0）
+
+| 函数 | 作用 |
+|------|------|
+| `heat_index` | NWS 热指数 |
+| `wind_chill` | NWS 2001 风寒 |
 
 ### `pymeteo.geo` 几何与站点
 
@@ -112,6 +184,7 @@ from pymeteo import showalter_index, wind_speed
 | `earth_distance` | WGS84 Vincenty 大地线距离 |
 | `gravity` | 重力加速度 g(φ)，纬度默认按**度** |
 | `sea_level_pressure` | 本站气压订正到海平面 |
+| `height_thickness` | 压高方程气层厚度（2.2.0） |
 
 完整参数说明见源码中的中文文档字符串。
 
@@ -141,6 +214,16 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 | `wind_speed(u, v)` | m/s → m/s | `wind_speed` |
 | `wind_direction(u, v, opt=0)` | 气象学来向（度）；静风时 `opt=0` 为 0，`opt=1` 为 nan | `wind_direction` |
 | `wind_component(wspd, wdir, opt=0)` | 风速 + 来向 → `(u, v)`（Python 返回元组；NCL 的 `opt` 未使用） | `uv_from_speed_direction` |
+| `mixhum_ptd(p, tdk, iswit)` | `p` 为 Pa，`tdk` 为 K；`iswit` 同 `mixhum_ptrh` | `mixing_ratio_from_dewpoint` |
+| `vapor_pres_rh(rh, es)` | `rh` 为 %，`es` 与返回同单位 | `RH/100 · e_s` |
+| `pot_temp(p, t)` | `p` 为 Pa，`t` 为 K，返回 K | `potential_temperature` |
+| `pot_temp_equiv(p, t, w, dim=-1, humVarType="r")` | `p` 为 Pa，`t` 为 K；`humVarType`：`r` 混合比、`q` 比湿、`rh` 相对湿度 % | `equivalent_potential_temperature` |
+| `temp_virtual(t, w, iounit)` | `iounit` 长度 3，见上文新增节 | `virtual_temperature` |
+| `wetbulb_stull(t, rh, iounit, opt=False)` | `rh` 为 %；`iounit` 长度 2（0=°C、1=K、2=°F） | `wet_bulb_temperature` |
+| `lclvl(p, tk, tdk)` | `p` 为 hPa，温度 K，返回 LCL 气压 | `lifting_condensation_level` |
+| `coriolis_param(lat)` | 纬度度 → s⁻¹ | `coriolis_parameter` |
+| `omega_to_w(omega, p, t)` | Pa/s、Pa、K → m/s | `omega_to_w` |
+| `w_to_omega(w, p, t)` | m/s、Pa、K → Pa/s | `w_to_omega` |
 
 沙氏 / K / SWEAT 等指数在 NCL 中没有与本库一一对应的同名内建函数，因此**只保留现代 API**，本模块不伪造 NCL 名字。需要灵活单位时请直接调用现代函数。
 
@@ -150,6 +233,12 @@ rh = pm.ncl.relhum_ttd(18.0 + 273.15, 6.3 + 273.15, 0)
 
 - NCL 相关例程（`relhum`、`mixhum_ptrh`、`dewtemp_trh` 等）
 - 李社宏. 用 C 语言开发的气象常用参数和物理量计算函数库（一）[J]. 陕西气象, 1994(03):42-45.
+- Bolton, D., 1980: The computation of equivalent potential temperature. *Mon. Wea. Rev.*, 108, 1046–1053.
+- Stull, R., 2011: Wet-bulb temperature from relative humidity and air temperature. *J. Appl. Meteor. Climatol.*, 50, 2267–2269.
+- Rothfusz, L. P., 1990: The heat index equation. NWS Technical Attachment SR 90-23.
+- NWS / Environment Canada, 2001: 风寒公式。
+
+2.2.0 新增算法均为按上述文献**重新实现**，未粘贴 MetPy 或 NCL 源码。
 
 在保持上述公式意图的前提下，重写时修正了若干会误导结果的问题：
 

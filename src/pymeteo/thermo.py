@@ -3,6 +3,9 @@
 饱和水汽压、抬升凝结温度沿用李社宏（1994）水面公式；相对湿度与露点之间的
 互换沿用 Dutton 经验潜热公式；由混合比求相对湿度沿用 NCL ``relhum`` 查表；
 由相对湿度求混合比 / 比湿沿用 NCL ``mixhum_ptrh`` 的 Tetens 公式。
+
+位温采用 Poisson 关系；相当位温与抬升凝结高度采用 Bolton（1980）；湿球温度
+采用 Stull（2011）海平面经验式。公式均按文献自行实现，不依赖 MetPy / NCL 源码。
 """
 
 from __future__ import annotations
@@ -44,6 +47,11 @@ _ONEMEP = 0.378
 _ES0 = 6.11
 _TETENS_A = 17.269
 _TETENS_B = 35.86
+
+# Poisson / Bolton 位温常数
+_POISSON_KAPPA = 0.286  # NCL ``pot_temp`` 所用指数；p0 = 1000 hPa
+_BOLTON_KAPPA = 0.2854  # Bolton (1980) 式 (43)
+_REFERENCE_PRESSURE_HPA = 1000.0
 
 # NCL relhum 饱和水汽压表，对应 173.16 K 起每隔 1 K；表值乘 0.1 后为 Pa
 _RELHUM_ES_TABLE = np.array(
@@ -714,3 +722,526 @@ def visibility(
     else:
         raise ValueError("method 必须是 'RUC' 或 'FSL'")
     return restore_shape(from_meters(vis_m, output_distance_unit), relative_humidity, temperature)
+
+
+def _mixing_ratio_from_vapor_pressure_hpa(
+    pressure_hpa: ArrayLike, vapor_pressure_hpa: ArrayLike
+) -> np.ndarray:
+    """由水汽压求混合比（kg/kg）：``w = ε e / (p - e)``，ε = 0.622。"""
+
+    pressure, vapor = np.broadcast_arrays(
+        as_float_array(pressure_hpa), as_float_array(vapor_pressure_hpa)
+    )
+    denominator = pressure - vapor
+    mixing = np.full(pressure.shape, np.nan, dtype=float)
+    valid = denominator > 0.0
+    mixing = np.where(valid, _EP * vapor / denominator, mixing)
+    return mixing
+
+
+def saturation_mixing_ratio(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_humidity_unit: str = "kg/kg",
+) -> ArrayOrScalar:
+    """计算饱和混合比 ``w_s(p, T)``。
+
+    参数
+    ----
+    pressure:
+        气压。
+    temperature:
+        空气温度。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    temperature_unit:
+        温度单位，默认 ``C``。
+    output_humidity_unit:
+        输出混合比单位，默认 ``kg/kg``。
+
+    返回
+    ----
+    float 或 ndarray
+        饱和混合比 ``w_s = ε e_s(T) / (p - e_s(T))``，其中 ε = 0.622，
+        ``e_s`` 为李社宏（1994）水面饱和水汽压。若 ``e_s ≥ p``，对应元素为
+        ``nan``。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    temperature_c = from_kelvin(to_kelvin(temperature, temperature_unit), "C")
+    vapor_hpa = _saturation_vapor_pressure_hpa(temperature_c)
+    mixing = _mixing_ratio_from_vapor_pressure_hpa(pressure_hpa, vapor_hpa)
+    return restore_shape(from_kgkg(mixing, output_humidity_unit), pressure, temperature)
+
+
+def mixing_ratio_from_dewpoint(
+    pressure: ArrayLike,
+    dewpoint: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_humidity_unit: str = "kg/kg",
+) -> ArrayOrScalar:
+    """由气压和露点计算水汽混合比。
+
+    实际水汽压取露点温度下的饱和水汽压，因此
+    ``w(p, T_d) = w_s(p, T_d)``。对应 NCL ``mixhum_ptd``。
+
+    参数含义同 :func:`saturation_mixing_ratio`（温度实参为露点）。
+    """
+
+    return saturation_mixing_ratio(
+        pressure,
+        dewpoint,
+        pressure_unit=pressure_unit,
+        temperature_unit=temperature_unit,
+        output_humidity_unit=output_humidity_unit,
+    )
+
+
+def vapor_pressure_from_mixing_ratio(
+    pressure: ArrayLike,
+    mixing_ratio: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    mixing_ratio_unit: str = "kg/kg",
+    output_pressure_unit: str = "hPa",
+) -> ArrayOrScalar:
+    """由气压和混合比反算水汽压。
+
+    参数
+    ----
+    pressure:
+        气压。
+    mixing_ratio:
+        水汽混合比。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    mixing_ratio_unit:
+        混合比单位，默认 ``kg/kg``。
+    output_pressure_unit:
+        输出水汽压单位，默认 ``hPa``。
+
+    返回
+    ----
+    float 或 ndarray
+        水汽压 ``e = w p / (ε + w)``，为 ``w = ε e / (p - e)`` 的代数逆。
+        与 NCL ``vapor_pres_rh``（由相对湿度乘饱和水汽压）是不同入口，
+        本函数由混合比反演。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    mixing = to_kgkg(mixing_ratio, mixing_ratio_unit)
+    pressure_b, mixing_b = np.broadcast_arrays(as_float_array(pressure_hpa), as_float_array(mixing))
+    vapor_hpa = mixing_b * pressure_b / (_EP + mixing_b)
+    return restore_shape(
+        from_pascal(to_pascal(vapor_hpa, "hPa"), output_pressure_unit),
+        pressure,
+        mixing_ratio,
+    )
+
+
+def vapor_pressure_from_relative_humidity(
+    temperature: ArrayLike,
+    relative_humidity: ArrayLike,
+    *,
+    temperature_unit: str = "C",
+    humidity_unit: str = "%",
+    output_pressure_unit: str = "hPa",
+) -> ArrayOrScalar:
+    """由温度和相对湿度计算水汽压：``e = RH · e_s(T)``。
+
+    饱和水汽压 ``e_s`` 用李社宏（1994）水面公式。NCL ``vapor_pres_rh`` 是
+    ``RH% / 100 · e_s`` 的薄封装（直接吃饱和水汽压）；本函数先由温度求
+    ``e_s`` 再相乘。
+    """
+
+    vapor_sat = saturation_vapor_pressure(
+        temperature, temperature_unit=temperature_unit, output_pressure_unit="hPa"
+    )
+    rh_fraction = to_rh_fraction(relative_humidity, humidity_unit)
+    vapor_hpa = as_float_array(vapor_sat) * as_float_array(rh_fraction)
+    return restore_shape(
+        from_pascal(to_pascal(vapor_hpa, "hPa"), output_pressure_unit),
+        temperature,
+        relative_humidity,
+    )
+
+
+def potential_temperature(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_temperature_unit: str = "K",
+) -> ArrayOrScalar:
+    """计算位温 θ。
+
+    参数
+    ----
+    pressure:
+        气压。
+    temperature:
+        空气温度。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    temperature_unit:
+        温度单位，默认 ``C``。
+    output_temperature_unit:
+        输出位温单位，默认 ``K``（气象学惯用开尔文）。
+
+    返回
+    ----
+    float 或 ndarray
+        位温 ``θ = T (p0 / p)^κ``，其中 ``p0 = 1000 hPa``，``κ = 0.286``
+        （Poisson 指数，与 NCL ``pot_temp`` 一致）。干绝热过程位温守恒。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    temperature_k = to_kelvin(temperature, temperature_unit)
+    theta_k = temperature_k * (_REFERENCE_PRESSURE_HPA / pressure_hpa) ** _POISSON_KAPPA
+    return restore_shape(from_kelvin(theta_k, output_temperature_unit), pressure, temperature)
+
+
+def _bolton_lcl_temperature_k(temperature_k: ArrayLike, dewpoint_k: ArrayLike) -> np.ndarray:
+    """Bolton（1980）式 (22) 抬升凝结温度（K）。
+
+    ``T_L = 1 / (1/(T_d - 56) + ln(T/T_d)/800) + 56``，温度均为开尔文。
+    露点高于气温时按 ``T_d = T`` 处理（已饱和）。
+    """
+
+    temperature_b, dewpoint_b = np.broadcast_arrays(
+        as_float_array(temperature_k), as_float_array(dewpoint_k)
+    )
+    dewpoint_b = np.minimum(dewpoint_b, temperature_b)
+    ratio = np.maximum(temperature_b / np.maximum(dewpoint_b, 1.0e-6), 1.0e-15)
+    return 1.0 / (1.0 / (dewpoint_b - 56.0) + np.log(ratio) / 800.0) + 56.0
+
+
+def equivalent_potential_temperature(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    dewpoint: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_temperature_unit: str = "K",
+) -> ArrayOrScalar:
+    """计算相当位温 θ_e（Bolton 1980 式 (43)）。
+
+    参数
+    ----
+    pressure:
+        气块气压。
+    temperature:
+        气块温度。
+    dewpoint:
+        气块露点。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    temperature_unit:
+        温度与露点单位，默认 ``C``。
+    output_temperature_unit:
+        输出单位，默认 ``K``。
+
+    返回
+    ----
+    float 或 ndarray
+        相当位温。先由 Bolton 式 (22) 求抬升凝结温度 ``T_L``，混合比
+        ``r`` 由露点饱和水汽压按 ``r = ε e / (p - e)`` 得到，再
+
+        ``θ_e = T (p0/p)^{0.2854 (1 - 0.28 r)}
+        · exp[(3376/T_L - 2.54) r (1 + 0.81 r)]``
+
+        其中 ``r`` 为 kg/kg，``T``、``T_L`` 为开尔文。引自 Bolton, D., 1980:
+        The computation of equivalent potential temperature. *Mon. Wea. Rev.*,
+        108, 1046–1053。最大误差约 0.3 K。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    temperature_k = to_kelvin(temperature, temperature_unit)
+    dewpoint_k = to_kelvin(dewpoint, temperature_unit)
+    pressure_b, temperature_b, dewpoint_b = np.broadcast_arrays(
+        as_float_array(pressure_hpa),
+        as_float_array(temperature_k),
+        as_float_array(dewpoint_k),
+    )
+    dewpoint_c = from_kelvin(dewpoint_b, "C")
+    mixing = _mixing_ratio_from_vapor_pressure_hpa(
+        pressure_b, _saturation_vapor_pressure_hpa(dewpoint_c)
+    )
+    t_lcl = _bolton_lcl_temperature_k(temperature_b, dewpoint_b)
+    exponent = _BOLTON_KAPPA * (1.0 - 0.28 * mixing)
+    theta = temperature_b * (_REFERENCE_PRESSURE_HPA / pressure_b) ** exponent
+    theta_e = theta * np.exp((3376.0 / t_lcl - 2.54) * mixing * (1.0 + 0.81 * mixing))
+    return restore_shape(
+        from_kelvin(theta_e, output_temperature_unit), pressure, temperature, dewpoint
+    )
+
+
+def virtual_temperature(
+    temperature: ArrayLike,
+    mixing_ratio: ArrayLike,
+    *,
+    temperature_unit: str = "C",
+    mixing_ratio_unit: str = "kg/kg",
+    output_temperature_unit: str | None = None,
+) -> ArrayOrScalar:
+    """计算虚温 ``T_v``。
+
+    参数
+    ----
+    temperature:
+        空气温度。
+    mixing_ratio:
+        水汽混合比。
+    temperature_unit:
+        温度单位，默认 ``C``。
+    mixing_ratio_unit:
+        混合比单位，默认 ``kg/kg``。
+    output_temperature_unit:
+        输出虚温单位；默认与 ``temperature_unit`` 相同。
+
+    返回
+    ----
+    float 或 ndarray
+        虚温 ``T_v = T (1 + r/ε) / (1 + r)``，ε = 0.622。这是湿空气状态方程
+        的精确形式；NCL ``temp_virtual`` 文档采用 ``T (1 + 0.61 r)`` 近似，
+        本实现不用该近似。混合比 ``r`` 须为 kg/kg。
+    """
+
+    if output_temperature_unit is None:
+        output_temperature_unit = temperature_unit
+    temperature_k = to_kelvin(temperature, temperature_unit)
+    mixing = to_kgkg(mixing_ratio, mixing_ratio_unit)
+    virtual_k = temperature_k * (1.0 + mixing / _EP) / (1.0 + mixing)
+    return restore_shape(
+        from_kelvin(virtual_k, output_temperature_unit), temperature, mixing_ratio
+    )
+
+
+def wet_bulb_temperature(
+    temperature: ArrayLike,
+    relative_humidity: ArrayLike,
+    *,
+    temperature_unit: str = "C",
+    humidity_unit: str = "%",
+    output_temperature_unit: str = "C",
+) -> ArrayOrScalar:
+    """由气温和相对湿度估算湿球温度（Stull 2011 海平面经验式）。
+
+    参数
+    ----
+    temperature:
+        干球温度。
+    relative_humidity:
+        相对湿度。
+    temperature_unit:
+        温度单位，默认 ``C``。
+    humidity_unit:
+        相对湿度单位，默认 ``%``。
+    output_temperature_unit:
+        输出湿球温度单位，默认 ``C``。
+
+    返回
+    ----
+    float 或 ndarray
+        湿球温度。公式（``T`` 为摄氏度，``RH`` 为百分数，``arctan`` 用弧度）::
+
+            T_w = T arctan[0.151977 (RH + 8.313659)^{1/2}]
+                + arctan(T + RH) - arctan(RH - 1.676331)
+                + 0.00391838 RH^{3/2} arctan(0.023101 RH)
+                - 4.686035
+
+        引自 Stull, R., 2011: Wet-bulb temperature from relative humidity and
+        air temperature. *J. Appl. Meteor. Climatol.*, 50, 2267–2269。
+        **仅适用于约 1013.25 hPa 的海平面**；有效范围约 -20–50 °C、
+        相对湿度 5–99%（极干且寒冷时误差较大）。平均绝对误差 < 0.3 °C。
+        文献示例：20 °C、50% 时约 13.7 °C。
+    """
+
+    temperature_c = from_kelvin(to_kelvin(temperature, temperature_unit), "C")
+    rh_percent = from_rh_fraction(to_rh_fraction(relative_humidity, humidity_unit), "%")
+    temperature_c, rh_percent = np.broadcast_arrays(
+        as_float_array(temperature_c), as_float_array(rh_percent)
+    )
+    wet_c = (
+        temperature_c * np.arctan(0.151977 * np.sqrt(rh_percent + 8.313659))
+        + np.arctan(temperature_c + rh_percent)
+        - np.arctan(rh_percent - 1.676331)
+        + 0.00391838 * np.power(rh_percent, 1.5) * np.arctan(0.023101 * rh_percent)
+        - 4.686035
+    )
+    return restore_shape(
+        from_kelvin(to_kelvin(wet_c, "C"), output_temperature_unit),
+        temperature,
+        relative_humidity,
+    )
+
+
+def lifting_condensation_level(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    dewpoint: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_pressure_unit: str = "hPa",
+    output_temperature_unit: str = "C",
+) -> tuple[ArrayOrScalar, ArrayOrScalar]:
+    """计算抬升凝结高度（LCL）的气压与温度。
+
+    参数
+    ----
+    pressure:
+        气块起始气压。
+    temperature:
+        气块温度。
+    dewpoint:
+        气块露点。
+    pressure_unit:
+        气压单位，默认 ``hPa``。
+    temperature_unit:
+        温度与露点单位，默认 ``C``。
+    output_pressure_unit:
+        输出 LCL 气压单位，默认 ``hPa``。
+    output_temperature_unit:
+        输出 LCL 温度单位，默认 ``C``。
+
+    返回
+    ----
+    (lcl_pressure, lcl_temperature)
+        LCL 气压与温度。``T_L`` 用 Bolton（1980）式 (22)；再沿干绝热
+        ``p_L = p (T_L / T)^{1/κ}``，``κ = 0.286``。已饱和（``T_d = T``）时
+        LCL 即起点。Wallace & Hobbs 示例：1000 hPa、15 °C、露点 4 °C 时
+        LCL 约 848 hPa。NCL ``lclvl`` 用 Stipanuk（1973）迭代，数值可能差
+        数 hPa。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    temperature_k = to_kelvin(temperature, temperature_unit)
+    dewpoint_k = to_kelvin(dewpoint, temperature_unit)
+    pressure_b, temperature_b, dewpoint_b = np.broadcast_arrays(
+        as_float_array(pressure_hpa),
+        as_float_array(temperature_k),
+        as_float_array(dewpoint_k),
+    )
+    t_lcl_k = _bolton_lcl_temperature_k(temperature_b, dewpoint_b)
+    p_lcl_hpa = pressure_b * (t_lcl_k / temperature_b) ** (1.0 / _POISSON_KAPPA)
+    pressure_out = from_pascal(to_pascal(p_lcl_hpa, "hPa"), output_pressure_unit)
+    temperature_out = from_kelvin(t_lcl_k, output_temperature_unit)
+    extras = (pressure, temperature, dewpoint)
+    return restore_shape(pressure_out, *extras), restore_shape(temperature_out, *extras)
+
+
+def _dewpoint_c_from_vapor_pressure_hpa(vapor_hpa: ArrayLike) -> np.ndarray:
+    """由水面饱和水汽压反演露点（摄氏度），牛顿迭代李社宏（1994）公式。"""
+
+    target = as_float_array(vapor_hpa)
+    ratio = np.log(np.maximum(target, 1.0e-12) / _ES0)
+    temperature_k = (ratio * _TETENS_B - _TETENS_A * _T0) / (ratio - _TETENS_A)
+    temperature_c = temperature_k - _T0
+    for _ in range(12):
+        saturation = _saturation_vapor_pressure_hpa(temperature_c)
+        delta = (
+            _saturation_vapor_pressure_hpa(temperature_c + 0.05)
+            - _saturation_vapor_pressure_hpa(temperature_c - 0.05)
+        ) / 0.1
+        temperature_c = temperature_c - (saturation - target) / np.where(
+            np.abs(delta) < 1.0e-12, np.nan, delta
+        )
+    return temperature_c
+
+
+def _moist_adiabatic_temperature_k(
+    pressure_lcl_hpa: ArrayLike,
+    temperature_lcl_k: ArrayLike,
+    mixing_ratio: ArrayLike,
+    pressure_target_hpa: ArrayLike,
+) -> np.ndarray:
+    """由 LCL 沿湿绝热（李社宏 1994 湿熵守恒）求目标气压上的气块温度（K）。"""
+
+    p_lcl, t_lcl, mixing, p_target = np.broadcast_arrays(
+        as_float_array(pressure_lcl_hpa),
+        as_float_array(temperature_lcl_k),
+        as_float_array(mixing_ratio),
+        as_float_array(pressure_target_hpa),
+    )
+    cpd = 0.2403
+    rd = 6.85578 * 0.01
+    l0 = 597.40
+    c_const = 1.002
+    c1 = 0.57
+    t0 = _T0
+    m2 = (cpd / rd) * (1.0 + c_const * mixing / cpd)
+
+    def moist_entropy(pressure: np.ndarray, temperature_k: np.ndarray) -> np.ndarray:
+        e_val = _saturation_vapor_pressure_hpa(temperature_k - t0)
+        e_val = np.minimum(e_val, pressure * 0.999)
+        return np.log((pressure - e_val) / np.power(temperature_k, m2)) - (0.622 / rd) * (
+            ((l0 + c1 * (t0 - temperature_k)) / temperature_k) * (e_val / (pressure - e_val))
+        )
+
+    qc = moist_entropy(p_lcl, t_lcl)
+    out = t_lcl.copy()
+    step = np.full(out.shape, 10.0, dtype=float)
+    for _ in range(10_000):
+        q_target = moist_entropy(p_target, out)
+        residual = np.abs(qc - q_target)
+        done = residual <= 0.0001
+        if bool(np.all(done)):
+            break
+        too_low = (~done) & (qc > q_target)
+        too_high = (~done) & (qc <= q_target)
+        out = np.where(too_low, out - step, out)
+        out = np.where(too_high, out + step - step / 5.0, out)
+        step = np.where(too_high, step / 5.0, step)
+    return out
+
+
+def parcel_temperature_at_pressure(
+    pressure: ArrayLike,
+    temperature: ArrayLike,
+    dewpoint: ArrayLike,
+    pressure_target: ArrayLike,
+    *,
+    pressure_unit: str = "hPa",
+    temperature_unit: str = "C",
+    output_temperature_unit: str = "C",
+) -> ArrayOrScalar:
+    """把近地层气块干绝热抬到 LCL、再湿绝热抬到目标气压，返回气块温度。
+
+    用于抬升指数等。LCL 用 Bolton（1980）；湿绝热段用李社宏（1994）湿熵
+    迭代（与沙氏指数同一格式）。若目标气压仍高于 LCL 气压（``p_target ≥ p_LCL``，
+    高度上尚未到达凝结高度），则全程干绝热 ``T_2 = T (p_2 / p)^{κ}``。
+    """
+
+    pressure_hpa = from_pascal(to_pascal(pressure, pressure_unit), "hPa")
+    target_hpa = from_pascal(to_pascal(pressure_target, pressure_unit), "hPa")
+    temperature_k = to_kelvin(temperature, temperature_unit)
+    dewpoint_k = to_kelvin(dewpoint, temperature_unit)
+    pressure_b, temperature_b, dewpoint_b, target_b = np.broadcast_arrays(
+        as_float_array(pressure_hpa),
+        as_float_array(temperature_k),
+        as_float_array(dewpoint_k),
+        as_float_array(target_hpa),
+    )
+    t_lcl = _bolton_lcl_temperature_k(temperature_b, dewpoint_b)
+    p_lcl = pressure_b * (t_lcl / temperature_b) ** (1.0 / _POISSON_KAPPA)
+    t_dry = temperature_b * (target_b / pressure_b) ** _POISSON_KAPPA
+    mixing = _mixing_ratio_from_vapor_pressure_hpa(
+        pressure_b, _saturation_vapor_pressure_hpa(from_kelvin(dewpoint_b, "C"))
+    )
+    t_moist = _moist_adiabatic_temperature_k(p_lcl, t_lcl, mixing, target_b)
+    parcel_k = np.where(target_b >= p_lcl, t_dry, t_moist)
+    return restore_shape(
+        from_kelvin(parcel_k, output_temperature_unit),
+        pressure,
+        temperature,
+        dewpoint,
+        pressure_target,
+    )

@@ -7,12 +7,22 @@ from pymeteo import (
     condensation_temperature,
     convert_humidity,
     dewpoint_from_relative_humidity,
+    equivalent_potential_temperature,
+    lifting_condensation_level,
+    mixing_ratio_from_dewpoint,
     mixing_ratio_from_relative_humidity,
+    parcel_temperature_at_pressure,
+    potential_temperature,
     relative_humidity_from_dewpoint,
     relative_humidity_from_mixing_ratio,
+    saturation_mixing_ratio,
     saturation_vapor_pressure,
     specific_humidity_from_relative_humidity,
+    vapor_pressure_from_mixing_ratio,
+    vapor_pressure_from_relative_humidity,
+    virtual_temperature,
     visibility,
+    wet_bulb_temperature,
 )
 
 
@@ -147,3 +157,148 @@ def test_zero_relative_humidity_dewpoint_is_nan() -> None:
 def test_thermo_arrays() -> None:
     e = saturation_vapor_pressure(np.array([0.0, 20.0]))
     np.testing.assert_allclose(e, [6.1078, 23.364614454202506])
+
+
+def test_saturation_mixing_ratio_equals_ws_from_es() -> None:
+    pressure = 1000.0
+    temperature = 20.0
+    es = saturation_vapor_pressure(temperature, temperature_unit="C")
+    expected = 0.622 * es / (pressure - es)
+    ws = saturation_mixing_ratio(pressure, temperature, output_humidity_unit="kg/kg")
+    assert ws == pytest.approx(expected)
+    grams = saturation_mixing_ratio(pressure, temperature, output_humidity_unit="g/kg")
+    assert grams == pytest.approx(expected * 1000.0)
+
+
+def test_mixing_ratio_from_dewpoint_wallace_hobbs_order() -> None:
+    # Wallace & Hobbs：1000 hPa、Td=6.4 °C 时混合比约 6 g/kg
+    mixing = mixing_ratio_from_dewpoint(
+        1000.0, 6.4, pressure_unit="hPa", temperature_unit="C", output_humidity_unit="g/kg"
+    )
+    assert mixing == pytest.approx(6.0, abs=0.15)
+
+
+def test_vapor_pressure_mixing_ratio_round_trip() -> None:
+    pressure = 1000.0
+    mixing = mixing_ratio_from_dewpoint(pressure, 10.0)
+    vapor = vapor_pressure_from_mixing_ratio(pressure, mixing)
+    es = saturation_vapor_pressure(10.0)
+    assert vapor == pytest.approx(es, rel=1e-10)
+
+
+def test_vapor_pressure_from_relative_humidity_half_saturation() -> None:
+    es = saturation_vapor_pressure(15.0)
+    vapor = vapor_pressure_from_relative_humidity(15.0, 50.0, humidity_unit="%")
+    assert vapor == pytest.approx(0.5 * es)
+
+
+def test_potential_temperature_at_1000_hpa_is_temperature() -> None:
+    theta = potential_temperature(1000.0, 20.0, temperature_unit="C", output_temperature_unit="C")
+    assert theta == pytest.approx(20.0)
+    theta_k = potential_temperature(
+        100000.0, 293.15, pressure_unit="Pa", temperature_unit="K", output_temperature_unit="K"
+    )
+    assert theta_k == pytest.approx(293.15)
+
+
+def test_potential_temperature_poisson_850_hpa() -> None:
+    theta = potential_temperature(850.0, 10.0, temperature_unit="C", output_temperature_unit="K")
+    expected = (10.0 + 273.15) * (1000.0 / 850.0) ** 0.286
+    assert theta == pytest.approx(expected)
+
+
+def test_potential_temperature_ncl_documented_point() -> None:
+    # NCL pot_temp 文档：p=100800 Pa、T=302.45 K → θ≈301.762 K
+    theta = potential_temperature(
+        100800.0, 302.45, pressure_unit="Pa", temperature_unit="K", output_temperature_unit="K"
+    )
+    assert theta == pytest.approx(301.762, abs=1e-3)
+
+
+def test_equivalent_potential_temperature_dry_near_potential() -> None:
+    theta = potential_temperature(1000.0, 20.0, output_temperature_unit="K")
+    theta_e = equivalent_potential_temperature(1000.0, 20.0, -40.0, output_temperature_unit="K")
+    assert theta_e == pytest.approx(theta, abs=0.5)
+
+
+def test_equivalent_potential_temperature_saturated_exceeds_theta() -> None:
+    theta = potential_temperature(1000.0, 20.0, output_temperature_unit="K")
+    theta_e = equivalent_potential_temperature(1000.0, 20.0, 20.0, output_temperature_unit="K")
+    assert theta_e > theta + 10.0
+
+
+def test_equivalent_potential_temperature_bolton_formula() -> None:
+    pressure = 1000.0
+    temperature_k = 27.0 + 273.15
+    dewpoint_k = 22.0 + 273.15
+    es = saturation_vapor_pressure(22.0)
+    mixing = 0.622 * es / (pressure - es)
+    t_lcl = 1.0 / (1.0 / (dewpoint_k - 56.0) + np.log(temperature_k / dewpoint_k) / 800.0) + 56.0
+    expected = temperature_k * np.exp((3376.0 / t_lcl - 2.54) * mixing * (1.0 + 0.81 * mixing))
+    theta_e = equivalent_potential_temperature(
+        pressure, 27.0, 22.0, temperature_unit="C", output_temperature_unit="K"
+    )
+    assert theta_e == pytest.approx(expected, rel=1e-10)
+
+
+def test_equivalent_potential_temperature_poisson_factor_off_1000_hpa() -> None:
+    pressure = 850.0
+    temperature_k = 10.0 + 273.15
+    dewpoint_k = 0.0 + 273.15
+    es = saturation_vapor_pressure(0.0)
+    mixing = 0.622 * es / (pressure - es)
+    t_lcl = 1.0 / (1.0 / (dewpoint_k - 56.0) + np.log(temperature_k / dewpoint_k) / 800.0) + 56.0
+    exponent = 0.2854 * (1.0 - 0.28 * mixing)
+    expected = (
+        temperature_k
+        * (1000.0 / pressure) ** exponent
+        * np.exp((3376.0 / t_lcl - 2.54) * mixing * (1.0 + 0.81 * mixing))
+    )
+    theta_e = equivalent_potential_temperature(
+        pressure, 10.0, 0.0, temperature_unit="C", output_temperature_unit="K"
+    )
+    assert theta_e == pytest.approx(expected, rel=1e-10)
+
+
+def test_virtual_temperature_exact_formula() -> None:
+    mixing = 0.0135
+    temperature_k = 20.0 + 273.15
+    expected_c = temperature_k * (1.0 + mixing / 0.622) / (1.0 + mixing) - 273.15
+    tv = virtual_temperature(20.0, mixing, mixing_ratio_unit="kg/kg")
+    assert tv == pytest.approx(expected_c)
+    tv_g = virtual_temperature(20.0, 13.5, mixing_ratio_unit="g/kg")
+    assert tv_g == pytest.approx(expected_c)
+
+
+def test_wet_bulb_stull_documented_example() -> None:
+    # Stull (2011) 与 NCL wetbulb_stull：20 °C、50% → 约 13.7 °C
+    tw = wet_bulb_temperature(20.0, 50.0)
+    assert tw == pytest.approx(13.699341968988136, rel=1e-8)
+    tw_k = wet_bulb_temperature(
+        20.0 + 273.15, 0.5, temperature_unit="K", humidity_unit="fraction", output_temperature_unit="K"
+    )
+    assert tw_k == pytest.approx(13.699341968988136 + 273.15, rel=1e-8)
+
+
+def test_lifting_condensation_level_saturated_is_starting_point() -> None:
+    p_lcl, t_lcl = lifting_condensation_level(950.0, 12.0, 12.0)
+    assert p_lcl == pytest.approx(950.0, rel=1e-6)
+    assert t_lcl == pytest.approx(12.0, abs=1e-4)
+
+
+def test_lifting_condensation_level_wallace_hobbs() -> None:
+    # Wallace & Hobbs / NCL lclvl：1000 hPa、15 °C、Td=4 °C → 约 848 hPa
+    p_lcl, t_lcl = lifting_condensation_level(1000.0, 15.0, 4.0)
+    assert p_lcl == pytest.approx(848.0, abs=3.0)
+    # 干绝热抬升中露点随气压下降，T_LCL 低于起始 T 与 Td
+    assert t_lcl < 15.0
+    assert t_lcl < 4.0
+
+
+def test_parcel_temperature_dry_adiabatic_when_lcl_above_target() -> None:
+    # 极干：LCL 远高于 500 hPa，500 hPa 气块温度应为干绝热
+    parcel = parcel_temperature_at_pressure(
+        1000.0, 20.0, -40.0, 500.0, output_temperature_unit="K"
+    )
+    expected = (20.0 + 273.15) * (500.0 / 1000.0) ** 0.286
+    assert parcel == pytest.approx(expected, rel=1e-8)

@@ -7,6 +7,9 @@ from pymeteo import (
     a_index,
     k_index,
     layer_temperature_difference,
+    lifted_index,
+    lifted_index_from_surface,
+    parcel_temperature_at_pressure,
     showalter_index,
     sweat_index,
     temperature_dewpoint_depression,
@@ -162,3 +165,36 @@ def test_a_index_independent_of_c_or_k() -> None:
         temperature_unit="K",
     )
     assert in_c == pytest.approx(in_k)
+
+
+def test_lifted_index_is_environment_minus_parcel() -> None:
+    assert lifted_index(-15.0, -10.0) == pytest.approx(-5.0)
+    assert lifted_index(-15.0, -20.0) == pytest.approx(5.0)
+    in_k = lifted_index(-15.0 + 273.15, -10.0 + 273.15, temperature_unit="K")
+    assert in_k == pytest.approx(-5.0)
+
+
+def test_lifted_index_from_surface_dry_matches_poisson() -> None:
+    t500 = -20.0
+    li = lifted_index_from_surface(1000.0, 20.0, -40.0, t500)
+    parcel_500 = (20.0 + 273.15) * (500.0 / 1000.0) ** 0.286 - 273.15
+    assert li == pytest.approx(t500 - parcel_500, rel=1e-8)
+
+
+def test_lifted_index_from_surface_moist_warmer_than_dry() -> None:
+    dry = lifted_index_from_surface(1000.0, 20.0, -40.0, -20.0)
+    moist = lifted_index_from_surface(1000.0, 20.0, 18.0, -20.0)
+    # 湿气块到达 500 hPa 更暖，LI 更小（更不稳定）
+    assert moist < dry
+
+
+def test_lifted_index_from_surface_matches_helper() -> None:
+    parcel = parcel_temperature_at_pressure(1000.0, 25.0, 15.0, 500.0)
+    li = lifted_index_from_surface(1000.0, 25.0, 15.0, -10.0)
+    assert li == pytest.approx(lifted_index(-10.0, parcel))
+
+
+def test_lifted_index_from_surface_pressure_unit_does_not_shift_500hpa() -> None:
+    li_hpa = lifted_index_from_surface(1000.0, 20.0, -40.0, -20.0, pressure_unit="hPa")
+    li_pa = lifted_index_from_surface(100000.0, 20.0, -40.0, -20.0, pressure_unit="Pa")
+    assert li_hpa == pytest.approx(li_pa)

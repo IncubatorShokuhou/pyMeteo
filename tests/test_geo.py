@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pytest
 
-from pymeteo import earth_distance, gravity, sea_level_pressure
+from pymeteo import earth_distance, gravity, height_thickness, sea_level_pressure
 
 
 def test_earth_distance_equator_one_degree() -> None:
@@ -50,3 +50,16 @@ def test_gravity_latitude_in_degrees() -> None:
 def test_sea_level_pressure_legacy() -> None:
     slp = sea_level_pressure(1000.0, 100.0, 20.0, 18.0, pressure_unit="hPa", temperature_unit="C")
     assert slp == pytest.approx(1011.7583630997631)
+
+
+def test_height_thickness_hypsometric_1000_to_500() -> None:
+    rd = 287.058
+    g = 9.80665
+    t_k = 273.15
+    expected_m = rd * t_k / g * math.log(1000.0 / 500.0)
+    thickness = height_thickness(1000.0, 500.0, 0.0, temperature_unit="C", output_distance_unit="m")
+    assert thickness == pytest.approx(expected_m)
+    thickness_km = height_thickness(
+        1000.0, 500.0, 273.15, temperature_unit="K", output_distance_unit="km"
+    )
+    assert thickness_km == pytest.approx(expected_m / 1000.0)

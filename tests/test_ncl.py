@@ -7,7 +7,9 @@ import pymeteo as pm
 from pymeteo import (
     convert_humidity,
     dewpoint_from_relative_humidity,
+    mixing_ratio_from_dewpoint,
     mixing_ratio_from_relative_humidity,
+    potential_temperature,
     relative_humidity_from_dewpoint,
     relative_humidity_from_mixing_ratio,
     specific_humidity_from_relative_humidity,
@@ -175,11 +177,21 @@ def test_ncl_wrappers_broadcast_arrays() -> None:
 
 def test_ncl_all_exports_expected_names() -> None:
     expected = {
+        "coriolis_param",
         "dewtemp_trh",
+        "lclvl",
         "mixhum_convert",
+        "mixhum_ptd",
         "mixhum_ptrh",
+        "omega_to_w",
+        "pot_temp",
+        "pot_temp_equiv",
         "relhum",
         "relhum_ttd",
+        "temp_virtual",
+        "vapor_pres_rh",
+        "w_to_omega",
+        "wetbulb_stull",
         "wind_component",
         "wind_direction",
         "wind_speed",
@@ -187,8 +199,89 @@ def test_ncl_all_exports_expected_names() -> None:
     assert set(pm.ncl.__all__) == expected
     for name in expected:
         assert hasattr(pm.ncl, name)
-    # 与现代 API 撞名的 wind_* 仍在顶层；NCL 专有名字不得再导出
-    ncl_only = expected - {"wind_speed", "wind_direction"}
+    # 与现代 API 撞名的 wind_* / omega_* 仍在顶层；NCL 专有名字不得再导出
+    ncl_only = expected - {"wind_speed", "wind_direction", "omega_to_w", "w_to_omega"}
     for name in ncl_only:
         assert name not in pm.__all__
         assert not hasattr(pm, name)
+
+
+def test_mixhum_ptd_matches_modern() -> None:
+    p = 100000.0
+    tdk = 6.4 + 273.15
+    mix_kg = pm.ncl.mixhum_ptd(p, tdk, 1)
+    mix_g = pm.ncl.mixhum_ptd(p, tdk, -1)
+    modern = mixing_ratio_from_dewpoint(
+        p, tdk, pressure_unit="Pa", temperature_unit="K", output_humidity_unit="kg/kg"
+    )
+    assert mix_kg == pytest.approx(modern)
+    assert mix_g == pytest.approx(mix_kg * 1000.0)
+    q_kg = pm.ncl.mixhum_ptd(p, tdk, 2)
+    assert q_kg == pytest.approx(mix_kg / (1.0 + mix_kg))
+
+
+def test_pot_temp_and_equiv_ncl_units() -> None:
+    theta = pm.ncl.pot_temp(85000.0, 10.0 + 273.15)
+    modern = potential_temperature(
+        85000.0, 10.0 + 273.15, pressure_unit="Pa", temperature_unit="K", output_temperature_unit="K"
+    )
+    assert theta == pytest.approx(modern)
+    from pymeteo import equivalent_potential_temperature, relative_humidity_from_dewpoint
+
+    td = 0.0 + 273.15
+    t = 15.0 + 273.15
+    p = 100000.0
+    mixing = mixing_ratio_from_dewpoint(
+        p, td, pressure_unit="Pa", temperature_unit="K", output_humidity_unit="kg/kg"
+    )
+    theta_e = pm.ncl.pot_temp_equiv(p, t, mixing, -1, "r")
+    modern_e = equivalent_potential_temperature(
+        p, t, td, pressure_unit="Pa", temperature_unit="K", output_temperature_unit="K"
+    )
+    assert theta_e == pytest.approx(modern_e, rel=1e-4)
+    rh = relative_humidity_from_dewpoint(t, td, temperature_unit="K", output_humidity_unit="%")
+    theta_e_rh = pm.ncl.pot_temp_equiv(p, t, rh, -1, "rh")
+    assert theta_e_rh == pytest.approx(modern_e, rel=1e-4)
+
+
+def test_temp_virtual_iounit_and_wetbulb_lcl_coriolis_omega() -> None:
+    from pymeteo import (
+        coriolis_parameter,
+        lifting_condensation_level,
+        virtual_temperature,
+        wet_bulb_temperature,
+    )
+
+    tv = pm.ncl.temp_virtual(20.0, 13.5, (0, 1, 0))
+    modern_tv = virtual_temperature(
+        20.0, 13.5, temperature_unit="C", mixing_ratio_unit="g/kg", output_temperature_unit="C"
+    )
+    assert tv == pytest.approx(modern_tv)
+    tw = pm.ncl.wetbulb_stull(20.0, 50.0, (0, 0), False)
+    assert tw == pytest.approx(
+        wet_bulb_temperature(20.0, 50.0, temperature_unit="C", humidity_unit="%")
+    )
+    tw_k = pm.ncl.wetbulb_stull(20.0 + 273.15, 50.0, (1, 1))
+    assert tw_k == pytest.approx(tw + 273.15, rel=1e-8)
+    plcl = pm.ncl.lclvl(1000.0, 15.0 + 273.15, 4.0 + 273.15)
+    modern_p, _ = lifting_condensation_level(
+        1000.0, 15.0 + 273.15, 4.0 + 273.15, temperature_unit="K"
+    )
+    assert plcl == pytest.approx(modern_p)
+    assert pm.ncl.coriolis_param(35.0) == pytest.approx(
+        coriolis_parameter(35.0, latitude_unit="deg")
+    )
+    omega = 0.05
+    p = 85000.0
+    t = 273.15
+    w = pm.ncl.omega_to_w(omega, p, t)
+    back = pm.ncl.w_to_omega(w, p, t)
+    assert back == pytest.approx(omega)
+    from pymeteo import omega_to_w as modern_omega_to_w
+
+    modern_w = modern_omega_to_w(
+        omega, t, p, omega_unit="Pa/s", temperature_unit="K", pressure_unit="Pa"
+    )
+    assert w == pytest.approx(modern_w)
+    vapor = pm.ncl.vapor_pres_rh(50.0, 23.37)
+    assert vapor == pytest.approx(11.685)
