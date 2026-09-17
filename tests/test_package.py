@@ -76,14 +76,33 @@ def test_public_api_exports() -> None:
 
 
 def test_version_present() -> None:
-    assert pymeteo.__version__ == "2.4.0"
+    assert pymeteo.__version__ == "2.4.1"
 
 
 def test_pypi_distribution_name() -> None:
     meta = metadata("pymeteo-kit")
     assert meta["Name"] == "pymeteo-kit"
-    assert version("pymeteo-kit") == "2.4.0"
+    assert version("pymeteo-kit") == "2.4.1"
     assert meta["Requires-Python"] == ">=3.7"
+
+
+def test_packaging_declares_mit_license() -> None:
+    text = (_REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    assert "License :: OSI Approved :: MIT License" in text
+    readme = (_REPO_ROOT / "README.md").read_text(encoding="utf-8")
+    assert "MIT License" in readme
+    assert "GPL-3.0" not in readme
+    readme_zh = (_REPO_ROOT / "README_zh.md").read_text(encoding="utf-8")
+    assert "MIT" in readme_zh
+    assert "GNU General Public License" not in readme_zh
+    assert "GPLv3" not in text
+    assert "GNU General Public License" not in text
+    license_text = (_REPO_ROOT / "LICENSE").read_text(encoding="utf-8")
+    assert license_text.startswith("MIT License")
+    assert "IncubatorShokuhou" in license_text
+    assert "2019-2026" in license_text
+    assert "GNU GENERAL PUBLIC LICENSE" not in license_text
+    assert "GPL" not in license_text
 
 
 def test_packaging_declares_python_37() -> None:
@@ -198,6 +217,8 @@ def test_built_wheel_ships_pymeteo_import_package(tmp_path: Path) -> None:
     assert "Name: pymeteo-kit" in meta
     assert "Requires-Python: >=3.7" in meta
     assert f"Version: {pymeteo.__version__}" in meta
+    assert "License-Expression: MIT" in meta or "License: MIT" in meta
+    assert "GPLv3" not in meta
 
 
 def test_old_single_file_names_are_gone() -> None:

@@ -18,7 +18,7 @@ import numpy as np
 
 try:
     from numpy.typing import ArrayLike
-except ImportError:  # NumPy 1.19 (last line that fully supports CPython 3.6)
+except ImportError:  # numpy.typing arrived in NumPy 1.20
     ArrayLike = Any  # type: ignore[misc,assignment]
 
 ArrayOrScalar = Union[float, np.ndarray]

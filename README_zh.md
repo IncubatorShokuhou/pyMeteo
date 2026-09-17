@@ -59,4 +59,4 @@ td_k = dewtemp_trh(18.0 + 273.15, 46.5)
 
 ## 许可
 
-GPL-3.0，见 [LICENSE](LICENSE)。
+MIT License，见 [LICENSE](LICENSE)。
